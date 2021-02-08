@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   CBadge,
   CDropdown,
@@ -9,6 +9,16 @@ import {
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 
+const Logout = () => {
+  const [setUsername] = useState();
+  const [setPassword] = useState();
+  const [setUser] = useState();
+  setUser({});
+  setUsername("");
+  setPassword("");
+  localStorage.clear();
+  console.log("LOGGEDOUT")
+};
 const TheHeaderDropdown = () => {
   return (
     <CDropdown
@@ -81,8 +91,8 @@ const TheHeaderDropdown = () => {
         </CDropdownItem>
         <CDropdownItem divider />
         <CDropdownItem>
-          <CIcon name="cil-lock-locked" className="mfe-2" />
-          Lock Account
+          <CIcon name="cil-lock-locked" className="mfe-2" onClick={Logout} />
+          Đăng xuất
         </CDropdownItem>
       </CDropdownMenu>
     </CDropdown>

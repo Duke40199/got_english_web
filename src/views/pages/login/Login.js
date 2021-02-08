@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { Link, useHistory } from 'react-router-dom'
 
 import {
   CButton,
@@ -19,16 +19,32 @@ import CIcon from '@coreui/icons-react'
 import axios from 'axios';
 
 const Login = () => {
-  const [username, setUsername] = useState();
-  const [password, setPassword] = useState();
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [user, setUser] = useState();
+  const history = useHistory();
+
+  useEffect(() => {
+    const loggedInUser = localStorage.getItem("user");
+    if (loggedInUser) {
+      const foundUser = JSON.parse(loggedInUser);
+      setUser(foundUser);
+    }
+  }, []);
   const handleSubmit = async e => {
     e.preventDefault();
     const user = { username, password };
-    const response = await axios.post("http://localhost:4000/login", user);
-    setUser(response.data);
-    localStorage.setItem('user', response.data);
-    console.log(response.data);
+    // send the username and password to the server
+    const response = await axios.post(
+      "http://localhost:4000/login",
+      user
+    );
+    // set the state of the user
+    setUser(response.data.data); 
+    // store the user in localStorage
+    localStorage.setItem("user", JSON.stringify(user));
+    console.log(`======= LOGIN USERNAME:${user.username}`);
+    history.push("/");
   };
   return (
     <div className="c-app c-default-layout flex-row align-items-center">
