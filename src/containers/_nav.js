@@ -1,16 +1,36 @@
 import React from 'react'
 import CIcon from '@coreui/icons-react'
 
-const _nav =  [
+const _nav = [
   {
     _tag: 'CSidebarNavItem',
     name: 'Dashboard',
     to: '/dashboard',
-    icon: <CIcon name="cil-speedometer" customClasses="c-sidebar-nav-icon"/>,
+    icon: <CIcon name="cil-speedometer" customClasses="c-sidebar-nav-icon" />,
     badge: {
       color: 'info',
       text: 'NEW',
     }
+  },
+  {
+    _tag: 'CSidebarNavItem',
+    name: 'Xem hồ sơ Ứng Viên',
+    icon: 'cil-spreadsheet',
+    badge: {
+      color: 'info',
+      text: 'MỚI',
+    }
+  },
+  {
+    _tag: 'CSidebarNavItem',
+    name: 'Quản lý Chuyên Gia',
+    icon: 'cil-people'
+  },
+  {
+    _tag: 'CSidebarNavItem',
+    name: 'Quản lý Quản Trị Viên',
+    to: '/manage-admin',
+    icon: 'cil-people'
   },
   {
     _tag: 'CSidebarNavTitle',
