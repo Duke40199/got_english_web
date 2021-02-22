@@ -2,3 +2,10 @@
 .react-datepicker-wrapper {
     display:block !important;
 }
+.certification-img {
+    cursor: zoom-in; 
+}
+.certification-img:hover {
+    transform: scale(1.01);
+    box-shadow: 1px 1px 5px 0 #999;
+}

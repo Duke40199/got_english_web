@@ -20,6 +20,7 @@ const WidgetsDropdown = lazy(() => import('../widgets/WidgetsDropdown.js'))
 const WidgetsBrand = lazy(() => import('../widgets/WidgetsBrand.js'))
 
 const Dashboard = () => {
+  document.title = 'Quản trị Phần mềm GotEnglish'
   return (
     <>
       <WidgetsDropdown />
@@ -27,21 +28,21 @@ const Dashboard = () => {
         <CCardBody>
           <CRow>
             <CCol sm="5">
-              <h4 id="traffic" className="card-title mb-0">Traffic</h4>
-              <div className="small text-muted">November 2017</div>
+              <h4 id="traffic" className="card-title mb-0">Thống kê Người Dùng</h4>
+              <div className="small text-muted">Tháng Một 2020</div>
             </CCol>
             <CCol sm="7" className="d-none d-md-block">
               <CButton color="primary" className="float-right">
-                <CIcon name="cil-cloud-download"/>
+                <CIcon name="cil-cloud-download" />
               </CButton>
               <CButtonGroup className="float-right mr-3">
                 {
-                  ['Day', 'Month', 'Year'].map(value => (
+                  ['Ngày', 'Tháng', 'Năm'].map(value => (
                     <CButton
                       color="outline-secondary"
                       key={value}
                       className="mx-0"
-                      active={value === 'Month'}
+                      active={value === 'Tháng'}
                     >
                       {value}
                     </CButton>
@@ -50,53 +51,53 @@ const Dashboard = () => {
               </CButtonGroup>
             </CCol>
           </CRow>
-          <MainChartExample style={{height: '300px', marginTop: '40px'}}/>
+          <MainChartExample style={{ height: '300px', marginTop: '40px' }} />
         </CCardBody>
         <CCardFooter>
           <CRow className="text-center">
             <CCol md sm="12" className="mb-sm-2 mb-0">
-              <div className="text-muted">Visits</div>
-              <strong>29.703 Users (40%)</strong>
+              <div className="text-muted">Lượt tải</div>
+              <strong>2.038</strong>
               <CProgress
                 className="progress-xs mt-2"
                 precision={1}
                 color="success"
-                value={40}
+                value={80}
               />
             </CCol>
             <CCol md sm="12" className="mb-sm-2 mb-0 d-md-down-none">
-              <div className="text-muted">Unique</div>
-              <strong>24.093 Users (20%)</strong>
+              <div className="text-muted">Ứng Viên Chuyên Gia mới</div>
+              <strong>164</strong>
               <CProgress
                 className="progress-xs mt-2"
                 precision={1}
                 color="info"
-                value={40}
+                value={10}
               />
             </CCol>
             <CCol md sm="12" className="mb-sm-2 mb-0">
-              <div className="text-muted">Pageviews</div>
-              <strong>78.706 Views (60%)</strong>
+              <div className="text-muted">Chuyên Gia mới</div>
+              <strong>285</strong>
               <CProgress
                 className="progress-xs mt-2"
                 precision={1}
                 color="warning"
-                value={40}
+                value={20}
               />
             </CCol>
             <CCol md sm="12" className="mb-sm-2 mb-0">
-              <div className="text-muted">New Users</div>
-              <strong>22.123 Users (80%)</strong>
+              <div className="text-muted">Người Dùng mới</div>
+              <strong>1.382</strong>
               <CProgress
                 className="progress-xs mt-2"
                 precision={1}
                 color="danger"
-                value={40}
+                value={70}
               />
             </CCol>
             <CCol md sm="12" className="mb-sm-2 mb-0 d-md-down-none">
-              <div className="text-muted">Bounce Rate</div>
-              <strong>Average Rate (40.15%)</strong>
+              <div className="text-muted">Khách</div>
+              <strong>924</strong>
               <CProgress
                 className="progress-xs mt-2"
                 precision={1}
@@ -107,9 +108,9 @@ const Dashboard = () => {
         </CCardFooter>
       </CCard>
 
-      <WidgetsBrand withCharts/>
+      {/* <WidgetsBrand withCharts/> */}
 
-      <CRow>
+      {/* <CRow>
         <CCol>
           <CCard>
             <CCardHeader>
@@ -549,7 +550,7 @@ const Dashboard = () => {
             </CCardBody>
           </CCard>
         </CCol>
-      </CRow>
+      </CRow> */}
     </>
   )
 }
