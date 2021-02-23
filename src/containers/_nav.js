@@ -38,6 +38,7 @@ const _nav = [
   {
     _tag: 'CSidebarNavItem',
     name: 'Quản lý Gói Coin',
+    to: '/manage-coin-bundle',
     icon: 'cil-dollar'
   },
   {
