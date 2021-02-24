@@ -222,7 +222,7 @@ const ManageAdmin = () => {
                 color="success"
             >
                 <CModalHeader closeButton>
-                    <CModalTitle>Thêm mới Quản Trị Viên</CModalTitle>
+                    <CModalTitle>Cập nhật Quản Trị Viên</CModalTitle>
                 </CModalHeader>
                 <CModalBody>
                     <CForm action="" method="post" encType="multipart/form-data" className="form-horizontal">
