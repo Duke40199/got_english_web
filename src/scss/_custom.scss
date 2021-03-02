@@ -2,10 +2,29 @@
 .react-datepicker-wrapper {
     display:block !important;
 }
-.certification-img {
+.lightbox-thumbnail-img {
     cursor: zoom-in; 
 }
-.certification-img:hover {
+.lightbox-thumbnail-img:hover {
     transform: scale(1.01);
     box-shadow: 1px 1px 5px 0 #999;
+}
+.comment-card-delete {
+    width: 21px;
+    position: absolute;
+    right: 4px;
+    top: 2px;
+    z-index: 9999;
+}
+.comment-card-delete:focus {
+    outline: 0 !important;
+}
+.statistic-month-year-input {
+    cursor: pointer;
+    padding: 2px 14px;
+    border: 0;
+    border-radius: 4px;
+    background-color: #216ba5;
+    font: inherit;
+    color: #fff;
 }

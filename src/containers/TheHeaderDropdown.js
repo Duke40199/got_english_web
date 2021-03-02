@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import {
-  CBadge,
   CDropdown,
   CDropdownItem,
   CDropdownMenu,
@@ -36,15 +35,18 @@ const TheHeaderDropdown = () => {
         </div>
       </CDropdownToggle>
       <CDropdownMenu className="pt-0" placement="bottom-end">
-        <CDropdownItem
+        {/* <CDropdownItem
           header
           tag="div"
           color="light"
           className="text-center"
         >
-          <strong>Account</strong>
-        </CDropdownItem>
+          <strong>Tài khoản</strong>
+        </CDropdownItem> */}
         <CDropdownItem>
+          <CIcon name="cil-user" className="mfe-2" />Hồ sơ
+        </CDropdownItem>
+        {/* <CDropdownItem>
           <CIcon name="cil-bell" className="mfe-2" />
           Updates
           <CBadge color="info" className="mfs-auto">42</CBadge>
@@ -73,9 +75,6 @@ const TheHeaderDropdown = () => {
           <strong>Settings</strong>
         </CDropdownItem>
         <CDropdownItem>
-          <CIcon name="cil-user" className="mfe-2" />Profile
-        </CDropdownItem>
-        <CDropdownItem>
           <CIcon name="cil-settings" className="mfe-2" />
           Settings
         </CDropdownItem>
@@ -88,11 +87,15 @@ const TheHeaderDropdown = () => {
           <CIcon name="cil-file" className="mfe-2" />
           Projects
           <CBadge color="primary" className="mfs-auto">42</CBadge>
-        </CDropdownItem>
+        </CDropdownItem> */}
         <CDropdownItem divider />
         <CDropdownItem>
+          <CIcon name="cil-settings" className="mfe-2" />
+            Thiết lập
+        </CDropdownItem>
+        <CDropdownItem>
           <CIcon name="cil-lock-locked" className="mfe-2" onClick={Logout} />
-          Đăng xuất
+            Đăng xuất
         </CDropdownItem>
       </CDropdownMenu>
     </CDropdown>

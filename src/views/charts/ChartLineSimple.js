@@ -32,7 +32,7 @@ const ChartLineSimple = props => {
         backgroundColor: getColor(backgroundColor),
         pointBackgroundColor: getColor(pointHoverColor),
         pointHoverBackgroundColor: getColor(pointHoverColor),
-        label
+        // label
       }
     ]
   })()

@@ -13,10 +13,6 @@ const _nav = [
     name: 'Xem hồ sơ Ứng Viên',
     icon: 'cil-spreadsheet',
     to: '/view-candidate-certification',
-    badge: {
-      color: 'info',
-      text: 'MỚI',
-    }
   },
   {
     _tag: 'CSidebarNavItem',
@@ -32,7 +28,8 @@ const _nav = [
   },
   {
     _tag: 'CSidebarNavItem',
-    name: 'Quản lý Diễn Đàn',
+    name: 'Quản lý Bài Viết',
+    to: '/manage-post',
     icon: 'cil-comment-bubble'
   },
   {
@@ -45,10 +42,6 @@ const _nav = [
     _tag: 'CSidebarNavItem',
     name: 'Báo Cáo từ Người Dùng',
     icon: 'cil-warning',
-    badge: {
-      color: 'danger',
-      text: 'MỚI',
-    }
   },
   // {
   //   _tag: 'CSidebarNavTitle',

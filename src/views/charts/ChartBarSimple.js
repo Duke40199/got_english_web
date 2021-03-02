@@ -20,7 +20,7 @@ const ChartBarSimple = props => {
         data: dataPoints,
         backgroundColor: getColor(backgroundColor),
         pointHoverBackgroundColor: getColor(pointHoverBackgroundColor),
-        label: label,
+        // label: label,
         barPercentage: 0.5,
         categoryPercentage: 1
       }

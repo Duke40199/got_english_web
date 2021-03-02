@@ -42,6 +42,8 @@ const ManageExpert = React.lazy(() => import('./views/pages/manage-expert/Manage
 const ViewExpertFeedback = React.lazy(() => import('./views/pages/manage-expert/view-expert-feedback/ViewExpertFeedback'));
 const ViewCandidateCertification = React.lazy(() => import('./views/pages/view-candidate-certification/ViewCandidateCertification'));
 const ManageCoinBundle = React.lazy(() => import('./views/pages/manage-coin-bundle/ManageCoinBundle'));
+const ManagePost = React.lazy(() => import('./views/pages/manage-post/ManagePost'));
+const ViewPostDetail = React.lazy(() => import('./views/pages/manage-post/view-post-detail/ViewPostDetail'));
 
 const routes = [
   { path: '/', exact: true, name: 'Trang chủ' },
@@ -88,7 +90,9 @@ const routes = [
   { path: '/manage-expert', exact: true, name: 'Quản lý Chuyên Gia', component: ManageExpert },
   { path: '/manage-expert/view-expert-feedback', exact: true, name: 'Xem chi tiết Đánh Giá của Chuyên Gia', component: ViewExpertFeedback },
   { path: '/view-candidate-certification', name: 'Xem hồ sơ Ứng Viên', component: ViewCandidateCertification },
-  { path: '/manage-coin-bundle', name: 'Quản lý Gói Coin', component: ManageCoinBundle }
+  { path: '/manage-coin-bundle', name: 'Quản lý Gói Coin', component: ManageCoinBundle },
+  { path: '/manage-post', exact: true, name: 'Quản lý Bài Viết', component: ManagePost },
+  { path: '/manage-post/view-post-detail', exact: true, name: 'Xem chi tiết Bài Viết', component: ViewPostDetail }
 ];
 
 export default routes;
