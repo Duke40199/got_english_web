@@ -1,6 +1,5 @@
 import React, { lazy, useState } from 'react'
 import {
-  CButtonGroup,
   CCard,
   CCardBody,
   CCardFooter,

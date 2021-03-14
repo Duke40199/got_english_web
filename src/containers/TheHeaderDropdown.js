@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import {
   CDropdown,
   CDropdownItem,
@@ -6,19 +6,19 @@ import {
   CDropdownToggle,
   CImg
 } from '@coreui/react'
+
 import CIcon from '@coreui/icons-react'
 
 const Logout = () => {
-  const [setUsername] = useState();
-  const [setPassword] = useState();
-  const [setUser] = useState();
-  setUser({});
-  setUsername("");
-  setPassword("");
   localStorage.clear();
-  console.log("LOGGEDOUT")
+  console.log("LOGGEDOUT");
+  window.location.href = '/';
 };
+
+
 const TheHeaderDropdown = () => {
+  const userInfo = JSON.parse(localStorage.getItem("user"));
+
   return (
     <CDropdown
       inNav
@@ -35,14 +35,14 @@ const TheHeaderDropdown = () => {
         </div>
       </CDropdownToggle>
       <CDropdownMenu className="pt-0" placement="bottom-end">
-        {/* <CDropdownItem
+        <CDropdownItem
           header
           tag="div"
           color="light"
           className="text-center"
         >
-          <strong>Tài khoản</strong>
-        </CDropdownItem> */}
+          Xin chào, <strong>{userInfo.data.username}</strong>
+        </CDropdownItem>
         <CDropdownItem>
           <CIcon name="cil-user" className="mfe-2" />Hồ sơ
         </CDropdownItem>
@@ -93,8 +93,8 @@ const TheHeaderDropdown = () => {
           <CIcon name="cil-settings" className="mfe-2" />
             Thiết lập
         </CDropdownItem>
-        <CDropdownItem>
-          <CIcon name="cil-lock-locked" className="mfe-2" onClick={Logout} />
+        <CDropdownItem onClick={Logout}>
+          <CIcon name="cil-lock-locked" className="mfe-2" />
             Đăng xuất
         </CDropdownItem>
       </CDropdownMenu>

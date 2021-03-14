@@ -10,9 +10,9 @@ const _nav = [
   },
   {
     _tag: 'CSidebarNavItem',
-    name: 'Xem hồ sơ Ứng Viên',
-    icon: 'cil-spreadsheet',
-    to: '/view-candidate-certification',
+    name: 'Quản lý Học Viên',
+    to: 'manage-learner',
+    icon: 'cil-book'
   },
   {
     _tag: 'CSidebarNavItem',
@@ -28,9 +28,9 @@ const _nav = [
   },
   {
     _tag: 'CSidebarNavItem',
-    name: 'Quản lý Bài Viết',
-    to: '/manage-post',
-    icon: 'cil-comment-bubble'
+    name: 'Xem hồ sơ Ứng Viên',
+    icon: 'cil-address-book',
+    to: '/view-candidate-certification',
   },
   {
     _tag: 'CSidebarNavItem',
@@ -40,8 +40,8 @@ const _nav = [
   },
   {
     _tag: 'CSidebarNavItem',
-    name: 'Báo Cáo từ Người Dùng',
-    icon: 'cil-warning',
+    name: 'Quản lý Đơn Giá',
+    icon: 'cil-cash',
   },
   // {
   //   _tag: 'CSidebarNavTitle',

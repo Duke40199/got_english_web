@@ -21,7 +21,7 @@ const MainChartExample = attributes => {
     for (let i = 0; i <= elements; i++) {
       data1.push(random(50, 200))
       data2.push(random(80, 100))
-      data3.push(65)
+      data3.push(random(40, 100))
       data4.push(random(20, 50))
     }
     return [
@@ -47,12 +47,11 @@ const MainChartExample = attributes => {
         backgroundColor: 'transparent',
         borderColor: brandDanger,
         pointHoverBackgroundColor: brandDanger,
-        borderWidth: 1,
-        borderDash: [8, 5],
+        borderWidth: 2,
         data: data3
       },
       {
-        label: 'Ứng Viên',
+        label: 'Quản Trị Viên',
         backgroundColor: 'transparent',
         borderColor: brandWarning,
         pointHoverBackgroundColor: brandWarning,

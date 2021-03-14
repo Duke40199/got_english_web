@@ -1,6 +1,7 @@
 
-import APIKit from './api';
-const APIUrl = process.env.BACKEND_URL || 'http://localhost:4000';
+import APIKit from './APIKit';
+// const APIUrl = process.env.BACKEND_URL || 'http://localhost:4000';
+const APIUrl = process.env.BACKEND_URL || 'https://got-english-backend-production-swiyh5bc4q-de.a.run.app/';
 function LoginAPI(user) {
   // let state = {
   //   redirect: false,
@@ -15,7 +16,7 @@ function LoginAPI(user) {
   //   returnedCompanyCode: " ",
   //   LoginToken: " ",
   // }
-  APIKit.post(APIUrl + "/login", {
+  APIKit.post(APIUrl + "login", {
     username: user.username,
     password: user.password,
   }).then(

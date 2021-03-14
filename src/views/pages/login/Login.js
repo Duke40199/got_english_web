@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useHistory } from 'react-router-dom'
+import APIKit, { setClientToken } from '../../../api/APIKit';
 
 import {
   CButton,
@@ -13,15 +14,17 @@ import {
   CInputGroup,
   CInputGroupPrepend,
   CInputGroupText,
-  CRow
+  CRow,
+  CAlert
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import axios from 'axios';
 
 const Login = () => {
+  //initial state
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState();
+  const [error, setError] = useState();
   const history = useHistory();
 
   useEffect(() => {
@@ -31,21 +34,45 @@ const Login = () => {
       setUser(foundUser);
     }
   }, []);
-  const handleSubmit = async e => {
+
+  const onPressLogin = async e => {
     e.preventDefault();
-    const user = { username, password };
-    // send the username and password to the server
-    const response = await axios.post(
-      "http://localhost:4000/login",
-      user
-    );
-    // set the state of the user
-    setUser(response.data.data); 
-    // store the user in localStorage
-    localStorage.setItem("user", JSON.stringify(user));
-    console.log(`======= LOGIN USERNAME:${user.username}`);
-    history.push("/");
+
+    const onSuccess = data => {
+      console.log(data);
+      // Set JSON Web Token on success
+      setClientToken(data.data.data.token);
+      // set the state of the user
+      setUser(data.data);
+      // store the user in localStorage
+      localStorage.setItem("user", JSON.stringify(data.data));
+      //console.log(`======= LOGIN USERNAME:${user.username}`);
+      history.push("/");
+    };
+
+    const onFailure = error => {
+      console.log(error);
+      if (error.response != null) {
+        if (error.response.status == 403) {
+          setError("Xin kiểm tra lại thông tin đăng nhập.");
+        }
+      } else {
+        setError("Đã có một lỗi bất thường xảy ra. Xin hãy liên hệ với Admin để bảo trì hệ thống.");
+      }
+    };
+
+    let user = { username, password };
+    const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    if (emailRegex.test(username)) {
+      //input is email
+      const email = username
+      user = { email, password };
+    }
+    APIKit.post('/login', user)
+      .then(onSuccess)
+      .catch(onFailure);
   };
+
   return (
     <div className="c-app c-default-layout flex-row align-items-center">
       <CContainer>
@@ -54,9 +81,9 @@ const Login = () => {
             <CCardGroup>
               <CCard className="p-4">
                 <CCardBody>
-                  <CForm onSubmit={handleSubmit}>
-                    <h1>Login</h1>
-                    <p className="text-muted">Sign In to your account</p>
+                  <CForm onSubmit={onPressLogin}>
+                    <h1>Đăng nhập</h1>
+                    <p className="text-muted">Xin hãy điền thông tin tài khoản</p>
                     <CInputGroup className="mb-3">
                       <CInputGroupPrepend>
                         <CInputGroupText>
@@ -64,7 +91,8 @@ const Login = () => {
                         </CInputGroupText>
                       </CInputGroupPrepend>
                       <CInput type="text"
-                        placeholder="Email"
+                        placeholder="Email hoặc Tên Đăng Nhập"
+                        required={true}
                         onChange={({ target }) => setUsername(target.value)}
                       />
                     </CInputGroup>
@@ -76,15 +104,17 @@ const Login = () => {
                       </CInputGroupPrepend>
                       <CInput type="password"
                         placeholder="Mật khẩu"
+                        required={true}
                         onChange={({ target }) => setPassword(target.value)}
                       />
                     </CInputGroup>
+                    {error != null ? <CAlert color="danger">{error}</CAlert> : null}
                     <CRow>
                       <CCol xs="6">
                         <CButton color="primary" className="px-4" type="Submit">Đăng Nhập</CButton>
                       </CCol>
                       <CCol xs="6" className="text-right">
-                        <CButton color="link" className="px-0">Forgot password?</CButton>
+                        <CButton color="link" className="px-0">Quên mật khẩu?</CButton>
                       </CCol>
                     </CRow>
                   </CForm>
@@ -93,11 +123,9 @@ const Login = () => {
               <CCard className="text-white bg-primary py-5 d-md-down-none" style={{ width: '44%' }}>
                 <CCardBody className="text-center">
                   <div>
-                    <h2>Sign up</h2>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut
-                      labore et dolore magna aliqua.</p>
+                    <p>Bạn chưa có tài khoản?</p>
                     <Link to="/register">
-                      <CButton color="primary" className="mt-3" active tabIndex={-1}>Register Now!</CButton>
+                      <CButton color="primary" className="mt-3" active tabIndex={-1}>Đăng ký ngay!</CButton>
                     </Link>
                   </div>
                 </CCardBody>
