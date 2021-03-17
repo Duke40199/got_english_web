@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Link, useHistory } from 'react-router-dom'
-import APIKit, { setClientToken } from '../../../api/APIKit';
-
+import { LoginAPI } from '../../../api/login';
+import { GetUserInfoAPI } from '../../../api/user';
 import {
   CButton,
   CCard,
@@ -27,50 +27,61 @@ const Login = () => {
   const [error, setError] = useState();
   const history = useHistory();
 
-  useEffect(() => {
-    const loggedInUser = localStorage.getItem("user");
-    if (loggedInUser) {
-      const foundUser = JSON.parse(loggedInUser);
-      setUser(foundUser);
-    }
-  }, []);
-
   const onPressLogin = async e => {
     e.preventDefault();
 
-    const onSuccess = data => {
-      console.log(data);
-      // Set JSON Web Token on success
-      setClientToken(data.data.data.token);
-      // set the state of the user
-      setUser(data.data);
-      // store the user in localStorage
-      localStorage.setItem("user", JSON.stringify(data.data));
-      //console.log(`======= LOGIN USERNAME:${user.username}`);
-      history.push("/");
-    };
+    // const onSuccess = async data => {
+    //   // Set JSON Web Token on success
+    //   setClientToken(data.data.data.token);
+    //   // set the state of the user
+    //   setUser(data.data);
+    //   // store the user in localStorage
+    //   localStorage.setItem("user", JSON.stringify(data.data));
+    //   // get logged in user info
+    //   await GetUserInfo()
 
-    const onFailure = error => {
-      console.log(error);
-      if (error.response != null) {
-        if (error.response.status == 403) {
-          setError("Xin kiểm tra lại thông tin đăng nhập.");
-        }
-      } else {
-        setError("Đã có một lỗi bất thường xảy ra. Xin hãy liên hệ với Admin để bảo trì hệ thống.");
-      }
-    };
+    //   //console.log(`======= LOGIN USERNAME:${user.username}`);
+    //   history.push("/");
+    // };
 
-    let user = { username, password };
+    // const onFailure = error => {
+    //   console.log(error);
+    //   if (error.response != null) {
+    //     if (error.response.status == 403) {
+    //       setError("Xin kiểm tra lại thông tin đăng nhập.");
+    //     }
+    //   } else {
+    //     setError("Đã có một lỗi bất thường xảy ra. Xin hãy liên hệ với Admin để bảo trì hệ thống.");
+    //   }
+    // };
+
+    let userInput = { username, password };
     const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     if (emailRegex.test(username)) {
       //input is email
       const email = username
-      user = { email, password };
+      userInput = { email, password };
     }
-    APIKit.post('/login', user)
-      .then(onSuccess)
-      .catch(onFailure);
+
+    const loginResult = await LoginAPI(userInput);
+
+    if (loginResult.userData != null) {
+      // set the state of the user
+      setUser(loginResult.userData);
+      // store the user in localStorage
+      localStorage.setItem("user", JSON.stringify(loginResult.userData));
+      // get logged in user detail info then store it into localStorage
+      const userInfo = await GetUserInfoAPI(loginResult.userData.username);
+      localStorage.setItem("userInfo", JSON.stringify(userInfo));
+      // refresh but not send any HTTP request
+      history.push("/");
+    } else {
+      setError(loginResult.errorMessage);
+    }
+
+    // APIKit.post('/login', user)
+    //   .then(onSuccess)
+    //   .catch(onFailure);
   };
 
   return (

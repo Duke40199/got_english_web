@@ -1,4 +1,5 @@
 import React from 'react'
+import { useHistory } from 'react-router-dom'
 import {
   CDropdown,
   CDropdownItem,
@@ -9,15 +10,15 @@ import {
 
 import CIcon from '@coreui/icons-react'
 
-const Logout = () => {
-  localStorage.clear();
-  console.log("LOGGEDOUT");
-  window.location.href = '/';
-};
-
-
 const TheHeaderDropdown = () => {
-  const userInfo = JSON.parse(localStorage.getItem("user"));
+  const history = useHistory();
+  const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+
+  const Logout = () => {
+    localStorage.clear();
+    console.log("LOGGEDOUT");
+    history.push("/");
+  };
 
   return (
     <CDropdown
@@ -28,7 +29,7 @@ const TheHeaderDropdown = () => {
       <CDropdownToggle className="c-header-nav-link" caret={false}>
         <div className="c-avatar">
           <CImg
-            src={'/avatars/6.jpg'}
+            src={userInfo.avatar_url}
             className="c-avatar-img"
             alt="admin@bootstrapmaster.com"
           />
@@ -41,7 +42,7 @@ const TheHeaderDropdown = () => {
           color="light"
           className="text-center"
         >
-          Xin chào, <strong>{userInfo.data.username}</strong>
+          Xin chào, <strong>{userInfo.username}</strong>
         </CDropdownItem>
         <CDropdownItem>
           <CIcon name="cil-user" className="mfe-2" />Hồ sơ
