@@ -43,6 +43,7 @@ const ViewExpertFeedback = React.lazy(() => import('./views/pages/manage-expert/
 const ViewCandidateCertification = React.lazy(() => import('./views/pages/view-candidate-certification/ViewCandidateCertification'));
 const ManageCoinBundle = React.lazy(() => import('./views/pages/manage-coin-bundle/ManageCoinBundle'));
 const ManageLearner = React.lazy(() => import('./views/pages/manage-learner/ManageLearner'));
+const MyProfile = React.lazy(() => import('./views/pages/my-profile/MyProfile'));
 
 const routes = [
   { path: '/', exact: true, name: 'Trang chủ' },
@@ -91,6 +92,7 @@ const routes = [
   { path: '/view-candidate-certification', name: 'Xem hồ sơ Ứng Viên', component: ViewCandidateCertification },
   { path: '/manage-coin-bundle', name: 'Quản lý Gói Coin', component: ManageCoinBundle },
   { path: '/manage-learner', name: 'Quản lý Học Viên', component: ManageLearner },
+  { path: '/my-profile', name: 'Hồ sơ của tôi', component: MyProfile },
 ];
 
 export default routes;

@@ -30,31 +30,6 @@ const Login = () => {
   const onPressLogin = async e => {
     e.preventDefault();
 
-    // const onSuccess = async data => {
-    //   // Set JSON Web Token on success
-    //   setClientToken(data.data.data.token);
-    //   // set the state of the user
-    //   setUser(data.data);
-    //   // store the user in localStorage
-    //   localStorage.setItem("user", JSON.stringify(data.data));
-    //   // get logged in user info
-    //   await GetUserInfo()
-
-    //   //console.log(`======= LOGIN USERNAME:${user.username}`);
-    //   history.push("/");
-    // };
-
-    // const onFailure = error => {
-    //   console.log(error);
-    //   if (error.response != null) {
-    //     if (error.response.status == 403) {
-    //       setError("Xin kiểm tra lại thông tin đăng nhập.");
-    //     }
-    //   } else {
-    //     setError("Đã có một lỗi bất thường xảy ra. Xin hãy liên hệ với Admin để bảo trì hệ thống.");
-    //   }
-    // };
-
     let userInput = { username, password };
     const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     if (emailRegex.test(username)) {
@@ -78,10 +53,6 @@ const Login = () => {
     } else {
       setError(loginResult.errorMessage);
     }
-
-    // APIKit.post('/login', user)
-    //   .then(onSuccess)
-    //   .catch(onFailure);
   };
 
   return (

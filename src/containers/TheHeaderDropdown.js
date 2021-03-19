@@ -44,7 +44,7 @@ const TheHeaderDropdown = () => {
         >
           Xin chào, <strong>{userInfo.username}</strong>
         </CDropdownItem>
-        <CDropdownItem>
+        <CDropdownItem href="/my-profile">
           <CIcon name="cil-user" className="mfe-2" />Hồ sơ
         </CDropdownItem>
         {/* <CDropdownItem>

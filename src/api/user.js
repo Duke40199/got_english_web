@@ -1,6 +1,7 @@
-import APIKit from './APIKit';
+import APIKit, { setClientToken } from './APIKit';
 
 export const GetUserInfoAPI = async (username) => {
+    const token = (JSON.parse(localStorage.getItem("user"))).token;
     let userInfo = null;
     const onSuccess = data => {
         //only first data
@@ -11,6 +12,8 @@ export const GetUserInfoAPI = async (username) => {
         console.log(error);
     }
 
+    setClientToken(token);
+
     await APIKit.get('/users', {
         params: {
             username: username,
@@ -20,4 +23,28 @@ export const GetUserInfoAPI = async (username) => {
         .catch(onFailure);
 
     return userInfo;
+}
+
+export const GetAdminInfoListAPI = async () => {
+    const token = (JSON.parse(localStorage.getItem("user"))).token;
+    let adminInfoList = null;
+    const onSuccess = data => {
+        adminInfoList = data.data.data;
+    }
+
+    const onFailure = error => {
+        console.log(error);
+    }
+
+    setClientToken(token);
+
+    await APIKit.get('/users', {
+        params: {
+            role: 'Admin',
+        }
+    })
+        .then(onSuccess)
+        .catch(onFailure);
+
+    return adminInfoList;
 }
