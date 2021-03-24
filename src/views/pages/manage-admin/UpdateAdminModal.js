@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 
 import {
     CCol,
+    CRow,
     CInput,
     CButton,
     CModal,
@@ -14,6 +15,7 @@ import {
     CInputFile,
     CForm
 } from '@coreui/react'
+import CIcon from '@coreui/icons-react'
 
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -25,23 +27,42 @@ import { GetUserInfoAPI } from '../../../api/user';
 const UpdateAdminModal = ({ selectedAdminUsername, show, handleClose }) => {
 
     const [updateAdminUUID, setUpdateAdminUUID] = useState("");
+    const [updateAdminFullname, setUpdateAdminFullname] = useState("");
     const [updateAdminUsername, setUpdateAdminUsername] = useState("");
     const [updateAdminPassword, setUpdateAdminPassword] = useState("");
     const [updateAdminEmail, setUpdateAdminEmail] = useState("");
     const [updateAdminAddress, setUpdateAdminAddress] = useState("");
     const [updateAdminPhoneNumber, setUpdateAdminPhoneNumber] = useState("");
     const [updateAdminBirthday, setUpdateAdminBirthday] = useState("");
+    const [updateAdminAvatarUrl, setUpdateAdminAvatarUrl] = useState("");
+
+    const avtUrlUploadOnclick = () => {
+        document.getElementById('updateAdminAvtUrlInput').click();
+        document.getElementById('updateAdminAvtUrlInput').onchange = (e) => {
+            var img = document.getElementById("updateAdminAvt");
+            // create blob url
+            var blobUrl = URL.createObjectURL(e.target.files[0]);
+            // use blob url to preview avatar
+            setUpdateAdminAvatarUrl(blobUrl);
+            img.onload = () => {
+                // delete blob url when the avatar loaded successfully
+                URL.revokeObjectURL(blobUrl);
+            }
+        }
+    }
 
     //this useEffect will be executed every time the modal show
     useEffect(async () => {
         if (selectedAdminUsername != null) {
             const selectedAdminInfo = await GetUserInfoAPI(selectedAdminUsername);
             setUpdateAdminUUID(selectedAdminInfo.id);
+            setUpdateAdminFullname(selectedAdminInfo.fullname);
             setUpdateAdminUsername(selectedAdminInfo.username);
             setUpdateAdminEmail(selectedAdminInfo.email);
             setUpdateAdminAddress(selectedAdminInfo.address);
             setUpdateAdminPhoneNumber(selectedAdminInfo.phone_number);
             setUpdateAdminBirthday(selectedAdminInfo.birthday);
+            setUpdateAdminAvatarUrl(selectedAdminInfo.avatar_url);
         }
     }, [show]);
 
@@ -65,6 +86,14 @@ const UpdateAdminModal = ({ selectedAdminUsername, show, handleClose }) => {
                         </CCol>
                         <CCol xs="12" md="8">
                             <p name="admin-id-static">{updateAdminUUID}</p>
+                        </CCol>
+                    </CFormGroup>
+                    <CFormGroup row>
+                        <CCol md="4">
+                            <CLabel htmlFor="update-admin-fullname-input">Họ và tên:</CLabel>
+                        </CCol>
+                        <CCol xs="12" md="8">
+                            <CInput type="text" id="update-admin-fullname-input" name="username" value={updateAdminFullname} required={true} onChange={({ target }) => setUpdateAdminFullname(target.value)} />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -128,7 +157,13 @@ const UpdateAdminModal = ({ selectedAdminUsername, show, handleClose }) => {
                     <CFormGroup row>
                         <CLabel col md="4" htmlFor="update-admin-avatar-url">Ảnh đại diện</CLabel>
                         <CCol xs="12" md="8">
-                            <CInputFile id="update-admin-avatar-url" name="update-admin-avatar-url" />
+                            <img id="updateAdminAvt" className="mr-2" src={updateAdminAvatarUrl} width="80" height="80" />
+                            <CButton
+                                color="info"
+                                className="rounded-circle"
+                                onClick={avtUrlUploadOnclick}
+                            ><CIcon name="cil-pencil"></CIcon></CButton>
+                            <CInputFile class="d-none" id="updateAdminAvtUrlInput" name="update-admin-avatar-url" />
                         </CCol>
                     </CFormGroup>
                 </CForm>

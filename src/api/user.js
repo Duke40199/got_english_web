@@ -14,7 +14,7 @@ export const GetUserInfoAPI = async (username) => {
 
     setClientToken(token);
 
-    await APIKit.get('/users', {
+    await APIKit.get('/accounts', {
         params: {
             username: username,
         }
@@ -38,7 +38,7 @@ export const GetAdminInfoListAPI = async () => {
 
     setClientToken(token);
 
-    await APIKit.get('/users', {
+    await APIKit.get('/accounts', {
         params: {
             role: 'Admin',
         }
@@ -47,4 +47,26 @@ export const GetAdminInfoListAPI = async () => {
         .catch(onFailure);
 
     return adminInfoList;
+}
+
+export const UpdateUserInfoByUserIdAPI = async (userID, updateInfoJson) => {
+    const token = (JSON.parse(localStorage.getItem("user"))).token;
+    let updateResult = null;
+    const onSuccess = response => {
+        console.log(response.data);
+        updateResult = response.data.success;
+    }
+
+    const onFailure = error => {
+        console.log(error);
+        updateResult = false;
+    }
+
+    setClientToken(token);
+
+    await APIKit.put('/accounts/' + userID + '/update', updateInfoJson)
+        .then(onSuccess)
+        .catch(onFailure);
+
+    return updateResult;
 }

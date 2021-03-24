@@ -17,7 +17,8 @@ import {
     CLabel,
     CFormGroup,
     CInputFile,
-    CForm
+    CForm,
+    CBadge
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import UpdateAdminModal from '../manage-admin/UpdateAdminModal'
@@ -25,27 +26,29 @@ import UpdateAdminModal from '../manage-admin/UpdateAdminModal'
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import vi from "date-fns/locale/vi";
+import { format } from 'date-fns';
 
 import { usePromiseTracker, trackPromise } from "react-promise-tracker";
 
-import usersData from '../../users/UsersData'
 import { GetAdminInfoListAPI } from '../../../api/user';
 
-const getBadge = status => {
-    switch (status) {
-        case 'Hoạt động': return 'success'
-        case 'Đã khóa': return 'danger'
+const getBadge = isSuspended => {
+    switch (isSuspended) {
+        case false: return 'success'
+        case true: return 'danger'
         default: return 'primary'
     }
 }
 const fields = [
-    { key: 'username', label: 'Tên đăng nhập' },
-    { key: 'email', label: 'Địa chỉ Email' },
-    { key: 'birthday', label: 'Ngày sinh' },
-    { key: 'address', label: 'Địa chỉ', _style: { width: '30%' } },
-    { key: 'phone_number', label: 'Số điện thoại' },
+    { key: 'fullname', label: 'Họ và tên', _style: { width: '14%' } },
+    { key: 'username', label: 'Tên đăng nhập', _style: { width: '11%' } },
+    { key: 'email', label: 'Địa chỉ Email', _style: { width: '10%' } },
+    { key: 'birthday', label: 'Ngày sinh', _style: { width: '10%' } },
+    { key: 'address', label: 'Địa chỉ', _style: { width: '24%' } },
+    { key: 'phone_number', label: 'Số điện thoại', _style: { width: '10%' } },
+    { key: 'is_suspended', label: '', _style: { width: '8%' } },
     //{ key: 'status', label: 'Trạng thái' },
-    { key: 'action', label: '' }]
+    { key: 'action', label: '', _style: { width: '5%' } }]
 
 const ManageAdmin = () => {
     const [addAdminModal, setAddAdminModalState] = useState(false);
@@ -98,30 +101,35 @@ const ManageAdmin = () => {
                             tableFilter={
                                 {
                                     label: "Tìm kiếm:",
-                                    placeholder: " ",
+                                    placeholder: "nhập dữ liệu...",
                                 }
                             }
                             scopedSlots={{
-                                // 'status':
-                                //     (item) => (
-                                //         <td>
-                                //             <CBadge color={getBadge(item.status)}>
-                                //                 {item.status}
-                                //             </CBadge>
-                                //         </td>
-                                //     ),
+                                'is_suspended':
+                                    (item) => (
+                                        <td>
+                                            <CBadge color={getBadge(item.is_suspended)}>
+                                                {item.is_suspended ? "Đã khóa" : "Hoạt động"}
+                                            </CBadge>
+                                        </td>
+                                    ),
+                                'birthday':
+                                    (item) => (<td>
+                                        {format(new Date(item.birthday), "dd/MM/yyyy")}
+                                    </td>),
                                 'action':
                                     (item, index) => {
                                         return (
-                                            <td className="py-1"><CButton
-                                                color="success"
-                                                size="sm"
-                                                className="mr-2"
-                                                onClick={() => updateAdminOnclick(item.username)}>Cập nhật</CButton>
-                                                <CButton
-                                                    color="danger"
-                                                    size="sm"
-                                                    onClick={() => { setBanAdminModalState(!banAdminModal) }} >Khóa</CButton>
+                                            <td className="py-1">
+
+                                                <button type="button" class="admin-update-button mr-2" data-toggle="tooltip" title="Cập nhật">
+                                                    <CIcon name="cil-pencil" onClick={() => updateAdminOnclick(item.username)}>
+                                                    </CIcon>
+                                                </button>
+                                                <button type="button" class="admin-ban-button" data-toggle="tooltip" title="Khóa">
+                                                    <CIcon name="cil-lock-locked" onClick={() => { setBanAdminModalState(!banAdminModal) }}>
+                                                    </CIcon>
+                                                </button>
                                             </td>
                                         )
                                     },
@@ -237,99 +245,6 @@ const ManageAdmin = () => {
                 </CModalFooter>
             </CModal>
             {/*POPUP UPDATE ADMIN*/}
-            {/* <CModal
-                show={updateAdminModal}
-                onClose={() => setUpdateAdminModalState(!updateAdminModal)}
-                color="success"
-            >
-                <CModalHeader closeButton>
-                    <CModalTitle>Cập nhật Quản Trị Viên</CModalTitle>
-                </CModalHeader>
-                <CModalBody>
-                    <CForm action="" method="post" encType="multipart/form-data" className="form-horizontal">
-                        <CFormGroup row>
-                            <CCol md="4">
-                                <CLabel htmlFor="admin-uuid-input">UUID:</CLabel>
-                            </CCol>
-                            <CCol xs="12" md="8">
-                                <p name="admin-id-static">{updateAdminInfo.id}</p>
-                            </CCol>
-                        </CFormGroup>
-                        <CFormGroup row>
-                            <CCol md="4">
-                                <CLabel htmlFor="update-admin-username-input">Tên đăng nhập:</CLabel>
-                            </CCol>
-                            <CCol xs="12" md="8">
-                                <CInput type="text" id="update-admin-username-input" name="username" value={updateAdminInfo.username} required={true} onChange={({ target }) => handleInputChange(target.name, target.value)} />
-                            </CCol>
-                        </CFormGroup>
-                        <CFormGroup row>
-                            <CCol md="4">
-                                <CLabel htmlFor="update-admin-password-input">Mật khẩu</CLabel>
-                            </CCol>
-                            <CCol xs="12" md="8">
-                                <CInput type="password" id="update-admin-password-input" name="update-admin-password-input" defaultValue="" required={true} />
-                            </CCol>
-                        </CFormGroup>
-                        <CFormGroup row>
-                            <CCol md="4">
-                                <CLabel htmlFor="update-admin-email-input">Email</CLabel>
-                            </CCol>
-                            <CCol xs="12" md="8">
-                                <CInput type="email" id="update-admin-email-input" name="update-admin-email-input" autoComplete="email" defaultValue={updateAdminInfo.email} required={true} />
-                            </CCol>
-                        </CFormGroup>
-                        <CFormGroup row>
-                            <CCol md="4">
-                                <CLabel htmlFor="update-admin-birthday-input">Ngày sinh</CLabel>
-                            </CCol>
-                            <CCol xs="12" md="8">
-                                <DatePicker
-                                    className="form-control"
-                                    locale="vi"
-                                    id="update-admin-birthday-input"
-                                    name="update-admin-birthday-input"
-                                    selected={adminBirthday}
-                                    placeholderText="Ngày/Tháng/Năm"
-                                    onChange={date => setAdminBirthday(date)}
-                                    required={true}
-                                    value={updateAdminInfo.birthday}
-                                    dateFormat="dd/MM/yyyy" />
-                            </CCol>
-                        </CFormGroup>
-                        <CFormGroup row>
-                            <CCol md="4">
-                                <CLabel htmlFor="update-admin-address-input">Địa chỉ</CLabel>
-                            </CCol>
-                            <CCol xs="12" md="8">
-                                <CInput type="text" id="update-admin-address-input" name="update-admin-address-input" defaultValue={updateAdminInfo.address} />
-                            </CCol>
-                        </CFormGroup>
-                        <CFormGroup row>
-                            <CCol md="4">
-                                <CLabel htmlFor="update-admin-phone-input">Số điện thoại</CLabel>
-                            </CCol>
-                            <CCol xs="12" md="8">
-                                <CInput type="tel" id="update-admin-phone-input" name="update-admin-phone-input" defaultValue={updateAdminInfo.phone_number} />
-                            </CCol>
-                        </CFormGroup>
-                        <CFormGroup row>
-                            <CLabel col md="4" htmlFor="update-admin-avatar-url">Ảnh đại diện</CLabel>
-                            <CCol xs="12" md="8">
-                                <CInputFile id="update-admin-avatar-url" name="update-admin-avatar-url" />
-                            </CCol>
-                        </CFormGroup>
-                    </CForm>
-                </CModalBody>
-                <CModalFooter>
-                    <CButton color="success" onClick={() => setUpdateAdminModalState(!updateAdminModal)}>
-                        Cập nhật
-                </CButton>{' '}
-                    <CButton color="secondary" onClick={() => setUpdateAdminModalState(!updateAdminModal)}>
-                        Hủy
-                </CButton>
-                </CModalFooter>
-            </CModal> */}
             <UpdateAdminModal
                 selectedAdminUsername={selectedAdminUsername}
                 show={updateAdminModalShow}
