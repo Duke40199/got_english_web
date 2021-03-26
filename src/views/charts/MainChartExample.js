@@ -5,6 +5,7 @@ import { getStyle, hexToRgba } from '@coreui/utils'
 const brandSuccess = getStyle('success') || '#4dbd74'
 const brandInfo = getStyle('info') || '#20a8d8'
 const brandDanger = getStyle('danger') || '#f86c6b'
+const brandWarning = getStyle('warning') || '#f9b115'
 
 const MainChartExample = attributes => {
   const random = (min, max) => {
@@ -12,26 +13,29 @@ const MainChartExample = attributes => {
   }
 
   const defaultDatasets = (() => {
-    let elements = 27
+    let elements = 31
     const data1 = []
     const data2 = []
     const data3 = []
+    const data4 = []
     for (let i = 0; i <= elements; i++) {
       data1.push(random(50, 200))
       data2.push(random(80, 100))
-      data3.push(65)
+      data3.push(random(40, 100))
+      data4.push(random(20, 50))
     }
     return [
       {
-        label: 'My First dataset',
-        backgroundColor: hexToRgba(brandInfo, 10),
+        label: 'Chuyên Gia',
+        //backgroundColor: hexToRgba(brandInfo, 10),
+        backgroundColor: 'transparent',
         borderColor: brandInfo,
         pointHoverBackgroundColor: brandInfo,
         borderWidth: 2,
         data: data1
       },
       {
-        label: 'My Second dataset',
+        label: 'Ứng Viên',
         backgroundColor: 'transparent',
         borderColor: brandSuccess,
         pointHoverBackgroundColor: brandSuccess,
@@ -39,14 +43,21 @@ const MainChartExample = attributes => {
         data: data2
       },
       {
-        label: 'My Third dataset',
+        label: 'Người Dùng',
         backgroundColor: 'transparent',
         borderColor: brandDanger,
         pointHoverBackgroundColor: brandDanger,
-        borderWidth: 1,
-        borderDash: [8, 5],
+        borderWidth: 2,
         data: data3
-      }
+      },
+      {
+        label: 'Quản Trị Viên',
+        backgroundColor: 'transparent',
+        borderColor: brandWarning,
+        pointHoverBackgroundColor: brandWarning,
+        borderWidth: 2,
+        data: data4
+      },
     ]
   })()
 
@@ -92,7 +103,7 @@ const MainChartExample = attributes => {
       {...attributes}
       datasets={defaultDatasets}
       options={defaultOptions}
-      labels={['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN']}
+      labels={['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24', '25', '26', '27', '28', '29', '30', '31']}
     />
   )
 }

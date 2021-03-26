@@ -10,13 +10,9 @@ const _nav = [
   },
   {
     _tag: 'CSidebarNavItem',
-    name: 'Xem hồ sơ Ứng Viên',
-    icon: 'cil-spreadsheet',
-    to: '/view-candidate-certification',
-    badge: {
-      color: 'info',
-      text: 'MỚI',
-    }
+    name: 'Quản lý Học Viên',
+    to: 'manage-learner',
+    icon: 'cil-book'
   },
   {
     _tag: 'CSidebarNavItem',
@@ -26,14 +22,15 @@ const _nav = [
   },
   {
     _tag: 'CSidebarNavItem',
-    name: 'Quản lý Quản Trị Viên',
-    to: '/manage-admin',
+    name: 'Quản lý Điều Hành Viên',
+    to: '/manage-moderator',
     icon: 'cil-people'
   },
   {
     _tag: 'CSidebarNavItem',
-    name: 'Quản lý Diễn Đàn',
-    icon: 'cil-comment-bubble'
+    name: 'Xem hồ sơ Ứng Viên',
+    icon: 'cil-address-book',
+    to: '/view-candidate-certification',
   },
   {
     _tag: 'CSidebarNavItem',
@@ -43,12 +40,8 @@ const _nav = [
   },
   {
     _tag: 'CSidebarNavItem',
-    name: 'Báo Cáo từ Người Dùng',
-    icon: 'cil-warning',
-    badge: {
-      color: 'danger',
-      text: 'MỚI',
-    }
+    name: 'Quản lý Đơn Giá',
+    icon: 'cil-cash',
   },
   // {
   //   _tag: 'CSidebarNavTitle',

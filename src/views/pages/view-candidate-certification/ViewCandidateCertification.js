@@ -19,8 +19,7 @@ const fields = [
     { key: 'birthday', label: 'Ngày sinh' },
     { key: 'occupation', label: 'Công việc' },
     { key: 'phone', label: 'Số điện thoại' },
-    { key: 'certificationImg', label: 'Chứng chỉ'},
-    { key: 'status', label: '' },
+    { key: 'certificationImg', label: 'Chứng chỉ' },
     { key: 'action', label: '' }]
 
 function openLightbox(index, changeCurrentIndex) {
@@ -47,15 +46,8 @@ const ViewCandidateCertification = () => {
                                     'certificationImg':
                                         (item, index) => (
                                             <td>
-                                                <img src={item.certificationImg} className="img-thumbnail certification-img" width="120px" height="90px" onClick={e => openLightbox(index, changeCurrentIndex)} />
-                                                {/* <Lightbox image={item.certificationImg} showTitle={false} /> */}
+                                                <img src={item.certificationImg} className="img-thumbnail lightbox-thumbnail-img" width="120px" height="90px" onClick={e => openLightbox(index, changeCurrentIndex)} />
                                                 {currentIndex == index ? <Lightbox image={item.certificationImg} showTitle={false} onClose={e => changeCurrentIndex(-1)} /> : null}
-                                            </td>
-                                        ),
-                                    'status':
-                                        (item) => (
-                                            <td>
-                                                {item.status == "new" ? <CBadge color="info"> MỚI </CBadge> : null}
                                             </td>
                                         ),
                                     'action':

@@ -1,54 +1,58 @@
-import React, { lazy } from 'react'
+import React, { lazy, useState } from 'react'
 import {
-  CBadge,
-  CButton,
-  CButtonGroup,
   CCard,
   CCardBody,
   CCardFooter,
-  CCardHeader,
   CCol,
   CProgress,
   CRow,
-  CCallout
 } from '@coreui/react'
-import CIcon from '@coreui/icons-react'
+
+import DatePicker, { registerLocale } from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import vi from "date-fns/locale/vi";
 
 import MainChartExample from '../charts/MainChartExample.js'
 
 const WidgetsDropdown = lazy(() => import('../widgets/WidgetsDropdown.js'))
-const WidgetsBrand = lazy(() => import('../widgets/WidgetsBrand.js'))
+
+const StatisticMonthYearPicker = () => {
+  const [startDate, setStartDate] = useState(new Date("2021/01"));
+  registerLocale("vi", vi);
+  const StatisticMonthYearInput = ({ value, onClick }) => (
+    <button className="statistic-month-year-input" onClick={onClick}>
+      {value}
+    </button>
+  );
+  return (
+    <DatePicker
+      selected={startDate}
+      onChange={date => setStartDate(date)}
+      locale="vi"
+      showMonthYearPicker
+      dateFormat="MM/yyyy"
+      value="01/2021"
+      customInput={<StatisticMonthYearInput />}
+    />
+  );
+};
 
 const Dashboard = () => {
-  document.title = 'Quản trị Phần mềm GotEnglish'
+
   return (
     <>
+      <h3 className="mb-3">Bảng tin ngày 26/02/2021:</h3>
       <WidgetsDropdown />
       <CCard>
         <CCardBody>
           <CRow>
             <CCol sm="5">
-              <h4 id="traffic" className="card-title mb-0">Thống kê Người Dùng</h4>
-              <div className="small text-muted">Tháng Một 2020</div>
+              <h4 id="traffic" className="card-title mb-0">Thống kê lượng Người Dùng theo Tháng</h4>
+              <div className="small text-muted">Tháng Một 2021</div>
+
             </CCol>
             <CCol sm="7" className="d-none d-md-block">
-              <CButton color="primary" className="float-right">
-                <CIcon name="cil-cloud-download" />
-              </CButton>
-              <CButtonGroup className="float-right mr-3">
-                {
-                  ['Ngày', 'Tháng', 'Năm'].map(value => (
-                    <CButton
-                      color="outline-secondary"
-                      key={value}
-                      className="mx-0"
-                      active={value === 'Tháng'}
-                    >
-                      {value}
-                    </CButton>
-                  ))
-                }
-              </CButtonGroup>
+              <StatisticMonthYearPicker />
             </CCol>
           </CRow>
           <MainChartExample style={{ height: '300px', marginTop: '40px' }} />
@@ -56,52 +60,43 @@ const Dashboard = () => {
         <CCardFooter>
           <CRow className="text-center">
             <CCol md sm="12" className="mb-sm-2 mb-0">
-              <div className="text-muted">Lượt tải</div>
-              <strong>2.038</strong>
-              <CProgress
-                className="progress-xs mt-2"
-                precision={1}
-                color="success"
-                value={80}
-              />
-            </CCol>
-            <CCol md sm="12" className="mb-sm-2 mb-0 d-md-down-none">
-              <div className="text-muted">Ứng Viên Chuyên Gia mới</div>
+              <div className="text-muted">Ứng Viên mới</div>
               <strong>164</strong>
               <CProgress
                 className="progress-xs mt-2"
                 precision={1}
-                color="info"
-                value={10}
+                color="success"
+                value={30}
               />
             </CCol>
-            <CCol md sm="12" className="mb-sm-2 mb-0">
+            <CCol md sm="12" className="mb-sm-2 mb-0 d-md-down-none">
               <div className="text-muted">Chuyên Gia mới</div>
-              <strong>285</strong>
+              <strong>48</strong>
               <CProgress
                 className="progress-xs mt-2"
                 precision={1}
-                color="warning"
+                color="info"
                 value={20}
               />
             </CCol>
             <CCol md sm="12" className="mb-sm-2 mb-0">
+              <div className="text-muted">Quản Trị Viên mới</div>
+              <strong>17</strong>
+              <CProgress
+                className="progress-xs mt-2"
+                precision={1}
+                color="warning"
+                value={10}
+              />
+            </CCol>
+            <CCol md sm="12" className="mb-sm-2 mb-0">
               <div className="text-muted">Người Dùng mới</div>
-              <strong>1.382</strong>
+              <strong>426</strong>
               <CProgress
                 className="progress-xs mt-2"
                 precision={1}
                 color="danger"
-                value={70}
-              />
-            </CCol>
-            <CCol md sm="12" className="mb-sm-2 mb-0 d-md-down-none">
-              <div className="text-muted">Khách</div>
-              <strong>924</strong>
-              <CProgress
-                className="progress-xs mt-2"
-                precision={1}
-                value={40}
+                value={50}
               />
             </CCol>
           </CRow>

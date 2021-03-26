@@ -24,19 +24,21 @@ const TheSidebar = () => {
   return (
     <CSidebar
       show={show}
-      onShowChange={(val) => dispatch({type: 'set', sidebarShow: val })}
+      onShowChange={(val) => dispatch({ type: 'set', sidebarShow: val })}
     >
       <CSidebarBrand className="d-md-down-none" to="/">
-        <CIcon
+        {/* <CIcon
           className="c-sidebar-brand-full"
           name="logo-negative"
           height={35}
-        />
-        <CIcon
+        /> */}
+        <img src="/logos/GotEnglish-big.png" className="c-sidebar-brand-full" name="logo-negative" height={25} width={200} />
+        <img src="/logos/GotEnglish-small.png" className="c-sidebar-brand-minimized" name="sygnet" height={25} width={25} />
+        {/* <CIcon
           className="c-sidebar-brand-minimized"
           name="sygnet"
           height={35}
-        />
+        /> */}
       </CSidebarBrand>
       <CSidebarNav>
 
@@ -50,7 +52,7 @@ const TheSidebar = () => {
           }}
         />
       </CSidebarNav>
-      <CSidebarMinimizer className="c-d-md-down-none"/>
+      <CSidebarMinimizer className="c-d-md-down-none" />
     </CSidebar>
   )
 }

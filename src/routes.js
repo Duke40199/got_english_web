@@ -37,11 +37,14 @@ const Typography = React.lazy(() => import('./views/theme/typography/Typography'
 const Widgets = React.lazy(() => import('./views/widgets/Widgets'));
 const Users = React.lazy(() => import('./views/users/Users'));
 const User = React.lazy(() => import('./views/users/User'));
-const ManageAdmin = React.lazy(() => import('./views/pages/manage-admin/ManageAdmin'));
+const ManageModerator = React.lazy(() => import('./views/pages/manage-moderator/ManageModerator'));
 const ManageExpert = React.lazy(() => import('./views/pages/manage-expert/ManageExpert'));
 const ViewExpertFeedback = React.lazy(() => import('./views/pages/manage-expert/view-expert-feedback/ViewExpertFeedback'));
 const ViewCandidateCertification = React.lazy(() => import('./views/pages/view-candidate-certification/ViewCandidateCertification'));
 const ManageCoinBundle = React.lazy(() => import('./views/pages/manage-coin-bundle/ManageCoinBundle'));
+const ManageLearner = React.lazy(() => import('./views/pages/manage-learner/ManageLearner'));
+const MyProfile = React.lazy(() => import('./views/pages/my-profile/MyProfile'));
+const Page404 = React.lazy(() => import('./views/pages/page404/Page404'));
 
 const routes = [
   { path: '/', exact: true, name: 'Trang chủ' },
@@ -84,11 +87,14 @@ const routes = [
   { path: '/widgets', name: 'Widgets', component: Widgets },
   { path: '/users', exact: true, name: 'Users', component: Users },
   { path: '/users/:id', exact: true, name: 'User Details', component: User },
-  { path: '/manage-admin', name: 'Quản lý Quản Trị Viên', component: ManageAdmin },
+  { path: '/manage-moderator', name: 'Quản lý Điều Hành Viên', component: ManageModerator, exact: true },
   { path: '/manage-expert', exact: true, name: 'Quản lý Chuyên Gia', component: ManageExpert },
   { path: '/manage-expert/view-expert-feedback', exact: true, name: 'Xem chi tiết Đánh Giá của Chuyên Gia', component: ViewExpertFeedback },
-  { path: '/view-candidate-certification', name: 'Xem hồ sơ Ứng Viên', component: ViewCandidateCertification },
-  { path: '/manage-coin-bundle', name: 'Quản lý Gói Coin', component: ManageCoinBundle }
+  { path: '/view-candidate-certification', name: 'Xem hồ sơ Ứng Viên', component: ViewCandidateCertification, exact: true },
+  { path: '/manage-coin-bundle', name: 'Quản lý Gói Coin', component: ManageCoinBundle, exact: true },
+  { path: '/manage-learner', name: 'Quản lý Học Viên', component: ManageLearner, exact: true },
+  { path: '/my-profile', name: 'Hồ sơ của tôi', component: MyProfile, exact: true },
+  { path: '*', name: '404', component: Page404 },
 ];
 
 export default routes;

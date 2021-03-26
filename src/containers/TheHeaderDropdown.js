@@ -1,25 +1,25 @@
-import React, { useState } from 'react'
+import React from 'react'
+import { useHistory } from 'react-router-dom'
 import {
-  CBadge,
   CDropdown,
   CDropdownItem,
   CDropdownMenu,
   CDropdownToggle,
   CImg
 } from '@coreui/react'
+
 import CIcon from '@coreui/icons-react'
 
-const Logout = () => {
-  const [setUsername] = useState();
-  const [setPassword] = useState();
-  const [setUser] = useState();
-  setUser({});
-  setUsername("");
-  setPassword("");
-  localStorage.clear();
-  console.log("LOGGEDOUT")
-};
 const TheHeaderDropdown = () => {
+  const history = useHistory();
+  const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+
+  const Logout = () => {
+    localStorage.clear();
+    console.log("LOGGEDOUT");
+    history.push("/");
+  };
+
   return (
     <CDropdown
       inNav
@@ -29,9 +29,8 @@ const TheHeaderDropdown = () => {
       <CDropdownToggle className="c-header-nav-link" caret={false}>
         <div className="c-avatar">
           <CImg
-            src={'/avatars/6.jpg'}
+            src={userInfo.avatar_url != "" ? userInfo.avatar_url : "/avatars/default_avt.png"}
             className="c-avatar-img"
-            alt="admin@bootstrapmaster.com"
           />
         </div>
       </CDropdownToggle>
@@ -42,9 +41,12 @@ const TheHeaderDropdown = () => {
           color="light"
           className="text-center"
         >
-          <strong>Account</strong>
+          Xin chào, <strong>{userInfo.username}</strong>
         </CDropdownItem>
-        <CDropdownItem>
+        <CDropdownItem href="/my-profile">
+          <CIcon name="cil-user" className="mfe-2" />Hồ sơ
+        </CDropdownItem>
+        {/* <CDropdownItem>
           <CIcon name="cil-bell" className="mfe-2" />
           Updates
           <CBadge color="info" className="mfs-auto">42</CBadge>
@@ -73,9 +75,6 @@ const TheHeaderDropdown = () => {
           <strong>Settings</strong>
         </CDropdownItem>
         <CDropdownItem>
-          <CIcon name="cil-user" className="mfe-2" />Profile
-        </CDropdownItem>
-        <CDropdownItem>
           <CIcon name="cil-settings" className="mfe-2" />
           Settings
         </CDropdownItem>
@@ -88,11 +87,15 @@ const TheHeaderDropdown = () => {
           <CIcon name="cil-file" className="mfe-2" />
           Projects
           <CBadge color="primary" className="mfs-auto">42</CBadge>
-        </CDropdownItem>
+        </CDropdownItem> */}
         <CDropdownItem divider />
         <CDropdownItem>
-          <CIcon name="cil-lock-locked" className="mfe-2" onClick={Logout} />
-          Đăng xuất
+          <CIcon name="cil-settings" className="mfe-2" />
+            Thiết lập
+        </CDropdownItem>
+        <CDropdownItem onClick={Logout}>
+          <CIcon name="cil-lock-locked" className="mfe-2" />
+            Đăng xuất
         </CDropdownItem>
       </CDropdownMenu>
     </CDropdown>
