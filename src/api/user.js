@@ -25,11 +25,11 @@ export const GetUserInfoAPI = async (username) => {
     return userInfo;
 }
 
-export const GetAdminInfoListAPI = async () => {
+export const GetModeratorInfoListAPI = async () => {
     const token = (JSON.parse(localStorage.getItem("user"))).token;
-    let adminInfoList = null;
+    let moderatorInfoList = null;
     const onSuccess = data => {
-        adminInfoList = data.data.data;
+        moderatorInfoList = data.data.data;
     }
 
     const onFailure = error => {
@@ -40,13 +40,13 @@ export const GetAdminInfoListAPI = async () => {
 
     await APIKit.get('/accounts', {
         params: {
-            role: 'Admin',
+            role: 'Moderator',
         }
     })
         .then(onSuccess)
         .catch(onFailure);
 
-    return adminInfoList;
+    return moderatorInfoList;
 }
 
 export const UpdateUserInfoByUserIdAPI = async (userID, updateInfoJson) => {
@@ -69,4 +69,26 @@ export const UpdateUserInfoByUserIdAPI = async (userID, updateInfoJson) => {
         .catch(onFailure);
 
     return updateResult;
+}
+
+export const CreateModeratorAPI = async (moderatorInfoJson) => {
+    const token = (JSON.parse(localStorage.getItem("user"))).token;
+    let createResult = null;
+    const onSuccess = response => {
+        console.log(response.data);
+        createResult = response.data.success;
+    }
+
+    const onFailure = error => {
+        console.log(error);
+        createResult = false;
+    }
+
+    setClientToken(token);
+
+    await APIKit.post('/accounts', moderatorInfoJson)
+        .then(onSuccess)
+        .catch(onFailure);
+
+    return createResult;
 }

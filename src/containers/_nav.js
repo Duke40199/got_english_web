@@ -22,8 +22,8 @@ const _nav = [
   },
   {
     _tag: 'CSidebarNavItem',
-    name: 'Quản lý Quản Trị Viên',
-    to: '/manage-admin',
+    name: 'Quản lý Điều Hành Viên',
+    to: '/manage-moderator',
     icon: 'cil-people'
   },
   {

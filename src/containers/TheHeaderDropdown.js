@@ -29,9 +29,8 @@ const TheHeaderDropdown = () => {
       <CDropdownToggle className="c-header-nav-link" caret={false}>
         <div className="c-avatar">
           <CImg
-            src={userInfo.avatar_url}
+            src={userInfo.avatar_url != "" ? userInfo.avatar_url : "/avatars/default_avt.png"}
             className="c-avatar-img"
-            alt="admin@bootstrapmaster.com"
           />
         </div>
       </CDropdownToggle>
