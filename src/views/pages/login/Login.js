@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { Link, useHistory } from 'react-router-dom'
-import { LoginAPI } from '../../../api/login';
-import { GetUserInfoAPI } from '../../../api/user';
+import { LoginAPI, GetMyProfileAPI } from '../../../api/login';
 import {
   CButton,
   CCard,
@@ -46,7 +45,8 @@ const Login = () => {
       // store the user in localStorage
       localStorage.setItem("user", JSON.stringify(loginResult.userData));
       // get logged in user detail info then store it into localStorage
-      const userInfo = await GetUserInfoAPI(loginResult.userData.username);
+      const userInfo = await GetMyProfileAPI();
+      console.log(userInfo);
       localStorage.setItem("userInfo", JSON.stringify(userInfo));
       // refresh but not send any HTTP request
       history.push("/");
