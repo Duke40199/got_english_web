@@ -22,6 +22,7 @@ import {
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import UpdateModeratorModal from '../manage-moderator/UpdateModeratorModal'
+import AddModeratorModal from '../manage-moderator/AddModeratorModal'
 
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -51,10 +52,9 @@ const fields = [
     { key: 'action', label: '', _style: { width: '5%' } }]
 
 const ManageModerator = () => {
-    const [addModeratorModal, setAddModeratorModalState] = useState(false);
+    const [addModeratorModalShow, setAddModeratorModalShow] = useState(false);
     const [banModeratorModal, setBanModeratorModalState] = useState(false);
     const [updateModeratorModalShow, setUpdateModeratorModalShow] = useState(false);
-    const [moderatorBirthday, setModeratorBirthday] = useState(null);
     const [moderatorInfoList, setModeratorInfoList] = useState(null);
     const [selectedModeratorUsername, setSelectedModeratorUsername] = useState(null);
 
@@ -63,7 +63,7 @@ const ManageModerator = () => {
     useEffect(async () => {
         const moderatorInfoList = await trackPromise(GetModeratorInfoListAPI());
         setModeratorInfoList(moderatorInfoList);
-    }, [])
+    }, [updateModeratorModalShow, addModeratorModalShow])
 
     const updateModeratorOnclick = (moderatorUsername) => {
         //open the update moderator modal
@@ -72,8 +72,12 @@ const ManageModerator = () => {
         setSelectedModeratorUsername(moderatorUsername);
     }
 
-    const hideModal = () => {
+    const hideUpdateModal = () => {
         setUpdateModeratorModalShow(false);
+    }
+
+    const hideAddModal = () => {
+        setAddModeratorModalShow(false);
     }
 
     registerLocale("vi", vi);
@@ -83,7 +87,7 @@ const ManageModerator = () => {
             <CCol>
                 <CCard>
                     <CCardHeader align="right">
-                        <CButton color="primary" className="mt-2 d-flex align-items-center" onClick={() => setAddModeratorModalState(!addModeratorModal)}>
+                        <CButton color="primary" className="mt-2 d-flex align-items-center" onClick={() => setAddModeratorModalShow(true)}>
                             <CIcon name="cilPlus" size="sm" className="mr-1"></CIcon>Thêm mới Điều Hành Viên</CButton>
                     </CCardHeader>
                     <CCardBody className="pt-0 pb-0">
@@ -115,7 +119,7 @@ const ManageModerator = () => {
                                     ),
                                 'birthday':
                                     (item) => (<td>
-                                        {item.birthday != "" ? format(parseISO(item.birthday), "dd/MM/yyyy") : ""}
+                                        {item.birthday != "" ? format(parseISO(item.birthday), "dd-MM-yyyy") : ""}
                                     </td>),
                                 'action':
                                     (item, index) => {
@@ -139,90 +143,11 @@ const ManageModerator = () => {
                 </CCard>
             </CCol>
             {/*POPUP ADD MODERATOR*/}
-            <CModal
-                show={addModeratorModal}
-                onClose={() => setAddModeratorModalState(!addModeratorModal)}
-                color="primary"
-            >
-                <CModalHeader closeButton>
-                    <CModalTitle>Thêm mới Quản Trị Viên</CModalTitle>
-                </CModalHeader>
-                <CModalBody>
-                    <CForm action="" method="post" encType="multipart/form-data" className="form-horizontal">
-                        <CFormGroup row>
-                            <CCol md="3">
-                                <CLabel htmlFor="moderator-id-input">Tên tài khoản</CLabel>
-                            </CCol>
-                            <CCol xs="12" md="9">
-                                <CInput id="moderator-id-input" name="moderator-id-input" required={true} />
-                            </CCol>
-                        </CFormGroup>
-                        <CFormGroup row>
-                            <CCol md="3">
-                                <CLabel htmlFor="moderator-password-input">Mật khẩu</CLabel>
-                            </CCol>
-                            <CCol xs="12" md="9">
-                                <CInput type="password" id="moderator-password-input" name="moderator-password-input" required={true} />
-                            </CCol>
-                        </CFormGroup>
-                        <CFormGroup row>
-                            <CCol md="3">
-                                <CLabel htmlFor="moderator-email-input">Email</CLabel>
-                            </CCol>
-                            <CCol xs="12" md="9">
-                                <CInput type="email" id="moderator-email-input" name="moderator-email-input" autoComplete="email" required={true} />
-                            </CCol>
-                        </CFormGroup>
-                        <CFormGroup row>
-                            <CCol md="3">
-                                <CLabel htmlFor="moderator-birthday-input">Ngày sinh</CLabel>
-                            </CCol>
-                            <CCol xs="12" md="9">
-                                <DatePicker
-                                    className="form-control"
-                                    locale="vi"
-                                    id="moderator-birthday-input"
-                                    name="moderator-birthday-input"
-                                    selected={moderatorBirthday}
-                                    placeholderText="Ngày/Tháng/Năm"
-                                    onChange={date => setModeratorBirthday(date)}
-                                    required={true}
-                                    dateFormat="dd/MM/yyyy" />
-                            </CCol>
-                        </CFormGroup>
-                        <CFormGroup row>
-                            <CCol md="3">
-                                <CLabel htmlFor="moderator-occupation-input">Công việc</CLabel>
-                            </CCol>
-                            <CCol xs="12" md="9">
-                                <CInput type="text" id="moderator-occupation-input" name="moderator-occupation-input" />
-                            </CCol>
-                        </CFormGroup>
-                        <CFormGroup row>
-                            <CCol md="3">
-                                <CLabel htmlFor="moderator-phone-input">Số điện thoại</CLabel>
-                            </CCol>
-                            <CCol xs="12" md="9">
-                                <CInput type="tel" id="moderator-phone-input" name="moderator-phone-input" />
-                            </CCol>
-                        </CFormGroup>
-                        <CFormGroup row>
-                            <CLabel col md="3" htmlFor="file-input">Ảnh đại diện</CLabel>
-                            <CCol xs="12" md="9">
-                                <CInputFile id="file-input" name="file-input" />
-                            </CCol>
-                        </CFormGroup>
-                    </CForm>
-                </CModalBody>
-                <CModalFooter>
-                    <CButton color="primary" onClick={() => setAddModeratorModalState(!addModeratorModal)}>
-                        Thêm
-                </CButton>{' '}
-                    <CButton color="secondary" onClick={() => setAddModeratorModalState(!addModeratorModal)}>
-                        Hủy
-                </CButton>
-                </CModalFooter>
-            </CModal>
+            {addModeratorModalShow ?
+                <AddModeratorModal
+                    show={addModeratorModalShow}
+                    handleClose={() => hideAddModal} />
+                : null}
             {/*POPUP BAN MODERATOR*/}
             <CModal
                 show={banModeratorModal}
@@ -245,11 +170,13 @@ const ManageModerator = () => {
                 </CModalFooter>
             </CModal>
             {/*POPUP UPDATE MODERATOR*/}
-            <UpdateModeratorModal
-                selectedModeratorUsername={selectedModeratorUsername}
-                show={updateModeratorModalShow}
-                handleClose={() => hideModal}
-            />
+            {(updateModeratorModalShow && selectedModeratorUsername != null) ?
+                <UpdateModeratorModal
+                    selectedModeratorUsername={selectedModeratorUsername}
+                    show={updateModeratorModalShow}
+                    handleClose={() => hideUpdateModal}
+                />
+                : null}
 
         </CRow >
     );

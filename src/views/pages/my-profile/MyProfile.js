@@ -11,16 +11,12 @@ import {
     CInput,
     CRow,
     CLabel,
-    CModal,
-    CModalFooter,
-    CModalBody,
-    CModalHeader,
-    CModalTitle,
     CAlert
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 
-import { UpdateUserInfoByUserIdAPI, GetUserInfoAPI } from '../../../api/user';
+import { UpdateUserInfoByUserIdAPI } from '../../../api/user';
+import { GetMyProfileAPI } from '../../../api/login'
 import firebase from '../../../firebase/firebase';
 
 import DatePicker, { registerLocale } from "react-datepicker";
@@ -39,33 +35,33 @@ const MyProfile = () => {
     const [email, setEmail] = useState(userInfo.email);
     const [address, setAddress] = useState(userInfo.address);
     const [phoneNumber, setPhoneNumber] = useState(userInfo.phone_number);
-    const [birthday, setBirthday] = useState(parseISO(userInfo.birthday));
+    const [birthday, setBirthday] = useState(userInfo.birthday != "" ? parseISO(userInfo.birthday) : "");
     const [avtSrc, setAvtSrc] = useState(userInfo.avatar_url);
-    const [confirmModalOpen, setConfirmModalOpen] = useState(false);
     const [updateMessage, setUpdateMessage] = useState(null);
 
-    const getFileBlob = (url, cb) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open("GET", url);
-        xhr.responseType = "blob";
-        xhr.addEventListener('load', function () {
-            cb(xhr.response);
+    const uploadToStorage = async (imageURL) => {
+        let blob = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.onload = function () {
+                resolve(xhr.response); // when BlobModule finishes reading, resolve with the blob
+            };
+            xhr.onerror = function () {
+                reject(new TypeError('Network request failed')); // error occurred, rejecting
+            };
+            xhr.responseType = 'blob'; // use BlobModule's UriHandler
+            xhr.open('GET', imageURL, true); // fetch the blob from uri in async mode
+            xhr.send(null); // no initial data
         });
-        xhr.send();
-    };
 
-    const uploadToStorage = (imageURL) => {
         const storageRef = firebase.storage().ref();
         const imagesRef = storageRef.child('uploads/' + userInfo.id);
+        const snapshot = await imagesRef.put(blob);
+        const remoteUri = await snapshot.ref.getDownloadURL();
 
-        getFileBlob(imageURL, blob => {
-            imagesRef.put(blob).then(function (snapshot) {
-                console.log('Uploaded a blob!');
-            });
+        // when we're done sending it, close and release the blob
+        blob = null;
 
-        });
-
-        return imagesRef.getDownloadURL();
+        return remoteUri;
     }
 
     const avtUrlUploadOnclick = () => {
@@ -74,17 +70,12 @@ const MyProfile = () => {
             const img = document.getElementById("myProfileAvt");
             const fileSize = e.target.files[0].size;
             const fileType = e.target.files[0].type;
-            console.log(fileSize, fileType);
             if (fileSize <= 300000 && (fileType == "image/jpeg" || fileType == "image/png" || fileType == "image/jpg")) {
                 // create blob url
                 const blobUrl = URL.createObjectURL(e.target.files[0]);
                 // use blob url to preview avatar
                 img.src = blobUrl;
                 setAvtSrc(blobUrl);
-                img.onchange = () => {
-                    // delete blob url when the avatar loaded successfully
-                    URL.revokeObjectURL(blobUrl);
-                }
             } else {
                 setUpdateMessage(<CAlert color="danger">Hệ thống chỉ chấp nhận file hình ảnh JPEG, JPG, PNG và dung lượng không quá 300KB</CAlert>);
             }
@@ -96,9 +87,15 @@ const MyProfile = () => {
 
         let userInput = {};
 
-        //upload local image to Firebase Storage
-        const newAvtSrc = await uploadToStorage(avtSrc);
-        console.log(newAvtSrc);
+        //check if uploaded file is blob file from local
+        const isBlob = avtSrc.includes("blob:");
+        let newAvtSrc = avtSrc;
+        if (isBlob) {
+            //upload local image to Firebase Storage
+            newAvtSrc = await uploadToStorage(avtSrc);
+        } else {
+            //do nothing
+        }
 
         if (password === "") {
             userInput = {
@@ -129,14 +126,12 @@ const MyProfile = () => {
 
         if (updateResult === true) {
             setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
-            const newUserInfo = await GetUserInfoAPI(username);
+            const newUserInfo = await GetMyProfileAPI();
             localStorage.setItem("userInfo", JSON.stringify(newUserInfo));
             history.push("/my-profile");
         } else {
             setUpdateMessage(<CAlert color="danger">Cập nhật thất bại!</CAlert>);
         }
-
-        setConfirmModalOpen(false);
     }
 
     registerLocale("vi", vi);
@@ -185,7 +180,7 @@ const MyProfile = () => {
                                     </CCol>
                                     <CCol>
                                         <CLabel htmlFor="password">Mật khẩu:</CLabel>
-                                        <CInput type="password" value={password} onChange={({ target }) => setPassword(target.value)} />
+                                        <CInput type="password" value={password} onChange={({ target }) => setPassword(target.value)} placeholder="[Không thay đổi]" />
                                     </CCol>
                                 </CRow>
                                 <CRow className="mt-2">
@@ -201,8 +196,7 @@ const MyProfile = () => {
                                 <CRow className="mt-2">
                                     <CCol>
                                         <CLabel htmlFor="birthday">Ngày sinh:</CLabel>
-                                        <DatePicker
-                                            ignoreReadonly
+                                        {/* <DatePicker
                                             maxDate="-1y"
                                             className="form-control"
                                             locale="vi"
@@ -211,7 +205,27 @@ const MyProfile = () => {
                                             onChange={date => setBirthday(date)}
                                             required={true}
                                             value={birthday}
-                                            dateFormat="dd-MM-yyyy" />
+                                            dateFormat="dd-MM-yyyy" /> */}
+                                        {
+                                            birthday != "" ?
+                                                <DatePicker
+                                                    className="form-control"
+                                                    locale="vi"
+                                                    selected={birthday}
+                                                    placeholderText="Ngày-Tháng-Năm"
+                                                    onChange={date => setBirthday(date)}
+                                                    dateFormat="dd-MM-yyyy"
+                                                    value={birthday}
+                                                />
+                                                :
+                                                <DatePicker
+                                                    className="form-control"
+                                                    locale="vi"
+                                                    placeholderText="Ngày-Tháng-Năm"
+                                                    onChange={date => setBirthday(date)}
+                                                    dateFormat="dd-MM-yyyy"
+                                                />
+                                        }
                                     </CCol>
                                     <CCol>
                                         <CLabel htmlFor="address">Địa chỉ:</CLabel>
@@ -230,80 +244,12 @@ const MyProfile = () => {
                                 </CRow>
                                 <CRow className="mt-2 text-center">
                                     <CCol>
-                                        <CButton className="mr-2" color="success" onClick={() => setConfirmModalOpen(true)}>Cập nhật</CButton>
+                                        <CButton className="mr-2" color="success" type="submit">Cập nhật</CButton>
                                         <CButton color="secondary" onClick={() => history.push("/")}>Trở về Trang Chủ</CButton >
                                     </CCol>
                                 </CRow>
                             </CCol>
                         </CRow>
-                        <CModal
-                            show={confirmModalOpen}
-                            onClose={() => setConfirmModalOpen(false)}
-                            closeOnBackdrop={false}
-                            color="success">
-                            <CModalHeader closeButton>
-                                <CModalTitle>Xác nhận cập nhật</CModalTitle>
-                            </CModalHeader>
-                            <CModalBody>
-                                <strong>Thông tin sau khi cập nhật:</strong>
-                                <CRow>
-                                    <CCol sm="4">
-                                        <CLabel>Họ và tên:</CLabel>
-                                    </CCol>
-                                    <CCol>{fullname}</CCol>
-                                </CRow>
-                                <CRow>
-                                    <CCol sm="4">
-                                        <CLabel>Tên đăng nhập:</CLabel>
-                                    </CCol>
-                                    <CCol>{username}</CCol>
-                                </CRow>
-                                <CRow>
-                                    <CCol sm="4">
-                                        <CLabel>Mật khẩu:</CLabel>
-                                    </CCol>
-                                    <CCol>{password == "" ? "[Không thay đổi]" : password}</CCol>
-                                </CRow>
-                                <CRow>
-                                    <CCol sm="4">
-                                        <CLabel>Email:</CLabel>
-                                    </CCol>
-                                    <CCol>{email}</CCol>
-                                </CRow>
-                                <CRow>
-                                    <CCol sm="4">
-                                        <CLabel>Ngày sinh:</CLabel>
-                                    </CCol>
-                                    <CCol>{format(birthday, 'dd-MM-yyyy')}</CCol>
-                                </CRow>
-                                <CRow>
-                                    <CCol sm="4">
-                                        <CLabel>Điện thoại:</CLabel>
-                                    </CCol>
-                                    <CCol>{phoneNumber}</CCol>
-                                </CRow>
-                                <CRow>
-                                    <CCol sm="4">
-                                        <CLabel>Địa chỉ:</CLabel>
-                                    </CCol>
-                                    <CCol>{address}</CCol>
-                                </CRow>
-                                <CRow>
-                                    <CCol sm="4">
-                                        <CLabel>Ảnh đại diện:</CLabel>
-                                    </CCol>
-                                    <CCol><img src={avtSrc} width="80" height="80" /></CCol>
-                                </CRow>
-                            </CModalBody>
-                            <CModalFooter>
-                                <CButton type="submit" color="success">
-                                    Xác nhận
-                            </CButton>
-                                <CButton color="secondary" onClick={() => setConfirmModalOpen(false)}>
-                                    Hủy
-                            </CButton>
-                            </CModalFooter>
-                        </CModal>
                     </CForm>
                 </CCardBody>
             </CCard>

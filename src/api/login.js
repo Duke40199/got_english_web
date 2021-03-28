@@ -1,5 +1,4 @@
-
-import APIKit, { setClientToken } from './APIKit';
+import APIKit from './APIKit';
 
 export const LoginAPI = async userInput => {
   let result = {
@@ -8,17 +7,6 @@ export const LoginAPI = async userInput => {
   };
 
   const onSuccess = data => {
-    // Set JSON Web Token on success
-    setClientToken(data.data.data.token);
-    // set the state of the user
-    // setUser(data.data);
-    // store the user in localStorage
-    // localStorage.setItem("user", JSON.stringify(data.data));
-    // get logged in user info
-    // await GetUserInfo()
-
-    //console.log(`======= LOGIN USERNAME:${user.username}`);
-    // history.push("/");
     result.userData = data.data.data;
   };
 
@@ -40,4 +28,28 @@ export const LoginAPI = async userInput => {
     .catch(onFailure);
 
   return result;
+}
+
+export const GetMyProfileAPI = async () => {
+  const token = (JSON.parse(localStorage.getItem("user"))).token;
+
+  let myProfile = null;
+
+  const onSuccess = data => {
+    myProfile = data.data.data;
+  }
+
+  const onFailure = error => {
+    console.log(error);
+  }
+
+  const apiConfig = {
+    headers: { "Authorization": `Bearer ${token}` }
+  }
+
+  await APIKit.get('/profile', apiConfig)
+    .then(onSuccess)
+    .catch(onFailure);
+
+  return myProfile;
 }
