@@ -7,26 +7,18 @@ import {
     CCol,
     CDataTable,
     CRow,
-    CInput,
     CButton,
     CModal,
     CModalHeader,
     CModalBody,
     CModalFooter,
     CModalTitle,
-    CLabel,
-    CFormGroup,
-    CInputFile,
-    CForm,
     CBadge
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import UpdateModeratorModal from '../manage-moderator/UpdateModeratorModal'
 import AddModeratorModal from '../manage-moderator/AddModeratorModal'
 
-import DatePicker, { registerLocale } from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import vi from "date-fns/locale/vi";
 import { format, parseISO } from 'date-fns';
 
 import { usePromiseTracker, trackPromise } from "react-promise-tracker";
@@ -40,16 +32,18 @@ const getBadge = isSuspended => {
         default: return 'primary'
     }
 }
+
 const fields = [
-    { key: 'fullname', label: 'Họ và tên', _style: { width: '14%' } },
-    { key: 'username', label: 'Tên đăng nhập', _style: { width: '11%' } },
-    { key: 'email', label: 'Địa chỉ Email', _style: { width: '10%' } },
+    { key: 'fullname', label: 'Họ và tên', _style: { width: '15%' } },
+    { key: 'username', label: 'Tên đăng nhập', _style: { width: '15%' } },
+    { key: 'email', label: 'Địa chỉ Email', _style: { width: '12%' } },
     { key: 'birthday', label: 'Ngày sinh', _style: { width: '10%' } },
     { key: 'address', label: 'Địa chỉ', _style: { width: '24%' } },
     { key: 'phone_number', label: 'Số điện thoại', _style: { width: '10%' } },
     { key: 'is_suspended', label: '', _style: { width: '8%' } },
     //{ key: 'status', label: 'Trạng thái' },
-    { key: 'action', label: '', _style: { width: '5%' } }]
+    { key: 'action', label: '', _style: { width: '6%' } }]
+
 
 const ManageModerator = () => {
     const [addModeratorModalShow, setAddModeratorModalShow] = useState(false);
@@ -80,8 +74,6 @@ const ManageModerator = () => {
         setAddModeratorModalShow(false);
     }
 
-    registerLocale("vi", vi);
-
     return (
         <CRow>
             <CCol>
@@ -92,6 +84,7 @@ const ManageModerator = () => {
                     </CCardHeader>
                     <CCardBody className="pt-0 pb-0">
                         <CDataTable
+                            addTableClasses="text-break"
                             items={moderatorInfoList}
                             fields={fields}
                             hover
