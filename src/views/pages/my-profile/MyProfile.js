@@ -16,7 +16,7 @@ import {
 import CIcon from '@coreui/icons-react'
 
 import { UpdateUserInfoByUserIdAPI } from '../../../api/user';
-import { GetMyProfileAPI } from '../../../api/login'
+import { GetMyProfileAPI, LoginAPI } from '../../../api/login'
 import firebase from '../../../firebase/firebase';
 
 import DatePicker, { registerLocale } from "react-datepicker";
@@ -104,7 +104,7 @@ const MyProfile = () => {
                 "email": email,
                 "address": address,
                 "phone_number": phoneNumber,
-                "birthday": format(birthday, 'yyyy/MM/dd'),
+                "birthday": ((birthday != "" && birthday != null) ? format(birthday, 'yyyy-MM-dd') : null),
                 "avatar_url": newAvtSrc,
             }
         } else {
@@ -115,7 +115,7 @@ const MyProfile = () => {
                 "email": email,
                 "address": address,
                 "phone_number": phoneNumber,
-                "birthday": format(birthday, 'yyyy/MM/dd'),
+                "birthday": ((birthday != "" && birthday != null) ? format(birthday, 'yyyy-MM-dd') : null),
                 "avatar_url": newAvtSrc,
             }
         }
@@ -126,9 +126,17 @@ const MyProfile = () => {
 
         if (updateResult === true) {
             setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
-            const newUserInfo = await GetMyProfileAPI();
-            localStorage.setItem("userInfo", JSON.stringify(newUserInfo));
-            history.push("/my-profile");
+            //re-login if username update
+            if (userInfo.username != username) {
+                localStorage.clear();
+                alert("Thông tin của bạn đã được cập nhật thành công. Tuy nhiên, do bạn đã thay đổi Tên đăng nhập nên cần phải đăng nhập lại.");
+                history.push("/");
+            } else {
+                //refresh data
+                const newUserInfo = await GetMyProfileAPI();
+                localStorage.setItem("userInfo", JSON.stringify(newUserInfo));
+                history.push("/my-profile");
+            }
         } else {
             setUpdateMessage(<CAlert color="danger">Cập nhật thất bại!</CAlert>);
         }
@@ -196,16 +204,6 @@ const MyProfile = () => {
                                 <CRow className="mt-2">
                                     <CCol>
                                         <CLabel htmlFor="birthday">Ngày sinh:</CLabel>
-                                        {/* <DatePicker
-                                            maxDate="-1y"
-                                            className="form-control"
-                                            locale="vi"
-                                            selected={birthday}
-                                            placeholderText="Ngày-Tháng-Năm"
-                                            onChange={date => setBirthday(date)}
-                                            required={true}
-                                            value={birthday}
-                                            dateFormat="dd-MM-yyyy" /> */}
                                         {
                                             birthday != "" ?
                                                 <DatePicker

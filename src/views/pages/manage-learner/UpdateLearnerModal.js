@@ -17,8 +17,6 @@ import {
     CAlert
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-
-
 import { GetUserInfoAPI, UpdateUserInfoByUserIdAPI } from '../../../api/user';
 import firebase from '../../../firebase/firebase';
 
@@ -27,39 +25,38 @@ import "react-datepicker/dist/react-datepicker.css";
 import vi from "date-fns/locale/vi";
 import { format, parseISO } from 'date-fns';
 
-
-const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) => {
+const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => {
     const history = useHistory();
 
-    const [updateModeratorUUID, setUpdateModeratorUUID] = useState("");
-    const [updateModeratorFullname, setUpdateModeratorFullname] = useState("");
-    const [updateModeratorUsername, setUpdateModeratorUsername] = useState("");
-    const [updateModeratorPassword, setUpdateModeratorPassword] = useState("");
-    const [updateModeratorEmail, setUpdateModeratorEmail] = useState("");
-    const [updateModeratorAddress, setUpdateModeratorAddress] = useState("");
-    const [updateModeratorPhoneNumber, setUpdateModeratorPhoneNumber] = useState("");
-    const [updateModeratorBirthday, setUpdateModeratorBirthday] = useState("");
-    const [updateModeratorAvatarUrl, setUpdateModeratorAvatarUrl] = useState("");
+    const [updateLearnerUUID, setUpdateLearnerUUID] = useState("");
+    const [updateLearnerFullname, setUpdateLearnerFullname] = useState("");
+    const [updateLearnerUsername, setUpdateLearnerUsername] = useState("");
+    const [updateLearnerPassword, setUpdateLearnerPassword] = useState("");
+    const [updateLearnerEmail, setUpdateLearnerEmail] = useState("");
+    const [updateLearnerAddress, setUpdateLearnerAddress] = useState("");
+    const [updateLearnerPhoneNumber, setUpdateLearnerPhoneNumber] = useState("");
+    const [updateLearnerBirthday, setUpdateLearnerBirthday] = useState("");
+    const [updateLearnerAvatarUrl, setUpdateLearnerAvatarUrl] = useState("");
     const [updateMessage, setUpdateMessage] = useState(null);
 
     //this useEffect will be executed every time the modal show
     useEffect(async () => {
-        if (selectedModeratorUsername != null) {
-            const selectedModeratorInfo = await GetUserInfoAPI(selectedModeratorUsername);
-            setUpdateModeratorUUID(selectedModeratorInfo.id);
-            setUpdateModeratorFullname(selectedModeratorInfo.fullname);
-            setUpdateModeratorUsername(selectedModeratorInfo.username);
-            setUpdateModeratorEmail(selectedModeratorInfo.email);
-            setUpdateModeratorAddress(selectedModeratorInfo.address);
-            setUpdateModeratorPhoneNumber(selectedModeratorInfo.phone_number);
-            if (selectedModeratorInfo.birthday != "") {
-                setUpdateModeratorBirthday(parseISO(selectedModeratorInfo.birthday));
+        if (selectedLearnerUsername != null) {
+            const selectedLearnerInfo = await GetUserInfoAPI(selectedLearnerUsername);
+            setUpdateLearnerUUID(selectedLearnerInfo.id);
+            setUpdateLearnerFullname(selectedLearnerInfo.fullname);
+            setUpdateLearnerUsername(selectedLearnerInfo.username);
+            setUpdateLearnerEmail(selectedLearnerInfo.email);
+            setUpdateLearnerAddress(selectedLearnerInfo.address);
+            setUpdateLearnerPhoneNumber(selectedLearnerInfo.phone_number);
+            if (selectedLearnerInfo.birthday != "") {
+                setUpdateLearnerBirthday(parseISO(selectedLearnerInfo.birthday));
             } else {
-                setUpdateModeratorBirthday("");
+                setUpdateLearnerBirthday("");
             }
-            setUpdateModeratorAvatarUrl(selectedModeratorInfo.avatar_url);
+            setUpdateLearnerAvatarUrl(selectedLearnerInfo.avatar_url);
         }
-    }, [selectedModeratorUsername]);
+    }, [selectedLearnerUsername]);
 
     const uploadToStorage = async (imageURL) => {
         let blob = await new Promise((resolve, reject) => {
@@ -76,7 +73,7 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
         });
 
         const storageRef = firebase.storage().ref();
-        const imagesRef = storageRef.child('uploads/' + updateModeratorUUID);
+        const imagesRef = storageRef.child('uploads/' + updateLearnerUUID);
         const snapshot = await imagesRef.put(blob);
         const remoteUri = await snapshot.ref.getDownloadURL();
 
@@ -87,9 +84,9 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
     }
 
     const avtUrlUploadOnclick = () => {
-        document.getElementById('updateModeratorAvtUrlInput').click();
-        document.getElementById('updateModeratorAvtUrlInput').onchange = (e) => {
-            var img = document.getElementById("updateModeratorAvt");
+        document.getElementById('updateLearnerAvtUrlInput').click();
+        document.getElementById('updateLearnerAvtUrlInput').onchange = (e) => {
+            var img = document.getElementById("updateLearnerAvt");
             const fileSize = e.target.files[0].size;
             const fileType = e.target.files[0].type;
             if (fileSize <= 300000 && (fileType == "image/jpeg" || fileType == "image/png" || fileType == "image/jpg")) {
@@ -97,7 +94,7 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
                 var blobUrl = URL.createObjectURL(e.target.files[0]);
                 // use blob url to preview avatar
                 img.src = blobUrl;
-                setUpdateModeratorAvatarUrl(blobUrl);
+                setUpdateLearnerAvatarUrl(blobUrl);
             } else {
                 setUpdateMessage(<CAlert color="danger">Hệ thống chỉ chấp nhận file hình ảnh JPEG, JPG, PNG và dung lượng không quá 300KB</CAlert>);
             }
@@ -110,44 +107,44 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
         let userInput = {};
 
         //check if uploaded file is blob file from local
-        const isBlob = updateModeratorAvatarUrl.includes("blob:");
-        let newAvtSrc = updateModeratorAvatarUrl;
+        const isBlob = updateLearnerAvatarUrl.includes("blob:");
+        let newAvtSrc = updateLearnerAvatarUrl;
         if (isBlob) {
             //upload local image to Firebase Storage
-            newAvtSrc = await uploadToStorage(updateModeratorAvatarUrl);
+            newAvtSrc = await uploadToStorage(updateLearnerAvatarUrl);
         } else {
             //do nothing
         }
 
-        if (updateModeratorPassword === "") {
+        if (updateLearnerPassword === "") {
             userInput = {
-                "fullname": updateModeratorFullname,
-                "username": updateModeratorUsername,
-                "email": updateModeratorEmail,
-                "address": updateModeratorAddress,
-                "phone_number": updateModeratorPhoneNumber,
-                "birthday": ((updateModeratorBirthday != "" && updateModeratorBirthday != null) ? format(updateModeratorBirthday, 'yyyy-MM-dd') : null),
+                "fullname": updateLearnerFullname,
+                "username": updateLearnerUsername,
+                "email": updateLearnerEmail,
+                "address": updateLearnerAddress,
+                "phone_number": updateLearnerPhoneNumber,
+                "birthday": ((updateLearnerBirthday != "" && updateLearnerBirthday != null) ? format(updateLearnerBirthday, 'yyyy-MM-dd') : null),
                 "avatar_url": newAvtSrc,
             }
         } else {
             userInput = {
-                "fullname": updateModeratorFullname,
-                "username": updateModeratorUsername,
-                "password": updateModeratorPassword,
-                "email": updateModeratorEmail,
-                "address": updateModeratorAddress,
-                "phone_number": updateModeratorPhoneNumber,
-                "birthday": ((updateModeratorBirthday != "" && updateModeratorBirthday != null) ? format(updateModeratorBirthday, 'yyyy-MM-dd') : null),
+                "fullname": updateLearnerFullname,
+                "username": updateLearnerUsername,
+                "password": updateLearnerPassword,
+                "email": updateLearnerEmail,
+                "address": updateLearnerAddress,
+                "phone_number": updateLearnerPhoneNumber,
+                "birthday": ((updateLearnerBirthday != "" && updateLearnerBirthday != null) ? format(updateLearnerBirthday, 'yyyy-MM-dd') : null),
                 "avatar_url": newAvtSrc,
             }
         }
 
-        const updateResult = await UpdateUserInfoByUserIdAPI(updateModeratorUUID, userInput);
+        const updateResult = await UpdateUserInfoByUserIdAPI(updateLearnerUUID, userInput);
         console.log(updateResult, userInput);
 
         if (updateResult === true) {
             setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
-            history.push("/manage-moderator");
+            history.push("/manage-learner");
         } else {
             setUpdateMessage(<CAlert color="danger">Cập nhật thất bại!</CAlert>);
         }
@@ -164,75 +161,75 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
         >
             <CForm onSubmit={onSubmitUpdateForm} method="post" encType="multipart/form-data" className="form-horizontal">
                 <CModalHeader closeButton>
-                    <CModalTitle>Cập nhật Điều Hành Viên</CModalTitle>
+                    <CModalTitle>Cập nhật Học Viên</CModalTitle>
                 </CModalHeader>
                 <CModalBody>
                     {updateMessage}
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="moderator-uuid-input">UUID:</CLabel>
+                            <CLabel htmlFor="learner-uuid-input">UUID:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <p name="moderator-id-static">{updateModeratorUUID}</p>
+                            <p name="learner-id-static">{updateLearnerUUID}</p>
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="update-moderator-fullname-input">Họ và tên:</CLabel>
+                            <CLabel htmlFor="update-learner-fullname-input">Họ và tên:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="text" id="update-moderator-fullname-input" name="fullname" value={updateModeratorFullname} onChange={({ target }) => setUpdateModeratorFullname(target.value)} />
+                            <CInput type="text" id="update-learner-fullname-input" name="fullname" value={updateLearnerFullname} onChange={({ target }) => setUpdateLearnerFullname(target.value)} />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="update-moderator-username-input">Tên đăng nhập:</CLabel>
+                            <CLabel htmlFor="update-learner-username-input">Tên đăng nhập:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="text" id="update-moderator-username-input" name="username" value={updateModeratorUsername} required={true} onChange={({ target }) => setUpdateModeratorUsername(target.value)} />
+                            <CInput type="text" id="update-learner-username-input" name="username" value={updateLearnerUsername} required={true} onChange={({ target }) => setUpdateLearnerUsername(target.value)} />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="update-moderator-password-input">Mật khẩu:</CLabel>
+                            <CLabel htmlFor="update-learner-password-input">Mật khẩu:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="password" id="update-moderator-password-input" name="update-moderator-password-input" value={updateModeratorPassword} onChange={({ target }) => setUpdateModeratorPassword(target.value)} />
+                            <CInput type="password" id="update-learner-password-input" name="update-learner-password-input" value={updateLearnerPassword} onChange={({ target }) => setUpdateLearnerPassword(target.value)} />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="update-moderator-email-input">Email:</CLabel>
+                            <CLabel htmlFor="update-learner-email-input">Email:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="email" id="update-moderator-email-input" name="update-moderator-email-input" autoComplete="email" value={updateModeratorEmail} required={true} onChange={({ target }) => setUpdateModeratorEmail(target.value)} />
+                            <CInput type="email" id="update-learner-email-input" name="update-learner-email-input" autoComplete="email" value={updateLearnerEmail} required={true} onChange={({ target }) => setUpdateLearnerEmail(target.value)} />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="update-moderator-birthday-input">Ngày sinh:</CLabel>
+                            <CLabel htmlFor="update-learner-birthday-input">Ngày sinh:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            {updateModeratorBirthday != "" ?
+                            {updateLearnerBirthday != "" ?
                                 <DatePicker
                                     className="form-control"
                                     locale="vi"
-                                    id="update-moderator-birthday-input"
-                                    name="update-moderator-birthday-input"
-                                    selected={updateModeratorBirthday}
+                                    id="update-learner-birthday-input"
+                                    name="update-learner-birthday-input"
+                                    selected={updateLearnerBirthday}
                                     placeholderText="Ngày-Tháng-Năm"
-                                    onChange={date => setUpdateModeratorBirthday(date)}
+                                    onChange={date => setUpdateLearnerBirthday(date)}
                                     dateFormat="dd-MM-yyyy"
-                                    value={updateModeratorBirthday}
+                                    value={updateLearnerBirthday}
                                 />
                                 :
                                 <DatePicker
                                     className="form-control"
                                     locale="vi"
-                                    id="update-moderator-birthday-input"
-                                    name="update-moderator-birthday-input"
+                                    id="update-learner-birthday-input"
+                                    name="update-learner-birthday-input"
                                     placeholderText="Ngày-Tháng-Năm"
-                                    onChange={date => setUpdateModeratorBirthday(date)}
+                                    onChange={date => setUpdateLearnerBirthday(date)}
                                     dateFormat="dd-MM-yyyy"
                                 />
                             }
@@ -240,30 +237,30 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="update-moderator-address-input">Địa chỉ:</CLabel>
+                            <CLabel htmlFor="update-learner-address-input">Địa chỉ:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="text" id="update-moderator-address-input" name="update-moderator-address-input" value={updateModeratorAddress} onChange={({ target }) => setUpdateModeratorAddress(target.value)} />
+                            <CInput type="text" id="update-learner-address-input" name="update-learner-address-input" value={updateLearnerAddress} onChange={({ target }) => setUpdateLearnerAddress(target.value)} />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="update-moderator-phone-input">Số điện thoại:</CLabel>
+                            <CLabel htmlFor="update-learner-phone-input">Số điện thoại:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="tel" id="update-moderator-phone-input" name="update-moderator-phone-input" value={updateModeratorPhoneNumber} onChange={({ target }) => setUpdateModeratorPhoneNumber(target.value)} />
+                            <CInput type="tel" id="update-learner-phone-input" name="update-learner-phone-input" value={updateLearnerPhoneNumber} onChange={({ target }) => setUpdateLearnerPhoneNumber(target.value)} />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
-                        <CLabel col md="4" htmlFor="update-moderator-avatar-url">Ảnh đại diện:</CLabel>
+                        <CLabel col md="4" htmlFor="update-learner-avatar-url">Ảnh đại diện:</CLabel>
                         <CCol xs="12" md="8">
-                            <img id="updateModeratorAvt" className="mr-2" src={updateModeratorAvatarUrl} width="80" height="80" />
+                            <img id="updateLearnerAvt" className="mr-2" src={updateLearnerAvatarUrl} width="80" height="80" />
                             <CButton
                                 color="info"
                                 className="rounded-circle"
                                 onClick={avtUrlUploadOnclick}
                             ><CIcon name="cil-pencil"></CIcon></CButton>
-                            <CInputFile class="d-none" id="updateModeratorAvtUrlInput" name="update-moderator-avatar-url" />
+                            <CInputFile class="d-none" id="updateLearnerAvtUrlInput" name="update-learner-avatar-url" />
                         </CCol>
                     </CFormGroup>
 
@@ -281,4 +278,4 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
     );
 }
 
-export default UpdateModeratorModal
+export default UpdateLearnerModal

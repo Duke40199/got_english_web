@@ -16,11 +16,7 @@ export const GetUserInfoAPI = async (username) => {
         headers: { "Authorization": `Bearer ${token}` }
     }
 
-    await APIKit.get('/accounts', {
-        params: {
-            username: username,
-        }
-    }, apiConfig)
+    await APIKit.get('/accounts?username=' + username, apiConfig)
         .then(onSuccess)
         .catch(onFailure);
 
@@ -42,15 +38,33 @@ export const GetModeratorInfoListAPI = async () => {
         headers: { "Authorization": `Bearer ${token}` }
     }
 
-    await APIKit.get('/accounts', {
-        params: {
-            role: 'Moderator',
-        }
-    }, apiConfig)
+    await APIKit.get('/accounts?role=Moderator', apiConfig)
         .then(onSuccess)
         .catch(onFailure);
 
     return moderatorInfoList;
+}
+
+export const GetLearnerInfoListAPI = async () => {
+    const token = (JSON.parse(localStorage.getItem("user"))).token;
+    let learnerInfoList = null;
+    const onSuccess = data => {
+        learnerInfoList = data.data.data;
+    }
+
+    const onFailure = error => {
+        console.log(error);
+    }
+
+    const apiConfig = {
+        headers: { "Authorization": `Bearer ${token}` }
+    }
+
+    await APIKit.get('/accounts?role=Learner', apiConfig)
+        .then(onSuccess)
+        .catch(onFailure);
+
+    return learnerInfoList;
 }
 
 export const UpdateUserInfoByUserIdAPI = async (userID, updateInfoJson) => {
