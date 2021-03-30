@@ -141,7 +141,6 @@ const AddLearnerModal = ({ show, handleClose }) => {
                     <CModalTitle>Thêm mới Quản Trị Viên</CModalTitle>
                 </CModalHeader>
                 <CModalBody>
-                    {addMessage}
                     <CFormGroup row>
                         <CCol md="4">
                             <CLabel htmlFor="learner-fullname-input">Họ và tên:</CLabel>
@@ -232,7 +231,7 @@ const AddLearnerModal = ({ show, handleClose }) => {
                             <CInputFile class="d-none" id="addLearnerAvtUrlInput" name="learner-avatar-url" />
                         </CCol>
                     </CFormGroup>
-
+                    {addMessage}
                 </CModalBody>
                 <CModalFooter>
                     <CButton color="primary" type="submit">

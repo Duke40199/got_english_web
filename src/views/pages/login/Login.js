@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-import { Link, useHistory } from 'react-router-dom'
-import { LoginAPI, GetMyProfileAPI } from '../../../api/login';
-import jwt_decode from 'jwt-decode';
+import { useHistory } from 'react-router-dom'
+import { LoginAPI, GetMyProfileAPI } from '../../../api/login'
+import jwt_decode from 'jwt-decode'
 import {
   CButton,
   CCard,
@@ -52,8 +52,8 @@ const Login = () => {
         const userInfo = await GetMyProfileAPI();
         console.log(userInfo);
         localStorage.setItem("userInfo", JSON.stringify(userInfo));
-        // refresh but not send any HTTP request
-        history.push("/");
+        // reload the page
+        history.go(0);
       } else {
         setError("Tài khoản của bạn không có quyền truy cập hệ thống này!");
       }

@@ -1,5 +1,5 @@
-import React from 'react'
-import CoinBundleData from '../manage-coin-bundle/CoinBundleData'
+import React, { useState, useEffect } from 'react'
+
 import {
     CCard,
     CCardBody,
@@ -7,57 +7,125 @@ import {
     CDataTable,
     CRow,
     CButton,
-    CCardHeader
+    CCardHeader,
+    CBadge
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
+import AddCoinBundleModal from '../manage-coin-bundle/AddCoinBundleModal';
+
+import { usePromiseTracker, trackPromise } from "react-promise-tracker";
+
+import { GetCoinBundleInfoListAPI } from '../../../api/coin-bundle'
+
+const getBadge = isDeleted => {
+    switch (isDeleted) {
+        case false: return 'success'
+        case true: return 'danger'
+        default: return 'primary'
+    }
+}
 
 const fields = [
-    { key: 'name', label: 'Tên Gói' },
-    { key: 'price', label: 'Giá Gói' },
-    { key: 'coinCount', label: 'Số lượng Coin' },
-    { key: 'action', label: '' }
+    { key: 'title', label: 'Tên Gói', _style: { width: '15%' } },
+    { key: 'description', label: 'Nội dung Gói', _style: { width: '35%' } },
+    { key: 'quantity', label: 'Số lượng Coin', _style: { width: '12%' } },
+    { key: 'price', label: 'Giá', _style: { width: '13%' } },
+    { key: 'price_unit', label: 'Đơn vị', _style: { width: '10%' } },
+    { key: 'is_deleted', label: '', _style: { width: '10%' } },
+    { key: 'action', label: '', _style: { width: '5%' } }
 ]
 
 const ManageCoinBundle = () => {
+    const [addCoinBundleModalShow, setAddCoinBundleModalShow] = useState(false);
+    const [updateCoinBundleModalShow, setUpdateCoinBundleModalShow] = useState(false);
+    const [coinBundleInfoList, setCoinBundleInfoList] = useState(null);
+    const [selectedCoinBundleId, setSelectedCoinBundleId] = useState(null);
+
+    const { promiseInProgress } = usePromiseTracker();
+
+    useEffect(async () => {
+        const coinBundleInfoList = await trackPromise(GetCoinBundleInfoListAPI());
+        setCoinBundleInfoList(coinBundleInfoList);
+    }, [updateCoinBundleModalShow, addCoinBundleModalShow]);
+
+    const updateCoinBundleOnclick = (coinBundleId) => {
+        //open the update coin bundle modal
+        setUpdateCoinBundleModalShow(true);
+        //set params
+        setSelectedCoinBundleId(coinBundleId);
+    }
+
+    const hideUpdateModal = () => {
+        setUpdateCoinBundleModalShow(false);
+    }
+
+    const hideAddModal = () => {
+        setAddCoinBundleModalShow(false);
+    }
+
     return (
         <CRow>
             <CCol>
                 <CCard>
                     <CCardHeader align="right">
-                        <CButton color="primary" className="mt-2 d-flex align-items-center">
+                        <CButton color="primary" className="mt-2 d-flex align-items-center" onClick={() => setAddCoinBundleModalShow(true)}>
                             <CIcon name="cilPlus" size="sm" className="mr-1"></CIcon>Thêm mới Gói Coin</CButton>
                     </CCardHeader>
-                    <CCardBody>
+                    <CCardBody className="pt-0 pb-0">
                         <CDataTable
-                            items={CoinBundleData}
+                            addTableClasses="text-break"
+                            items={coinBundleInfoList}
                             fields={fields}
                             hover
                             striped
                             bordered
                             size="sm"
-                            itemsPerPage={10}
+                            itemsPerPage={20}
                             pagination
-                            scopedSlots={
+                            loading={promiseInProgress}
+                            noItemsView={{ noResults: 'Không có kết quả tìm kiếm trùng khớp', noItems: 'Không có dữ liệu' }}
+                            tableFilter={
                                 {
-                                    'action':
-                                        (item, index) => (
-                                            <td className="py-1"><CButton
-                                                color="success"
-                                                size="sm"
-                                                className="mr-2"
-                                            >Cập nhật</CButton>
-                                                <CButton
-                                                    color="danger"
-                                                    size="sm"
-                                                >Xóa</CButton>
-                                            </td>
-                                        ),
+                                    label: "Tìm kiếm:",
+                                    placeholder: "nhập dữ liệu...",
                                 }
                             }
+                            scopedSlots={{
+                                'is_deleted':
+                                    (item) => (
+                                        <td>
+                                            <CBadge color={getBadge(item.is_deleted)}>
+                                                {item.is_suspended ? "Đã khóa" : "Hoạt động"}
+                                            </CBadge>
+                                        </td>
+                                    ),
+                                'action':
+                                    (item, index) => {
+                                        return (
+                                            <td className="py-1">
+
+                                                <button type="button" className="table-update-button mr-2" data-toggle="tooltip" title="Cập nhật">
+                                                    <CIcon name="cil-pencil" onClick={() => updateCoinBundleOnclick(item.id)}>
+                                                    </CIcon>
+                                                </button>
+                                                <button type="button" className="table-ban-button" data-toggle="tooltip" title="Khóa">
+                                                    <CIcon name="cil-lock-locked" >
+                                                    </CIcon>
+                                                </button>
+                                            </td>
+                                        )
+                                    },
+                            }}
                         />
                     </CCardBody>
                 </CCard>
             </CCol>
+            {/*POPUP ADD COIN BUNDLE*/}
+            {addCoinBundleModalShow ?
+                <AddCoinBundleModal
+                    show={addCoinBundleModalShow}
+                    handleClose={() => hideAddModal} />
+                : null}
         </CRow>
     )
 }

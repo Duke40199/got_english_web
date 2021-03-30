@@ -3,6 +3,7 @@ import { useHistory } from 'react-router-dom'
 
 import {
     CCol,
+    CRow,
     CInput,
     CButton,
     CModal,
@@ -14,12 +15,13 @@ import {
     CFormGroup,
     CInputFile,
     CForm,
-    CAlert
+    CAlert,
+    CInputCheckbox
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 
 
-import { GetUserInfoAPI, UpdateUserInfoByUserIdAPI } from '../../../api/user';
+import { GetUserInfoAPI, UpdateUserInfoByUserIdAPI, UpdateModeratorPermission } from '../../../api/user';
 import firebase from '../../../firebase/firebase';
 
 import DatePicker, { registerLocale } from "react-datepicker";
@@ -40,6 +42,9 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
     const [updateModeratorPhoneNumber, setUpdateModeratorPhoneNumber] = useState("");
     const [updateModeratorBirthday, setUpdateModeratorBirthday] = useState("");
     const [updateModeratorAvatarUrl, setUpdateModeratorAvatarUrl] = useState("");
+    const [updateModeratorCanManageCoinBundle, setUpdateModeratorCanManageCoinBundle] = useState("");
+    const [updateModeratorCanManagePricing, setUpdateModeratorCanManagePricing] = useState("");
+    const [updateModeratorCanManageApplicationForm, setUpdateModeratorCanManageApplicationForm] = useState("");
     const [updateMessage, setUpdateMessage] = useState(null);
 
     //this useEffect will be executed every time the modal show
@@ -58,6 +63,9 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
                 setUpdateModeratorBirthday("");
             }
             setUpdateModeratorAvatarUrl(selectedModeratorInfo.avatar_url);
+            setUpdateModeratorCanManageCoinBundle(selectedModeratorInfo.can_manage_coin_bundle);
+            setUpdateModeratorCanManagePricing(selectedModeratorInfo.can_manage_pricing);
+            setUpdateModeratorCanManageApplicationForm(selectedModeratorInfo.can_manage_application_form);
         }
     }, [selectedModeratorUsername]);
 
@@ -108,6 +116,7 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
         e.preventDefault();
 
         let userInput = {};
+        let permissionInput = {};
 
         //check if uploaded file is blob file from local
         const isBlob = updateModeratorAvatarUrl.includes("blob:");
@@ -128,6 +137,12 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
                 "phone_number": updateModeratorPhoneNumber,
                 "birthday": ((updateModeratorBirthday != "" && updateModeratorBirthday != null) ? format(updateModeratorBirthday, 'yyyy-MM-dd') : null),
                 "avatar_url": newAvtSrc,
+
+            }
+            permissionInput = {
+                "can_manage_coin_bundle": updateModeratorCanManageCoinBundle,
+                "can_manage_pricing": updateModeratorCanManagePricing,
+                "can_manage_application_form": updateModeratorCanManageApplicationForm
             }
         } else {
             userInput = {
@@ -140,12 +155,19 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
                 "birthday": ((updateModeratorBirthday != "" && updateModeratorBirthday != null) ? format(updateModeratorBirthday, 'yyyy-MM-dd') : null),
                 "avatar_url": newAvtSrc,
             }
+            permissionInput = {
+                "can_manage_coin_bundle": updateModeratorCanManageCoinBundle,
+                "can_manage_pricing": updateModeratorCanManagePricing,
+                "can_manage_application_form": updateModeratorCanManageApplicationForm
+            }
         }
 
-        const updateResult = await UpdateUserInfoByUserIdAPI(updateModeratorUUID, userInput);
-        console.log(updateResult, userInput);
+        console.log(userInput);
 
-        if (updateResult === true) {
+        const updateResult = await UpdateUserInfoByUserIdAPI(updateModeratorUUID, userInput);
+        const permissionUpdateResult = await UpdateModeratorPermission(updateModeratorUUID, permissionInput);
+
+        if (updateResult === true && permissionUpdateResult === true) {
             setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
             history.push("/manage-moderator");
         } else {
@@ -167,7 +189,6 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
                     <CModalTitle>Cập nhật Điều Hành Viên</CModalTitle>
                 </CModalHeader>
                 <CModalBody>
-                    {updateMessage}
                     <CFormGroup row>
                         <CCol md="4">
                             <CLabel htmlFor="moderator-uuid-input">UUID:</CLabel>
@@ -197,7 +218,7 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
                             <CLabel htmlFor="update-moderator-password-input">Mật khẩu:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="password" id="update-moderator-password-input" name="update-moderator-password-input" value={updateModeratorPassword} onChange={({ target }) => setUpdateModeratorPassword(target.value)} />
+                            <CInput type="password" id="update-moderator-password-input" name="update-moderator-password-input" value={updateModeratorPassword} placeholder="[Không thay đổi]" onChange={({ target }) => setUpdateModeratorPassword(target.value)} />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -255,6 +276,41 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
+                        <CCol md="4">
+                            <CLabel htmlFor="update-moderator-permission">Quyền hạn:</CLabel>
+                        </CCol>
+                        <CCol xs="12" md="8">
+                            <CLabel htmlFor="update-moderator-can-manage-coin-bundle-input"
+                                className="w-100 permission-input-checkbox">
+                                <CInputCheckbox
+                                    id="update-moderator-can-manage-coin-bundle-input"
+                                    name="update-moderator-can-manage-coin-bundle-input"
+                                    checked={updateModeratorCanManageCoinBundle}
+                                    onChange={({ target }) => setUpdateModeratorCanManageCoinBundle(target.checked)} />
+                                Quản lý Gói Coin
+                                </CLabel>
+                            <CLabel htmlFor="update-moderator-can-manage-pricing-input"
+                                className="w-100 permission-input-checkbox">
+                                <CInputCheckbox
+                                    id="update-moderator-can-manage-pricing-input"
+                                    name="update-moderator-can-manage-pricing-input"
+                                    checked={updateModeratorCanManagePricing}
+                                    onChange={({ target }) => setUpdateModeratorCanManagePricing(target.checked)} />
+                                Quản lý Đơn Giá
+                                </CLabel>
+                            <CLabel htmlFor="update-moderator-can-manage-application-form-input"
+                                className="w-100 permission-input-checkbox">
+                                <CInputCheckbox
+                                    id="update-moderator-can-manage-application-form-input"
+                                    name="update-moderator-can-manage-application-form-input"
+                                    checked={updateModeratorCanManageApplicationForm}
+                                    onChange={({ target }) => setUpdateModeratorCanManageApplicationForm(target.checked)}
+                                />
+                                Quản lý Hồ sơ Ứng Viên
+                                </CLabel>
+                        </CCol>
+                    </CFormGroup>
+                    <CFormGroup row>
                         <CLabel col md="4" htmlFor="update-moderator-avatar-url">Ảnh đại diện:</CLabel>
                         <CCol xs="12" md="8">
                             <img id="updateModeratorAvt" className="mr-2" src={updateModeratorAvatarUrl} width="80" height="80" />
@@ -266,7 +322,7 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
                             <CInputFile class="d-none" id="updateModeratorAvtUrlInput" name="update-moderator-avatar-url" />
                         </CCol>
                     </CFormGroup>
-
+                    {updateMessage}
                 </CModalBody>
                 <CModalFooter>
                     <CButton color="success" type="submit">

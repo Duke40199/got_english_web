@@ -34,11 +34,11 @@ const getBadge = isSuspended => {
 }
 
 const fields = [
-    { key: 'fullname', label: 'Họ và tên', _style: { width: '15%' } },
-    { key: 'username', label: 'Tên đăng nhập', _style: { width: '15%' } },
-    { key: 'email', label: 'Địa chỉ Email', _style: { width: '12%' } },
+    { key: 'fullname', label: 'Họ và tên', _style: { width: '14%' } },
+    { key: 'username', label: 'Tên đăng nhập', _style: { width: '12%' } },
+    { key: 'email', label: 'Địa chỉ Email', _style: { width: '20%' } },
     { key: 'birthday', label: 'Ngày sinh', _style: { width: '10%' } },
-    { key: 'address', label: 'Địa chỉ', _style: { width: '24%' } },
+    { key: 'address', label: 'Địa chỉ', _style: { width: '20%' } },
     { key: 'phone_number', label: 'Số điện thoại', _style: { width: '10%' } },
     { key: 'is_suspended', label: '', _style: { width: '8%' } },
     //{ key: 'status', label: 'Trạng thái' },
@@ -119,11 +119,11 @@ const ManageModerator = () => {
                                         return (
                                             <td className="py-1">
 
-                                                <button type="button" class="table-update-button mr-2" data-toggle="tooltip" title="Cập nhật">
+                                                <button type="button" className="table-update-button mr-2" data-toggle="tooltip" title="Cập nhật">
                                                     <CIcon name="cil-pencil" onClick={() => updateModeratorOnclick(item.username)}>
                                                     </CIcon>
                                                 </button>
-                                                <button type="button" class="table-ban-button" data-toggle="tooltip" title="Khóa">
+                                                <button type="button" className="table-ban-button" data-toggle="tooltip" title="Khóa">
                                                     <CIcon name="cil-lock-locked" onClick={() => { setBanModeratorModalState(!banModeratorModal) }}>
                                                     </CIcon>
                                                 </button>
