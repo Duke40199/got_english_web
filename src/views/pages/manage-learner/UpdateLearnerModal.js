@@ -164,7 +164,6 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => {
                     <CModalTitle>Cập nhật Học Viên</CModalTitle>
                 </CModalHeader>
                 <CModalBody>
-                    {updateMessage}
                     <CFormGroup row>
                         <CCol md="4">
                             <CLabel htmlFor="learner-uuid-input">UUID:</CLabel>
@@ -263,7 +262,7 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => {
                             <CInputFile class="d-none" id="updateLearnerAvtUrlInput" name="update-learner-avatar-url" />
                         </CCol>
                     </CFormGroup>
-
+                    {updateMessage}
                 </CModalBody>
                 <CModalFooter>
                     <CButton color="success" type="submit">

@@ -12,7 +12,9 @@ export const GetCoinBundleInfoListAPI = async () => {
     }
 
     const apiConfig = {
-        headers: { "Authorization": `Bearer ${token}` }
+        headers: {
+            "Authorization": `Bearer ${token}`
+        }
     }
 
     await APIKit.get('/coin-bundles', apiConfig)
@@ -20,6 +22,31 @@ export const GetCoinBundleInfoListAPI = async () => {
         .catch(onFailure);
 
     return coinBundleInfoList;
+}
+
+export const GetCoinBundleByIdAPI = async (coinBundleId) => {
+    const token = (JSON.parse(localStorage.getItem("user"))).token;
+    let coinBundleInfo = null;
+    const onSuccess = data => {
+        //only first data
+        coinBundleInfo = data.data.data[0];
+    }
+
+    const onFailure = error => {
+        console.log(error);
+    }
+
+    const apiConfig = {
+        headers: {
+            "Authorization": `Bearer ${token}`
+        }
+    }
+
+    await APIKit.get('/coin-bundles?id=' + coinBundleId, apiConfig)
+        .then(onSuccess)
+        .catch(onFailure);
+
+    return coinBundleInfo;
 }
 
 export const UpdateCoinBundleByIdAPI = async (coinBundleId, updateInfoJson) => {
@@ -39,7 +66,7 @@ export const UpdateCoinBundleByIdAPI = async (coinBundleId, updateInfoJson) => {
         headers: { "Authorization": `Bearer ${token}` }
     }
 
-    await APIKit.get('/coin-bundles/' + coinBundleId + '/update', updateInfoJson, apiConfig)
+    await APIKit.put('/coin-bundles/' + coinBundleId + '/update', updateInfoJson, apiConfig)
         .then(onSuccess)
         .catch(onFailure);
 

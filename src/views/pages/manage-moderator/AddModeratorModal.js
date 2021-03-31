@@ -14,11 +14,12 @@ import {
     CFormGroup,
     CInputFile,
     CForm,
-    CAlert
+    CAlert,
+    CInputCheckbox
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 
-import { CreateUserAPI, UpdateUserInfoByUserIdAPI } from '../../../api/user';
+import { CreateUserAPI, UpdateUserInfoByUserIdAPI, UpdateModeratorPermission } from '../../../api/user';
 import firebase from '../../../firebase/firebase';
 
 import DatePicker, { registerLocale } from "react-datepicker";
@@ -37,6 +38,9 @@ const AddModeratorModal = ({ show, handleClose }) => {
     const [addModeratorPhoneNumber, setAddModeratorPhoneNumber] = useState("");
     const [addModeratorBirthday, setAddModeratorBirthday] = useState("");
     const [addModeratorAvatarUrl, setAddModeratorAvatarUrl] = useState("");
+    const [addModeratorCanManageCoinBundle, setAddModeratorCanManageCoinBundle] = useState(false);
+    const [addModeratorCanManagePricing, setAddModeratorCanManagePricing] = useState(false);
+    const [addModeratorCanManageApplicationForm, setAddModeratorCanManageApplicationForm] = useState(false);
     const [addMessage, setAddMessage] = useState(null);
 
     const uploadToStorage = async (imageURL, updateModeratorUUID) => {
@@ -95,7 +99,7 @@ const AddModeratorModal = ({ show, handleClose }) => {
         const addModeratorResult = await CreateUserAPI(userInput);
         console.log(addModeratorResult, userInput);
 
-        if (addModeratorResult != null) {
+        if (addModeratorResult === true) {
             const newModeratorID = addModeratorResult.data;
             //check if uploaded file is blob file from local
             const isBlob = addModeratorAvatarUrl.includes("blob:");
@@ -113,14 +117,20 @@ const AddModeratorModal = ({ show, handleClose }) => {
                 "birthday": ((addModeratorBirthday != "" && addModeratorBirthday != null) ? format(addModeratorBirthday, 'yyyy-MM-dd') : null),
                 "avatar_url": newAvtSrc
             }
+            const permissionInput = {
+                "can_manage_coin_bundle": addModeratorCanManageCoinBundle,
+                "can_manage_pricing": addModeratorCanManagePricing,
+                "can_manage_application_form": addModeratorCanManageApplicationForm
+            }
 
             const updateModeratorAvt = await UpdateUserInfoByUserIdAPI(newModeratorID, additionalData);
+            const permissionUpdateResult = await UpdateModeratorPermission(newModeratorID, permissionInput);
             console.log(newModeratorID, additionalData)
-            if (updateModeratorAvt === true) {
+            if (updateModeratorAvt === true && permissionUpdateResult === true) {
                 setAddMessage(<CAlert color="success">Thêm mới thành công!</CAlert>);
                 history.push("/manage-moderator");
             } else {
-                setAddMessage(<CAlert color="danger">Quá trình upload avatar thất bại!</CAlert>);
+                setAddMessage(<CAlert color="danger">Thêm mới thành công! Tuy nhiên phần thông tin cập nhật đã gặp sự cố. Hãy sử dụng chức năng Cập nhật để cập nhật lại thông tin.</CAlert>);
             }
         } else {
             setAddMessage(<CAlert color="danger">Thêm mới thất bại!</CAlert>);
@@ -141,7 +151,6 @@ const AddModeratorModal = ({ show, handleClose }) => {
                     <CModalTitle>Thêm mới Quản Trị Viên</CModalTitle>
                 </CModalHeader>
                 <CModalBody>
-                    {addMessage}
                     <CFormGroup row>
                         <CCol md="4">
                             <CLabel htmlFor="moderator-fullname-input">Họ và tên:</CLabel>
@@ -221,6 +230,41 @@ const AddModeratorModal = ({ show, handleClose }) => {
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
+                        <CCol md="4">
+                            <CLabel htmlFor="add-moderator-permission">Quyền hạn:</CLabel>
+                        </CCol>
+                        <CCol xs="12" md="8">
+                            <CLabel htmlFor="add-moderator-can-manage-coin-bundle-input"
+                                className="w-100 permission-input-checkbox">
+                                <CInputCheckbox
+                                    id="add-moderator-can-manage-coin-bundle-input"
+                                    name="add-moderator-can-manage-coin-bundle-input"
+                                    checked={addModeratorCanManageCoinBundle}
+                                    onChange={({ target }) => setAddModeratorCanManageCoinBundle(target.checked)} />
+                                Quản lý Gói Coin
+                                </CLabel>
+                            <CLabel htmlFor="add-moderator-can-manage-pricing-input"
+                                className="w-100 permission-input-checkbox">
+                                <CInputCheckbox
+                                    id="add-moderator-can-manage-pricing-input"
+                                    name="add-moderator-can-manage-pricing-input"
+                                    checked={addModeratorCanManagePricing}
+                                    onChange={({ target }) => setAddModeratorCanManagePricing(target.checked)} />
+                                Quản lý Đơn Giá
+                                </CLabel>
+                            <CLabel htmlFor="add-moderator-can-manage-application-form-input"
+                                className="w-100 permission-input-checkbox">
+                                <CInputCheckbox
+                                    id="add-moderator-can-manage-application-form-input"
+                                    name="add-moderator-can-manage-application-form-input"
+                                    checked={addModeratorCanManageApplicationForm}
+                                    onChange={({ target }) => setAddModeratorCanManageApplicationForm(target.checked)}
+                                />
+                                Quản lý Hồ sơ Ứng Viên
+                                </CLabel>
+                        </CCol>
+                    </CFormGroup>
+                    <CFormGroup row>
                         <CLabel col md="4" htmlFor="moderator-avatar-url">Ảnh đại diện:</CLabel>
                         <CCol xs="12" md="8">
                             <img id="addModeratorAvt" className="mr-2" src={addModeratorAvatarUrl} width="80" height="80" />
@@ -232,7 +276,7 @@ const AddModeratorModal = ({ show, handleClose }) => {
                             <CInputFile class="d-none" id="addModeratorAvtUrlInput" name="moderator-avatar-url" />
                         </CCol>
                     </CFormGroup>
-
+                    {addMessage}
                 </CModalBody>
                 <CModalFooter>
                     <CButton color="primary" type="submit">

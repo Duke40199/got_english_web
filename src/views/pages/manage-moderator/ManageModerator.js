@@ -13,7 +13,8 @@ import {
     CModalBody,
     CModalFooter,
     CModalTitle,
-    CBadge
+    CBadge,
+    CAlert
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import UpdateModeratorModal from '../manage-moderator/UpdateModeratorModal'
@@ -44,7 +45,6 @@ const fields = [
     //{ key: 'status', label: 'Trạng thái' },
     { key: 'action', label: '', _style: { width: '6%' } }]
 
-
 const ManageModerator = () => {
     const [addModeratorModalShow, setAddModeratorModalShow] = useState(false);
     const [banModeratorModal, setBanModeratorModalState] = useState(false);
@@ -74,105 +74,115 @@ const ManageModerator = () => {
         setAddModeratorModalShow(false);
     }
 
-    return (
-        <CRow>
-            <CCol>
-                <CCard>
-                    <CCardHeader align="right">
-                        <CButton color="primary" className="mt-2 d-flex align-items-center" onClick={() => setAddModeratorModalShow(true)}>
-                            <CIcon name="cilPlus" size="sm" className="mr-1"></CIcon>Thêm mới Điều Hành Viên</CButton>
-                    </CCardHeader>
-                    <CCardBody className="pt-0 pb-0">
-                        <CDataTable
-                            addTableClasses="text-break"
-                            items={moderatorInfoList}
-                            fields={fields}
-                            hover
-                            striped
-                            bordered
-                            size="sm"
-                            itemsPerPage={20}
-                            pagination
-                            loading={promiseInProgress}
-                            noItemsView={{ noResults: 'Không có kết quả tìm kiếm trùng khớp', noItems: 'Không có dữ liệu' }}
-                            tableFilter={
-                                {
-                                    label: "Tìm kiếm:",
-                                    placeholder: "nhập dữ liệu...",
+    //check permission
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    const canManageModerator = userInfo.can_manage_moderator;
+    if (canManageModerator) {
+        return (
+            <CRow>
+                <CCol>
+                    <CCard>
+                        <CCardHeader align="right">
+                            <CButton color="primary" className="mt-2 d-flex align-items-center" onClick={() => setAddModeratorModalShow(true)}>
+                                <CIcon name="cilPlus" size="sm" className="mr-1"></CIcon>Thêm mới Điều Hành Viên</CButton>
+                        </CCardHeader>
+                        <CCardBody className="pt-0 pb-0">
+                            <CDataTable
+                                addTableClasses="text-break"
+                                items={moderatorInfoList}
+                                fields={fields}
+                                hover
+                                striped
+                                bordered
+                                size="sm"
+                                itemsPerPage={20}
+                                pagination
+                                loading={promiseInProgress}
+                                noItemsView={{ noResults: 'Không có kết quả tìm kiếm trùng khớp', noItems: 'Không có dữ liệu' }}
+                                tableFilter={
+                                    {
+                                        label: "Tìm kiếm:",
+                                        placeholder: "nhập dữ liệu...",
+                                    }
                                 }
-                            }
-                            scopedSlots={{
-                                'is_suspended':
-                                    (item) => (
-                                        <td>
-                                            <CBadge color={getBadge(item.is_suspended)}>
-                                                {item.is_suspended ? "Đã khóa" : "Hoạt động"}
-                                            </CBadge>
-                                        </td>
-                                    ),
-                                'birthday':
-                                    (item) => (<td>
-                                        {item.birthday != "" ? format(parseISO(item.birthday), "dd-MM-yyyy") : ""}
-                                    </td>),
-                                'action':
-                                    (item, index) => {
-                                        return (
-                                            <td className="py-1">
-
-                                                <button type="button" className="table-update-button mr-2" data-toggle="tooltip" title="Cập nhật">
-                                                    <CIcon name="cil-pencil" onClick={() => updateModeratorOnclick(item.username)}>
-                                                    </CIcon>
-                                                </button>
-                                                <button type="button" className="table-ban-button" data-toggle="tooltip" title="Khóa">
-                                                    <CIcon name="cil-lock-locked" onClick={() => { setBanModeratorModalState(!banModeratorModal) }}>
-                                                    </CIcon>
-                                                </button>
+                                scopedSlots={{
+                                    'is_suspended':
+                                        (item) => (
+                                            <td>
+                                                <CBadge color={getBadge(item.is_suspended)}>
+                                                    {item.is_suspended ? "Đã khóa" : "Hoạt động"}
+                                                </CBadge>
                                             </td>
-                                        )
-                                    },
-                            }}
-                        />
-                    </CCardBody>
-                </CCard>
-            </CCol>
-            {/*POPUP ADD MODERATOR*/}
-            {addModeratorModalShow ?
-                <AddModeratorModal
-                    show={addModeratorModalShow}
-                    handleClose={() => hideAddModal} />
-                : null}
-            {/*POPUP BAN MODERATOR*/}
-            <CModal
-                show={banModeratorModal}
-                onClose={() => setBanModeratorModalState(!banModeratorModal)}
-                color="danger"
-            >
-                <CModalHeader closeButton>
-                    <CModalTitle>Khóa Quản Trị Viên</CModalTitle>
-                </CModalHeader>
-                <CModalBody>
-                    Bạn chắn chắn muốn khóa Quản Trị Viên này chứ?
-                </CModalBody>
-                <CModalFooter>
-                    <CButton color="danger" onClick={() => setBanModeratorModalState(!banModeratorModal)}>
-                        Khóa
-                </CButton>{' '}
-                    <CButton color="secondary" onClick={() => setBanModeratorModalState(!banModeratorModal)}>
-                        Hủy
-                </CButton>
-                </CModalFooter>
-            </CModal>
-            {/*POPUP UPDATE MODERATOR*/}
-            {(updateModeratorModalShow && selectedModeratorUsername != null) ?
-                <UpdateModeratorModal
-                    selectedModeratorUsername={selectedModeratorUsername}
-                    show={updateModeratorModalShow}
-                    handleClose={() => hideUpdateModal}
-                />
-                : null}
+                                        ),
+                                    'birthday':
+                                        (item) => (<td>
+                                            {item.birthday != "" ? format(parseISO(item.birthday), "dd-MM-yyyy") : ""}
+                                        </td>),
+                                    'action':
+                                        (item, index) => {
+                                            return (
+                                                <td className="py-1">
 
-        </CRow >
-    );
+                                                    <button type="button" className="table-update-button mr-2" data-toggle="tooltip" title="Cập nhật">
+                                                        <CIcon name="cil-pencil" onClick={() => updateModeratorOnclick(item.username)}>
+                                                        </CIcon>
+                                                    </button>
+                                                    <button type="button" className="table-ban-button" data-toggle="tooltip" title="Khóa">
+                                                        <CIcon name="cil-lock-locked" onClick={() => { setBanModeratorModalState(!banModeratorModal) }}>
+                                                        </CIcon>
+                                                    </button>
+                                                </td>
+                                            )
+                                        },
+                                }}
+                            />
+                        </CCardBody>
+                    </CCard>
+                </CCol>
+                {/*POPUP ADD MODERATOR*/}
+                {addModeratorModalShow ?
+                    <AddModeratorModal
+                        show={addModeratorModalShow}
+                        handleClose={() => hideAddModal} />
+                    : null}
+                {/*POPUP BAN MODERATOR*/}
+                <CModal
+                    show={banModeratorModal}
+                    onClose={() => setBanModeratorModalState(!banModeratorModal)}
+                    color="danger"
+                >
+                    <CModalHeader closeButton>
+                        <CModalTitle>Khóa Quản Trị Viên</CModalTitle>
+                    </CModalHeader>
+                    <CModalBody>
+                        Bạn chắn chắn muốn khóa Quản Trị Viên này chứ?
+                    </CModalBody>
+                    <CModalFooter>
+                        <CButton color="danger" onClick={() => setBanModeratorModalState(!banModeratorModal)}>
+                            Khóa
+                    </CButton>{' '}
+                        <CButton color="secondary" onClick={() => setBanModeratorModalState(!banModeratorModal)}>
+                            Hủy
+                    </CButton>
+                    </CModalFooter>
+                </CModal>
+                {/*POPUP UPDATE MODERATOR*/}
+                {(updateModeratorModalShow && selectedModeratorUsername != null) ?
+                    <UpdateModeratorModal
+                        selectedModeratorUsername={selectedModeratorUsername}
+                        show={updateModeratorModalShow}
+                        handleClose={() => hideUpdateModal}
+                    />
+                    : null}
+
+            </CRow >
+        );
+    } else {
+        return (
+            <CAlert color="danger">Bạn không có quyền sử dụng chức năng này!</CAlert>
+        );
+    }
+
 }
 
 export default ManageModerator

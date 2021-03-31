@@ -95,7 +95,7 @@ const AddLearnerModal = ({ show, handleClose }) => {
         const addLearnerResult = await CreateUserAPI(userInput);
         console.log(addLearnerResult, userInput);
 
-        if (addLearnerResult != null) {
+        if (addLearnerResult === true) {
             const newLearnerID = addLearnerResult.data;
             //check if uploaded file is blob file from local
             const isBlob = addLearnerAvatarUrl.includes("blob:");
@@ -120,7 +120,7 @@ const AddLearnerModal = ({ show, handleClose }) => {
                 setAddMessage(<CAlert color="success">Thêm mới thành công!</CAlert>);
                 history.push("/manage-learner");
             } else {
-                setAddMessage(<CAlert color="danger">Quá trình upload avatar thất bại!</CAlert>);
+                setAddMessage(<CAlert color="danger">Thêm mới thành công! Tuy nhiên phần thông tin cập nhật đã gặp sự cố. Hãy sử dụng chức năng Cập nhật để cập nhật lại thông tin.</CAlert>);
             }
         } else {
             setAddMessage(<CAlert color="danger">Thêm mới thất bại!</CAlert>);

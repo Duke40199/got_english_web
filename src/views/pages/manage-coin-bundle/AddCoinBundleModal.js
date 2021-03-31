@@ -12,11 +12,9 @@ import {
     CModalTitle,
     CLabel,
     CFormGroup,
-    CInputFile,
     CForm,
     CAlert
 } from '@coreui/react'
-import CIcon from '@coreui/icons-react'
 import { CreateCoinBundleAPI } from '../../../api/coin-bundle';
 
 const AddCoinBundleModal = ({ show, handleClose }) => {
@@ -82,7 +80,7 @@ const AddCoinBundleModal = ({ show, handleClose }) => {
                             <CLabel htmlFor="coin-bundle-quantity-input">Số lượng Coin:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="number" id="coin-bundle-quantity-input" name="coin-bundle-quantity-input" onChange={({ target }) => setAddCoinBundleQuantity(target.value)} required />
+                            <CInput type="number" min="0" id="coin-bundle-quantity-input" name="coin-bundle-quantity-input" onChange={({ target }) => setAddCoinBundleQuantity(target.value)} required />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>

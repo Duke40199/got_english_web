@@ -42,9 +42,9 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
     const [updateModeratorPhoneNumber, setUpdateModeratorPhoneNumber] = useState("");
     const [updateModeratorBirthday, setUpdateModeratorBirthday] = useState("");
     const [updateModeratorAvatarUrl, setUpdateModeratorAvatarUrl] = useState("");
-    const [updateModeratorCanManageCoinBundle, setUpdateModeratorCanManageCoinBundle] = useState("");
-    const [updateModeratorCanManagePricing, setUpdateModeratorCanManagePricing] = useState("");
-    const [updateModeratorCanManageApplicationForm, setUpdateModeratorCanManageApplicationForm] = useState("");
+    const [updateModeratorCanManageCoinBundle, setUpdateModeratorCanManageCoinBundle] = useState(false);
+    const [updateModeratorCanManagePricing, setUpdateModeratorCanManagePricing] = useState(false);
+    const [updateModeratorCanManageApplicationForm, setUpdateModeratorCanManageApplicationForm] = useState(false);
     const [updateMessage, setUpdateMessage] = useState(null);
 
     //this useEffect will be executed every time the modal show
