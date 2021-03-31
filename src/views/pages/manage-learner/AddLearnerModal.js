@@ -95,7 +95,7 @@ const AddLearnerModal = ({ show, handleClose }) => {
         const addLearnerResult = await CreateUserAPI(userInput);
         console.log(addLearnerResult, userInput);
 
-        if (addLearnerResult != null) {
+        if (addLearnerResult === true) {
             const newLearnerID = addLearnerResult.data;
             //check if uploaded file is blob file from local
             const isBlob = addLearnerAvatarUrl.includes("blob:");
@@ -120,7 +120,7 @@ const AddLearnerModal = ({ show, handleClose }) => {
                 setAddMessage(<CAlert color="success">Thêm mới thành công!</CAlert>);
                 history.push("/manage-learner");
             } else {
-                setAddMessage(<CAlert color="danger">Quá trình upload avatar thất bại!</CAlert>);
+                setAddMessage(<CAlert color="danger">Thêm mới thành công! Tuy nhiên phần thông tin cập nhật đã gặp sự cố. Hãy sử dụng chức năng Cập nhật để cập nhật lại thông tin.</CAlert>);
             }
         } else {
             setAddMessage(<CAlert color="danger">Thêm mới thất bại!</CAlert>);
@@ -141,7 +141,6 @@ const AddLearnerModal = ({ show, handleClose }) => {
                     <CModalTitle>Thêm mới Quản Trị Viên</CModalTitle>
                 </CModalHeader>
                 <CModalBody>
-                    {addMessage}
                     <CFormGroup row>
                         <CCol md="4">
                             <CLabel htmlFor="learner-fullname-input">Họ và tên:</CLabel>
@@ -232,7 +231,7 @@ const AddLearnerModal = ({ show, handleClose }) => {
                             <CInputFile class="d-none" id="addLearnerAvtUrlInput" name="learner-avatar-url" />
                         </CCol>
                     </CFormGroup>
-
+                    {addMessage}
                 </CModalBody>
                 <CModalFooter>
                     <CButton color="primary" type="submit">
