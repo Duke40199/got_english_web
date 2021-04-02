@@ -20,7 +20,7 @@ import CIcon from '@coreui/icons-react'
 
 import { CreateUserAPI, UpdateUserInfoByUserIdAPI } from '../../../api/user';
 import firebase from '../../../firebase/firebase';
-
+import jwt_decode from 'jwt-decode'
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import vi from "date-fns/locale/vi";
@@ -95,8 +95,9 @@ const AddLearnerModal = ({ show, handleClose }) => {
         const addLearnerResult = await CreateUserAPI(userInput);
         console.log(addLearnerResult, userInput);
 
-        if (addLearnerResult === true) {
-            const newLearnerID = addLearnerResult.data;
+        if (addLearnerResult.success === true) {
+            const newLearnerToken = addLearnerResult.data.token;
+            const newLearnerID = (jwt_decode(newLearnerToken)).claims.id;
             //check if uploaded file is blob file from local
             const isBlob = addLearnerAvatarUrl.includes("blob:");
             let newAvtSrc = addLearnerAvatarUrl;
@@ -110,7 +111,7 @@ const AddLearnerModal = ({ show, handleClose }) => {
                 "fullname": addLearnerFullname,
                 "address": addLearnerAddress,
                 "phone_number": addLearnerPhoneNumber,
-                "birthday": ((addLearnerBirthday != "" && addLearnerBirthday != null) ? format(addLearnerBirthday, 'yyyy-MM-dd') : null),
+                "birthday": ((addLearnerBirthday == "" || addLearnerBirthday == null) ? null : format(addLearnerBirthday, 'yyyy-MM-dd')),
                 "avatar_url": newAvtSrc
             }
 
@@ -178,7 +179,17 @@ const AddLearnerModal = ({ show, handleClose }) => {
                             <CLabel htmlFor="learner-birthday-input">Ngày sinh:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            {addLearnerBirthday != "" ?
+                            {(addLearnerBirthday == "" || addLearnerBirthday == null) ?
+                                <DatePicker
+                                    className="form-control"
+                                    locale="vi"
+                                    id="learner-birthday-input"
+                                    name="learner-birthday-input"
+                                    placeholderText="Ngày-Tháng-Năm"
+                                    onChange={date => setAddLearnerBirthday(date)}
+                                    dateFormat="dd-MM-yyyy" />
+                                :
+
                                 <DatePicker
                                     className="form-control"
                                     locale="vi"
@@ -190,15 +201,6 @@ const AddLearnerModal = ({ show, handleClose }) => {
                                     dateFormat="dd-MM-yyyy"
                                     value={addLearnerBirthday}
                                 />
-                                :
-                                <DatePicker
-                                    className="form-control"
-                                    locale="vi"
-                                    id="learner-birthday-input"
-                                    name="learner-birthday-input"
-                                    placeholderText="Ngày-Tháng-Năm"
-                                    onChange={date => setAddLearnerBirthday(date)}
-                                    dateFormat="dd-MM-yyyy" />
                             }
 
                         </CCol>

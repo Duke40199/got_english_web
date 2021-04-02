@@ -13,7 +13,7 @@ import CIcon from '@coreui/icons-react'
 const TheHeaderDropdown = () => {
   const history = useHistory();
   const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-  console.log(userInfo.avatar_url == null);
+  
   const Logout = () => {
     localStorage.clear();
     console.log("LOGGEDOUT");

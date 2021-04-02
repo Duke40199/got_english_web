@@ -30,13 +30,13 @@ const getBadge = isSuspended => {
     switch (isSuspended) {
         case false: return 'success'
         case true: return 'danger'
-        default: return 'primary'
+        default: return 'success'
     }
 }
 
 const fields = [
     { key: 'fullname', label: 'Họ và tên', _style: { width: '14%' } },
-    { key: 'username', label: 'Tên đăng nhập', _style: { width: '12%' } },
+    { key: 'username', label: 'Tên tài khoản', _style: { width: '12%' } },
     { key: 'email', label: 'Địa chỉ Email', _style: { width: '20%' } },
     { key: 'birthday', label: 'Ngày sinh', _style: { width: '10%' } },
     { key: 'address', label: 'Địa chỉ', _style: { width: '20%' } },
@@ -76,7 +76,7 @@ const ManageModerator = () => {
 
     //check permission
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-    const canManageModerator = userInfo.can_manage_moderator;
+    const canManageModerator = userInfo.admin_permissions.can_manage_moderator;
     if (canManageModerator) {
         return (
             <CRow>
@@ -116,7 +116,7 @@ const ManageModerator = () => {
                                         ),
                                     'birthday':
                                         (item) => (<td>
-                                            {item.birthday != "" ? format(parseISO(item.birthday), "dd-MM-yyyy") : ""}
+                                            {(item.birthday == "" || item.birthday == null) ? "" : format(parseISO(item.birthday), "dd-MM-yyyy")}
                                         </td>),
                                     'action':
                                         (item, index) => {
@@ -152,10 +152,10 @@ const ManageModerator = () => {
                     color="danger"
                 >
                     <CModalHeader closeButton>
-                        <CModalTitle>Khóa Quản Trị Viên</CModalTitle>
+                        <CModalTitle>Khóa Điều Hành Viên</CModalTitle>
                     </CModalHeader>
                     <CModalBody>
-                        Bạn chắn chắn muốn khóa Quản Trị Viên này chứ?
+                        Bạn chắn chắn muốn khóa Điều Hành Viên này chứ?
                     </CModalBody>
                     <CModalFooter>
                         <CButton color="danger" onClick={() => setBanModeratorModalState(!banModeratorModal)}>

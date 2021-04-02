@@ -75,7 +75,7 @@ const WidgetsDropdown = () => {
         <CWidgetDropdown
           color="gradient-warning"
           header="621"
-          text="Cuộc Trò Chuyện trong ngày hôm nay"
+          text="Phiên Hỗ Trợ đã hoàn thành trong ngày hôm nay"
           footerSlot={
             <ChartBarSimple
               pointed
@@ -105,7 +105,7 @@ const WidgetsDropdown = () => {
         <CWidgetDropdown
           color="gradient-danger"
           header="47"
-          text="Bài Viết mới trong ngày hôm nay"
+          text="Gói Coin đã được bán trong ngày hôm nay"
           footerSlot={
             <ChartBarSimple
               className="mt-3 mx-3"

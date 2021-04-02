@@ -21,7 +21,7 @@ import CIcon from '@coreui/icons-react'
 
 import { CreateUserAPI, UpdateUserInfoByUserIdAPI, UpdateModeratorPermission } from '../../../api/user';
 import firebase from '../../../firebase/firebase';
-
+import jwt_decode from 'jwt-decode'
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import vi from "date-fns/locale/vi";
@@ -99,8 +99,9 @@ const AddModeratorModal = ({ show, handleClose }) => {
         const addModeratorResult = await CreateUserAPI(userInput);
         console.log(addModeratorResult, userInput);
 
-        if (addModeratorResult === true) {
-            const newModeratorID = addModeratorResult.data;
+        if (addModeratorResult.success === true) {
+            const newModeratorToken = addModeratorResult.data.token;
+            const newModeratorID = (jwt_decode(newModeratorToken)).claims.id;
             //check if uploaded file is blob file from local
             const isBlob = addModeratorAvatarUrl.includes("blob:");
             let newAvtSrc = addModeratorAvatarUrl;
@@ -114,7 +115,7 @@ const AddModeratorModal = ({ show, handleClose }) => {
                 "fullname": addModeratorFullname,
                 "address": addModeratorAddress,
                 "phone_number": addModeratorPhoneNumber,
-                "birthday": ((addModeratorBirthday != "" && addModeratorBirthday != null) ? format(addModeratorBirthday, 'yyyy-MM-dd') : null),
+                "birthday": ((addModeratorBirthday == "" || addModeratorBirthday == null) ? null : format(addModeratorBirthday, 'yyyy-MM-dd')),
                 "avatar_url": newAvtSrc
             }
             const permissionInput = {
