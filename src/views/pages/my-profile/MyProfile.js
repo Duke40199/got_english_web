@@ -16,7 +16,7 @@ import {
 import CIcon from '@coreui/icons-react'
 
 import { UpdateUserInfoByUserIdAPI } from '../../../api/user';
-import { GetMyProfileAPI, LoginAPI } from '../../../api/login'
+import { GetMyProfileAPI } from '../../../api/login'
 import firebase from '../../../firebase/firebase';
 
 import DatePicker, { registerLocale } from "react-datepicker";
@@ -35,8 +35,8 @@ const MyProfile = () => {
     const [email, setEmail] = useState(userInfo.email);
     const [address, setAddress] = useState(userInfo.address);
     const [phoneNumber, setPhoneNumber] = useState(userInfo.phone_number);
-    const [birthday, setBirthday] = useState(userInfo.birthday != "" ? parseISO(userInfo.birthday) : "");
-    const [avtSrc, setAvtSrc] = useState(userInfo.avatar_url);
+    const [birthday, setBirthday] = useState((userInfo.birthday == "" || userInfo.birthday == null) ? "" : parseISO(userInfo.birthday));
+    const [avtSrc, setAvtSrc] = useState((userInfo.avatar_url == "" || userInfo.avatar_url == null) ? "" : userInfo.avatar_url);
     const [updateMessage, setUpdateMessage] = useState(null);
 
     const uploadToStorage = async (imageURL) => {
@@ -126,10 +126,9 @@ const MyProfile = () => {
 
         if (updateResult === true) {
             setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
-            //re-login if username update
             if (userInfo.username != username) {
+                alert("Cập nhật thông tin thành công! Tuy nhiên, bạn đã thay đổi Tên tài khoản nên cần phải đăng nhập lại.");
                 localStorage.clear();
-                alert("Thông tin của bạn đã được cập nhật thành công. Tuy nhiên, do bạn đã thay đổi Tên đăng nhập nên cần phải đăng nhập lại.");
                 history.push("/");
             } else {
                 //refresh data
@@ -153,7 +152,7 @@ const MyProfile = () => {
                         <CRow>
                             <CCol sm="4" className="text-center">
                                 <div className="rounded-circle d-inline-block overflow-hidden border-2 border-dark position-relative" width="auto">
-                                    <img id="myProfileAvt" src={userInfo.avatar_url != "" ? userInfo.avatar_url : "/avatars/default_avt.png"} width="250" height="250" />
+                                    <img id="myProfileAvt" src={(userInfo.avatar_url == "" || userInfo.avatar_url == null) ? "/avatars/default_avt.png" : userInfo.avatar_url} width="250" height="250" />
                                     <CButton
                                         onClick={avtUrlUploadOnclick}
                                         color="info"
@@ -183,7 +182,7 @@ const MyProfile = () => {
                                 </CRow>
                                 <CRow className="mt-2">
                                     <CCol>
-                                        <CLabel htmlFor="username">Tên đăng nhập:</CLabel>
+                                        <CLabel htmlFor="username">Tên tài khoản:</CLabel>
                                         <CInput value={username} onChange={({ target }) => setUsername(target.value)} />
                                     </CCol>
                                     <CCol>
@@ -198,7 +197,7 @@ const MyProfile = () => {
                                     </CCol>
                                     <CCol>
                                         <CLabel htmlFor="email">Email:</CLabel>
-                                        <CInput value={email} onChange={({ target }) => setEmail(target.value)} />
+                                        <CInput value={email} onChange={({ target }) => setEmail(target.value)} readOnly />
                                     </CCol>
                                 </CRow>
                                 <CRow className="mt-2">

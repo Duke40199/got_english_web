@@ -49,12 +49,12 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => {
             setUpdateLearnerEmail(selectedLearnerInfo.email);
             setUpdateLearnerAddress(selectedLearnerInfo.address);
             setUpdateLearnerPhoneNumber(selectedLearnerInfo.phone_number);
-            if (selectedLearnerInfo.birthday != "") {
-                setUpdateLearnerBirthday(parseISO(selectedLearnerInfo.birthday));
-            } else {
+            if (selectedLearnerInfo.birthday == "" || selectedLearnerInfo.birthday == null) {
                 setUpdateLearnerBirthday("");
+            } else {
+                setUpdateLearnerBirthday(parseISO(selectedLearnerInfo.birthday));
             }
-            setUpdateLearnerAvatarUrl(selectedLearnerInfo.avatar_url);
+            setUpdateLearnerAvatarUrl(selectedLearnerInfo.avatar_url == "" || selectedLearnerInfo == null ? "" : selectedLearnerInfo.avatar_url);
         }
     }, [selectedLearnerUsername]);
 
@@ -123,7 +123,7 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => {
                 "email": updateLearnerEmail,
                 "address": updateLearnerAddress,
                 "phone_number": updateLearnerPhoneNumber,
-                "birthday": ((updateLearnerBirthday != "" && updateLearnerBirthday != null) ? format(updateLearnerBirthday, 'yyyy-MM-dd') : null),
+                "birthday": ((updateLearnerBirthday == "" || updateLearnerBirthday == null) ? null : format(updateLearnerBirthday, 'yyyy-MM-dd')),
                 "avatar_url": newAvtSrc,
             }
         } else {
@@ -134,7 +134,7 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => {
                 "email": updateLearnerEmail,
                 "address": updateLearnerAddress,
                 "phone_number": updateLearnerPhoneNumber,
-                "birthday": ((updateLearnerBirthday != "" && updateLearnerBirthday != null) ? format(updateLearnerBirthday, 'yyyy-MM-dd') : null),
+                "birthday": ((updateLearnerBirthday == "" || updateLearnerBirthday == null) ? null : format(updateLearnerBirthday, 'yyyy-MM-dd')),
                 "avatar_url": newAvtSrc,
             }
         }
@@ -182,7 +182,7 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => {
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="update-learner-username-input">Tên đăng nhập:</CLabel>
+                            <CLabel htmlFor="update-learner-username-input">Tên tài khoản:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
                             <CInput type="text" id="update-learner-username-input" name="username" value={updateLearnerUsername} required={true} onChange={({ target }) => setUpdateLearnerUsername(target.value)} />
@@ -193,7 +193,7 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => {
                             <CLabel htmlFor="update-learner-password-input">Mật khẩu:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="password" id="update-learner-password-input" name="update-learner-password-input" value={updateLearnerPassword} onChange={({ target }) => setUpdateLearnerPassword(target.value)} />
+                            <CInput type="password" id="update-learner-password-input" name="update-learner-password-input" placeholder="[Không thay đổi]" value={updateLearnerPassword} onChange={({ target }) => setUpdateLearnerPassword(target.value)} />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -209,7 +209,17 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => {
                             <CLabel htmlFor="update-learner-birthday-input">Ngày sinh:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            {updateLearnerBirthday != "" ?
+                            {(updateLearnerBirthday == "" || updateLearnerBirthday == null) ?
+                                <DatePicker
+                                    className="form-control"
+                                    locale="vi"
+                                    id="update-learner-birthday-input"
+                                    name="update-learner-birthday-input"
+                                    placeholderText="Ngày-Tháng-Năm"
+                                    onChange={date => setUpdateLearnerBirthday(date)}
+                                    dateFormat="dd-MM-yyyy"
+                                />
+                                :
                                 <DatePicker
                                     className="form-control"
                                     locale="vi"
@@ -220,16 +230,6 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => {
                                     onChange={date => setUpdateLearnerBirthday(date)}
                                     dateFormat="dd-MM-yyyy"
                                     value={updateLearnerBirthday}
-                                />
-                                :
-                                <DatePicker
-                                    className="form-control"
-                                    locale="vi"
-                                    id="update-learner-birthday-input"
-                                    name="update-learner-birthday-input"
-                                    placeholderText="Ngày-Tháng-Năm"
-                                    onChange={date => setUpdateLearnerBirthday(date)}
-                                    dateFormat="dd-MM-yyyy"
                                 />
                             }
                         </CCol>

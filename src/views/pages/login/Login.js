@@ -23,7 +23,7 @@ import { signInWithEmailAndPasswordHandler } from 'src/firebase/firebase'
 
 const Login = () => {
   //initial state
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState();
   const [error, setError] = useState();
@@ -32,14 +32,7 @@ const Login = () => {
   const onPressLogin = async e => {
     e.preventDefault();
 
-    let userInput = { username, password };
-    const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    if (emailRegex.test(username)) {
-      //input is email
-      const email = username
-      userInput = { email, password };
-    }
-    const idToken = await signInWithEmailAndPasswordHandler(username, password);
+    const idToken = await signInWithEmailAndPasswordHandler(email, password);
     const loginResult = await LoginAPI(idToken);
 
     if (loginResult.userData != null) {
@@ -52,7 +45,6 @@ const Login = () => {
         localStorage.setItem("user", JSON.stringify(loginResult.userData));
         // get logged in user detail info then store it into localStorage
         const userInfo = await GetMyProfileAPI();
-        console.log(userInfo);
         localStorage.setItem("userInfo", JSON.stringify(userInfo));
         // reload the page
         history.go(0);
@@ -80,10 +72,10 @@ const Login = () => {
                         <CIcon name="cil-user" />
                       </CInputGroupText>
                     </CInputGroupPrepend>
-                    <CInput type="text"
-                      placeholder="Email hoặc Tên Đăng Nhập"
-                      required={true}
-                      onChange={({ target }) => setUsername(target.value)}
+                    <CInput type="email"
+                      placeholder="Email"
+                      required
+                      onChange={({ target }) => setEmail(target.value)}
                     />
                   </CInputGroup>
                   <CInputGroup className="mb-4">
@@ -94,7 +86,7 @@ const Login = () => {
                     </CInputGroupPrepend>
                     <CInput type="password"
                       placeholder="Mật khẩu"
-                      required={true}
+                      required
                       onChange={({ target }) => setPassword(target.value)}
                     />
                   </CInputGroup>

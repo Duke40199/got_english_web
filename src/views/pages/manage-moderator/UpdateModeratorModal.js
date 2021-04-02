@@ -57,15 +57,15 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
             setUpdateModeratorEmail(selectedModeratorInfo.email);
             setUpdateModeratorAddress(selectedModeratorInfo.address);
             setUpdateModeratorPhoneNumber(selectedModeratorInfo.phone_number);
-            if (selectedModeratorInfo.birthday != "") {
-                setUpdateModeratorBirthday(parseISO(selectedModeratorInfo.birthday));
-            } else {
+            if (selectedModeratorInfo.birthday == "" || selectedModeratorInfo.birthday == null) {
                 setUpdateModeratorBirthday("");
+            } else {
+                setUpdateModeratorBirthday(parseISO(selectedModeratorInfo.birthday));
             }
-            setUpdateModeratorAvatarUrl(selectedModeratorInfo.avatar_url);
-            setUpdateModeratorCanManageCoinBundle(selectedModeratorInfo.can_manage_coin_bundle);
-            setUpdateModeratorCanManagePricing(selectedModeratorInfo.can_manage_pricing);
-            setUpdateModeratorCanManageApplicationForm(selectedModeratorInfo.can_manage_application_form);
+            setUpdateModeratorAvatarUrl((selectedModeratorInfo.avatar_url == "" || selectedModeratorInfo.avatar_url == null) ? "" : selectedModeratorInfo.avatar_url);
+            setUpdateModeratorCanManageCoinBundle(selectedModeratorInfo.moderator_permissions.can_manage_coin_bundle);
+            setUpdateModeratorCanManagePricing(selectedModeratorInfo.moderator_permissions.can_manage_pricing);
+            setUpdateModeratorCanManageApplicationForm(selectedModeratorInfo.moderator_permissions.can_manage_application_form);
         }
     }, [selectedModeratorUsername]);
 
@@ -207,7 +207,7 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="update-moderator-username-input">Tên đăng nhập:</CLabel>
+                            <CLabel htmlFor="update-moderator-username-input">Tên tài khoản:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
                             <CInput type="text" id="update-moderator-username-input" name="username" value={updateModeratorUsername} required={true} onChange={({ target }) => setUpdateModeratorUsername(target.value)} />
@@ -234,7 +234,17 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
                             <CLabel htmlFor="update-moderator-birthday-input">Ngày sinh:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            {updateModeratorBirthday != "" ?
+                            {(updateModeratorBirthday == "" || updateModeratorBirthday == null) ?
+                                <DatePicker
+                                    className="form-control"
+                                    locale="vi"
+                                    id="update-moderator-birthday-input"
+                                    name="update-moderator-birthday-input"
+                                    placeholderText="Ngày-Tháng-Năm"
+                                    onChange={date => setUpdateModeratorBirthday(date)}
+                                    dateFormat="dd-MM-yyyy"
+                                />
+                                :
                                 <DatePicker
                                     className="form-control"
                                     locale="vi"
@@ -245,16 +255,6 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
                                     onChange={date => setUpdateModeratorBirthday(date)}
                                     dateFormat="dd-MM-yyyy"
                                     value={updateModeratorBirthday}
-                                />
-                                :
-                                <DatePicker
-                                    className="form-control"
-                                    locale="vi"
-                                    id="update-moderator-birthday-input"
-                                    name="update-moderator-birthday-input"
-                                    placeholderText="Ngày-Tháng-Năm"
-                                    onChange={date => setUpdateModeratorBirthday(date)}
-                                    dateFormat="dd-MM-yyyy"
                                 />
                             }
                         </CCol>
