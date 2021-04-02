@@ -1,15 +1,13 @@
 import APIKit from './APIKit';
 
-export const LoginAPI = async userInput => {
+export const LoginAPI = async idToken => {
   let result = {
     userData: null,
     errorMessage: null,
   };
-
   const onSuccess = data => {
     result.userData = data.data.data;
   };
-
   const onFailure = error => {
     console.log(error);
     let errorMessage = "";
@@ -22,8 +20,10 @@ export const LoginAPI = async userInput => {
     }
     result.errorMessage = errorMessage;
   };
-
-  await APIKit.post('/login', userInput)
+  const apiConfig = {
+    headers: { "Authorization": `Bearer ${idToken.token}` }
+  }
+  await APIKit.post('/login', null, apiConfig)
     .then(onSuccess)
     .catch(onFailure);
 
