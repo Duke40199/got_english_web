@@ -153,7 +153,7 @@ const MyProfile = () => {
                         <CRow>
                             <CCol sm="4" className="text-center">
                                 <div className="rounded-circle d-inline-block overflow-hidden border-2 border-dark position-relative" width="auto">
-                                    <img id="myProfileAvt" src={userInfo.avatar_url != "" ? userInfo.avatar_url : "/avatars/default_avt.png"} width="250" height="250" />
+                                    <img id="myProfileAvt" src={(userInfo.avatar_url == "" || userInfo.avatar_url == null) ? "/avatars/default_avt.png" : userInfo.avatar_url} width="250" height="250" />
                                     <CButton
                                         onClick={avtUrlUploadOnclick}
                                         color="info"
