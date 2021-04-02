@@ -5,6 +5,11 @@ export const LoginAPI = async idToken => {
     userData: null,
     errorMessage: null,
   };
+  if (idToken == undefined) {
+    let errorMessage = "Xin kiểm tra lại thông tin đăng nhập.";
+    result.errorMessage = errorMessage
+    return result;
+  }
   const onSuccess = data => {
     result.userData = data.data.data;
   };
@@ -20,6 +25,8 @@ export const LoginAPI = async idToken => {
     }
     result.errorMessage = errorMessage;
   };
+  // console.log(idToken.token);
+  // await sleep(5000);
   const apiConfig = {
     headers: { "Authorization": `Bearer ${idToken.token}` }
   }
@@ -29,7 +36,11 @@ export const LoginAPI = async idToken => {
 
   return result;
 }
-
+// function sleep(ms) {
+//   return new Promise((resolve) => {
+//     setTimeout(resolve, ms);
+//   });
+// }
 export const GetMyProfileAPI = async () => {
   const token = (JSON.parse(localStorage.getItem("user"))).token;
 

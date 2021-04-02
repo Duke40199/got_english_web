@@ -24,8 +24,10 @@ export const signInWithEmailAndPasswordHandler = async (email, password) => {
     await auth.signInWithEmailAndPassword(email, password).catch(error => {
         console.error("Error signing in with password and email", error);
     }).then(async (userCredential) => {
-        var firebaseUser = userCredential.user;
-        idToken = await firebaseUser.getIdTokenResult(false);
+        if (userCredential !== undefined) {
+            var firebaseUser = userCredential.user;
+            idToken = await firebaseUser.getIdTokenResult(false);
+        }
     });
     return idToken
 };
