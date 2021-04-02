@@ -6,8 +6,7 @@ export const LoginAPI = async idToken => {
     errorMessage: null,
   };
   if (idToken == undefined) {
-    let errorMessage = "Xin kiểm tra lại thông tin đăng nhập.";
-    result.errorMessage = errorMessage
+    result.errorMessage = "Xin kiểm tra lại thông tin đăng nhập."
     return result;
   }
   const onSuccess = data => {
