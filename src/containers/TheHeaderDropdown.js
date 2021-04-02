@@ -13,7 +13,7 @@ import CIcon from '@coreui/icons-react'
 const TheHeaderDropdown = () => {
   const history = useHistory();
   const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-  
+
   const Logout = () => {
     localStorage.clear();
     console.log("LOGGEDOUT");
@@ -29,7 +29,7 @@ const TheHeaderDropdown = () => {
       <CDropdownToggle className="c-header-nav-link" caret={false}>
         <div className="c-avatar">
           <CImg
-            src={userInfo.avatar_url != "" ? userInfo.avatar_url : "/avatars/default_avt.png"}
+            src={(userInfo.avatar_url != "" || userInfo.avatar_url != null) ? userInfo.avatar_url : "/avatars/default_avt.png"}
             className="c-avatar-img"
           />
         </div>
