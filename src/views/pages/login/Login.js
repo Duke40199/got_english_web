@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import { LoginAPI, GetMyProfileAPI } from '../../../api/login'
 import jwt_decode from 'jwt-decode'
+import util from 'util';
 import {
   CButton,
   CCard,
@@ -18,6 +19,7 @@ import {
   CAlert
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
+import { signInWithEmailAndPasswordHandler } from 'src/firebase/firebase'
 
 const Login = () => {
   //initial state
@@ -37,8 +39,8 @@ const Login = () => {
       const email = username
       userInput = { email, password };
     }
-
-    const loginResult = await LoginAPI(userInput);
+    const idToken = await signInWithEmailAndPasswordHandler(username, password);
+    const loginResult = await LoginAPI(idToken);
 
     if (loginResult.userData != null) {
       //role check

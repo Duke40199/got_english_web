@@ -1,15 +1,17 @@
 import APIKit from './APIKit';
 
-export const LoginAPI = async userInput => {
+export const LoginAPI = async idToken => {
   let result = {
     userData: null,
     errorMessage: null,
   };
-
+  if (idToken == undefined) {
+    result.errorMessage = "Xin kiểm tra lại thông tin đăng nhập."
+    return result;
+  }
   const onSuccess = data => {
     result.userData = data.data.data;
   };
-
   const onFailure = error => {
     console.log(error);
     let errorMessage = "";
@@ -22,14 +24,22 @@ export const LoginAPI = async userInput => {
     }
     result.errorMessage = errorMessage;
   };
-
-  await APIKit.post('/login', userInput)
+  // console.log(idToken.token);
+  // await sleep(5000);
+  const apiConfig = {
+    headers: { "Authorization": `Bearer ${idToken.token}` }
+  }
+  await APIKit.post('/login', null, apiConfig)
     .then(onSuccess)
     .catch(onFailure);
 
   return result;
 }
-
+// function sleep(ms) {
+//   return new Promise((resolve) => {
+//     setTimeout(resolve, ms);
+//   });
+// }
 export const GetMyProfileAPI = async () => {
   const token = (JSON.parse(localStorage.getItem("user"))).token;
 
