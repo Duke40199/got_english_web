@@ -8,6 +8,7 @@ import {
   CRow,
 } from '@coreui/react'
 
+import { format } from 'date-fns'
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import vi from "date-fns/locale/vi";
@@ -41,7 +42,7 @@ const Dashboard = () => {
 
   return (
     <>
-      <h3 className="mb-3">Bảng tin ngày 26/02/2021:</h3>
+      <h3 className="mb-3">Bảng tin ngày {format(new Date(), 'dd-MM-yyyy')}:</h3>
       <WidgetsDropdown />
       <CCard>
         <CCardBody>

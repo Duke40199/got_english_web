@@ -101,7 +101,6 @@ const MyProfile = () => {
             userInput = {
                 "fullname": fullname,
                 "username": username,
-                "email": email,
                 "address": address,
                 "phone_number": phoneNumber,
                 "birthday": ((birthday != "" && birthday != null) ? format(birthday, 'yyyy-MM-dd') : null),
@@ -112,7 +111,6 @@ const MyProfile = () => {
                 "fullname": fullname,
                 "username": username,
                 "password": password,
-                "email": email,
                 "address": address,
                 "phone_number": phoneNumber,
                 "birthday": ((birthday != "" && birthday != null) ? format(birthday, 'yyyy-MM-dd') : null),
@@ -197,7 +195,7 @@ const MyProfile = () => {
                                     </CCol>
                                     <CCol>
                                         <CLabel htmlFor="email">Email:</CLabel>
-                                        <CInput value={email} onChange={({ target }) => setEmail(target.value)} readOnly />
+                                        <CInput value={email} readOnly />
                                     </CCol>
                                 </CRow>
                                 <CRow className="mt-2">

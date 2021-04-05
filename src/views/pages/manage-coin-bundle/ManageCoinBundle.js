@@ -67,7 +67,7 @@ const ManageCoinBundle = () => {
 
     //check permission
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-    const canManageCoinBundle = userInfo.moderator_permissions.can_manage_coin_bundle;
+    const canManageCoinBundle = userInfo.moderator_details.can_manage_coin_bundle;
     if (canManageCoinBundle) {
         return (
             <CRow>

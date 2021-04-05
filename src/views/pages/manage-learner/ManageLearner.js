@@ -76,7 +76,7 @@ const ManageLearner = () => {
 
     //check permission
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-    const canManageLearner = userInfo.admin_permissions.can_manage_learner;
+    const canManageLearner = userInfo.admin_details.can_manage_learner;
     if (canManageLearner) {
         return (
             <CRow>
@@ -106,6 +106,24 @@ const ManageLearner = () => {
                                     }
                                 }
                                 scopedSlots={{
+                                    'fullname':
+                                        (item) => (
+                                            <td>
+                                                {item.fullname == null ? "" : item.fullname}
+                                            </td>
+                                        ),
+                                    'address':
+                                        (item) => (
+                                            <td>
+                                                {item.address == null ? "" : item.address}
+                                            </td>
+                                        ),
+                                    'phone_number':
+                                        (item) => (
+                                            <td>
+                                                {item.phone_number == null ? "" : item.phone_number}
+                                            </td>
+                                        ),
                                     'is_suspended':
                                         (item) => (
                                             <td>

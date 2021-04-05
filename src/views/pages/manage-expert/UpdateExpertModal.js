@@ -25,38 +25,38 @@ import "react-datepicker/dist/react-datepicker.css";
 import vi from "date-fns/locale/vi";
 import { format, parseISO } from 'date-fns';
 
-const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => {
+const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose }) => {
     const history = useHistory();
 
-    const [updateLearnerUUID, setUpdateLearnerUUID] = useState("");
-    const [updateLearnerFullname, setUpdateLearnerFullname] = useState("");
-    const [updateLearnerUsername, setUpdateLearnerUsername] = useState("");
-    const [updateLearnerPassword, setUpdateLearnerPassword] = useState("");
-    const [updateLearnerEmail, setUpdateLearnerEmail] = useState("");
-    const [updateLearnerAddress, setUpdateLearnerAddress] = useState("");
-    const [updateLearnerPhoneNumber, setUpdateLearnerPhoneNumber] = useState("");
-    const [updateLearnerBirthday, setUpdateLearnerBirthday] = useState("");
-    const [updateLearnerAvatarUrl, setUpdateLearnerAvatarUrl] = useState("");
+    const [updateExpertUUID, setUpdateExpertUUID] = useState("");
+    const [updateExpertFullname, setUpdateExpertFullname] = useState("");
+    const [updateExpertUsername, setUpdateExpertUsername] = useState("");
+    const [updateExpertPassword, setUpdateExpertPassword] = useState("");
+    const [updateExpertEmail, setUpdateExpertEmail] = useState("");
+    const [updateExpertAddress, setUpdateExpertAddress] = useState("");
+    const [updateExpertPhoneNumber, setUpdateExpertPhoneNumber] = useState("");
+    const [updateExpertBirthday, setUpdateExpertBirthday] = useState("");
+    const [updateExpertAvatarUrl, setUpdateExpertAvatarUrl] = useState("");
     const [updateMessage, setUpdateMessage] = useState(null);
 
     //this useEffect will be executed every time the modal show
     useEffect(async () => {
-        if (selectedLearnerUsername != null) {
-            const selectedLearnerInfo = await GetUserInfoAPI(selectedLearnerUsername);
-            setUpdateLearnerUUID(selectedLearnerInfo.id);
-            setUpdateLearnerFullname(selectedLearnerInfo.fullname);
-            setUpdateLearnerUsername(selectedLearnerInfo.username);
-            setUpdateLearnerEmail(selectedLearnerInfo.email);
-            setUpdateLearnerAddress(selectedLearnerInfo.address);
-            setUpdateLearnerPhoneNumber(selectedLearnerInfo.phone_number);
-            if (selectedLearnerInfo.birthday == "" || selectedLearnerInfo.birthday == null) {
-                setUpdateLearnerBirthday("");
+        if (selectedExpertUsername != null) {
+            const selectedExpertInfo = await GetUserInfoAPI(selectedExpertUsername);
+            setUpdateExpertUUID(selectedExpertInfo.id);
+            setUpdateExpertFullname(selectedExpertInfo.fullname);
+            setUpdateExpertUsername(selectedExpertInfo.username);
+            setUpdateExpertEmail(selectedExpertInfo.email);
+            setUpdateExpertAddress(selectedExpertInfo.address);
+            setUpdateExpertPhoneNumber(selectedExpertInfo.phone_number);
+            if (selectedExpertInfo.birthday == "" || selectedExpertInfo.birthday == null) {
+                setUpdateExpertBirthday("");
             } else {
-                setUpdateLearnerBirthday(parseISO(selectedLearnerInfo.birthday));
+                setUpdateExpertBirthday(parseISO(selectedExpertInfo.birthday));
             }
-            setUpdateLearnerAvatarUrl(selectedLearnerInfo.avatar_url == "" || selectedLearnerInfo == null ? "" : selectedLearnerInfo.avatar_url);
+            setUpdateExpertAvatarUrl(selectedExpertInfo.avatar_url == "" || selectedExpertInfo == null ? "" : selectedExpertInfo.avatar_url);
         }
-    }, [selectedLearnerUsername]);
+    }, [selectedExpertUsername]);
 
     const uploadToStorage = async (imageURL) => {
         let blob = await new Promise((resolve, reject) => {
@@ -73,7 +73,7 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => {
         });
 
         const storageRef = firebase.storage().ref();
-        const imagesRef = storageRef.child('uploads/' + updateLearnerUUID);
+        const imagesRef = storageRef.child('uploads/' + updateExpertUUID);
         const snapshot = await imagesRef.put(blob);
         const remoteUri = await snapshot.ref.getDownloadURL();
 
@@ -84,9 +84,9 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => {
     }
 
     const avtUrlUploadOnclick = () => {
-        document.getElementById('updateLearnerAvtUrlInput').click();
-        document.getElementById('updateLearnerAvtUrlInput').onchange = (e) => {
-            var img = document.getElementById("updateLearnerAvt");
+        document.getElementById('updateExpertAvtUrlInput').click();
+        document.getElementById('updateExpertAvtUrlInput').onchange = (e) => {
+            var img = document.getElementById("updateExpertAvt");
             const fileSize = e.target.files[0].size;
             const fileType = e.target.files[0].type;
             if (fileSize <= 300000 && (fileType == "image/jpeg" || fileType == "image/png" || fileType == "image/jpg")) {
@@ -94,7 +94,7 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => {
                 var blobUrl = URL.createObjectURL(e.target.files[0]);
                 // use blob url to preview avatar
                 img.src = blobUrl;
-                setUpdateLearnerAvatarUrl(blobUrl);
+                setUpdateExpertAvatarUrl(blobUrl);
             } else {
                 setUpdateMessage(<CAlert color="danger">Hệ thống chỉ chấp nhận file hình ảnh JPEG, JPG, PNG và dung lượng không quá 300KB</CAlert>);
             }
@@ -107,42 +107,42 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => {
         let userInput = {};
 
         //check if uploaded file is blob file from local
-        const isBlob = updateLearnerAvatarUrl.includes("blob:");
-        let newAvtSrc = updateLearnerAvatarUrl;
+        const isBlob = updateExpertAvatarUrl.includes("blob:");
+        let newAvtSrc = updateExpertAvatarUrl;
         if (isBlob) {
             //upload local image to Firebase Storage
-            newAvtSrc = await uploadToStorage(updateLearnerAvatarUrl);
+            newAvtSrc = await uploadToStorage(updateExpertAvatarUrl);
         } else {
             //do nothing
         }
 
-        if (updateLearnerPassword === "") {
+        if (updateExpertPassword === "") {
             userInput = {
-                "fullname": updateLearnerFullname,
-                "username": updateLearnerUsername,
-                "address": updateLearnerAddress,
-                "phone_number": updateLearnerPhoneNumber,
-                "birthday": ((updateLearnerBirthday == "" || updateLearnerBirthday == null) ? null : format(updateLearnerBirthday, 'yyyy-MM-dd')),
+                "fullname": updateExpertFullname,
+                "username": updateExpertUsername,
+                "address": updateExpertAddress,
+                "phone_number": updateExpertPhoneNumber,
+                "birthday": ((updateExpertBirthday == "" || updateExpertBirthday == null) ? null : format(updateExpertBirthday, 'yyyy-MM-dd')),
                 "avatar_url": newAvtSrc,
             }
         } else {
             userInput = {
-                "fullname": updateLearnerFullname,
-                "username": updateLearnerUsername,
-                "password": updateLearnerPassword,
-                "address": updateLearnerAddress,
-                "phone_number": updateLearnerPhoneNumber,
-                "birthday": ((updateLearnerBirthday == "" || updateLearnerBirthday == null) ? null : format(updateLearnerBirthday, 'yyyy-MM-dd')),
+                "fullname": updateExpertFullname,
+                "username": updateExpertUsername,
+                "password": updateExpertPassword,
+                "address": updateExpertAddress,
+                "phone_number": updateExpertPhoneNumber,
+                "birthday": ((updateExpertBirthday == "" || updateExpertBirthday == null) ? null : format(updateExpertBirthday, 'yyyy-MM-dd')),
                 "avatar_url": newAvtSrc,
             }
         }
 
-        const updateResult = await UpdateUserInfoByUserIdAPI(updateLearnerUUID, userInput);
+        const updateResult = await UpdateUserInfoByUserIdAPI(updateExpertUUID, userInput);
         console.log(updateResult, userInput);
 
         if (updateResult === true) {
             setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
-            history.push("/manage-learner");
+            history.push("/manage-expert");
         } else {
             setUpdateMessage(<CAlert color="danger">Cập nhật thất bại!</CAlert>);
         }
@@ -159,105 +159,105 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => {
         >
             <CForm onSubmit={onSubmitUpdateForm} method="post" encType="multipart/form-data" className="form-horizontal">
                 <CModalHeader closeButton>
-                    <CModalTitle>Cập nhật Học Viên</CModalTitle>
+                    <CModalTitle>Cập nhật Chuyên Gia</CModalTitle>
                 </CModalHeader>
                 <CModalBody>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="learner-uuid-input">UUID:</CLabel>
+                            <CLabel htmlFor="expert-uuid-input">UUID:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <p name="learner-id-static">{updateLearnerUUID}</p>
+                            <p name="expert-id-static">{updateExpertUUID}</p>
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="update-learner-fullname-input">Họ và tên:</CLabel>
+                            <CLabel htmlFor="update-expert-fullname-input">Họ và tên:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="text" id="update-learner-fullname-input" name="fullname" value={updateLearnerFullname} onChange={({ target }) => setUpdateLearnerFullname(target.value)} />
+                            <CInput type="text" id="update-expert-fullname-input" name="fullname" value={updateExpertFullname} onChange={({ target }) => setUpdateExpertFullname(target.value)} />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="update-learner-username-input">Tên tài khoản:</CLabel>
+                            <CLabel htmlFor="update-expert-username-input">Tên tài khoản:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="text" id="update-learner-username-input" name="username" value={updateLearnerUsername} required={true} onChange={({ target }) => setUpdateLearnerUsername(target.value)} />
+                            <CInput type="text" id="update-expert-username-input" name="username" value={updateExpertUsername} required={true} onChange={({ target }) => setUpdateExpertUsername(target.value)} />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="update-learner-password-input">Mật khẩu:</CLabel>
+                            <CLabel htmlFor="update-expert-password-input">Mật khẩu:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="password" id="update-learner-password-input" name="update-learner-password-input" placeholder="[Không thay đổi]" value={updateLearnerPassword} onChange={({ target }) => setUpdateLearnerPassword(target.value)} />
+                            <CInput type="password" id="update-expert-password-input" name="update-expert-password-input" placeholder="[Không thay đổi]" value={updateExpertPassword} onChange={({ target }) => setUpdateExpertPassword(target.value)} />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="update-learner-email-input">Email:</CLabel>
+                            <CLabel htmlFor="update-expert-email-input">Email:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="email" id="update-learner-email-input" name="update-learner-email-input" autoComplete="email" value={updateLearnerEmail} required={true} readOnly />
+                            <CInput type="email" id="update-expert-email-input" name="update-expert-email-input" autoComplete="email" value={updateExpertEmail} required={true} readOnly />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="update-learner-birthday-input">Ngày sinh:</CLabel>
+                            <CLabel htmlFor="update-expert-birthday-input">Ngày sinh:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            {(updateLearnerBirthday == "" || updateLearnerBirthday == null) ?
+                            {(updateExpertBirthday == "" || updateExpertBirthday == null) ?
                                 <DatePicker
                                     className="form-control"
                                     locale="vi"
-                                    id="update-learner-birthday-input"
-                                    name="update-learner-birthday-input"
+                                    id="update-expert-birthday-input"
+                                    name="update-expert-birthday-input"
                                     placeholderText="Ngày-Tháng-Năm"
-                                    onChange={date => setUpdateLearnerBirthday(date)}
+                                    onChange={date => setUpdateExpertBirthday(date)}
                                     dateFormat="dd-MM-yyyy"
                                 />
                                 :
                                 <DatePicker
                                     className="form-control"
                                     locale="vi"
-                                    id="update-learner-birthday-input"
-                                    name="update-learner-birthday-input"
-                                    selected={updateLearnerBirthday}
+                                    id="update-expert-birthday-input"
+                                    name="update-expert-birthday-input"
+                                    selected={updateExpertBirthday}
                                     placeholderText="Ngày-Tháng-Năm"
-                                    onChange={date => setUpdateLearnerBirthday(date)}
+                                    onChange={date => setUpdateExpertBirthday(date)}
                                     dateFormat="dd-MM-yyyy"
-                                    value={updateLearnerBirthday}
+                                    value={updateExpertBirthday}
                                 />
                             }
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="update-learner-address-input">Địa chỉ:</CLabel>
+                            <CLabel htmlFor="update-expert-address-input">Địa chỉ:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="text" id="update-learner-address-input" name="update-learner-address-input" value={updateLearnerAddress} onChange={({ target }) => setUpdateLearnerAddress(target.value)} />
+                            <CInput type="text" id="update-expert-address-input" name="update-expert-address-input" value={updateExpertAddress} onChange={({ target }) => setUpdateExpertAddress(target.value)} />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="update-learner-phone-input">Số điện thoại:</CLabel>
+                            <CLabel htmlFor="update-expert-phone-input">Số điện thoại:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="tel" id="update-learner-phone-input" name="update-learner-phone-input" value={updateLearnerPhoneNumber} onChange={({ target }) => setUpdateLearnerPhoneNumber(target.value)} />
+                            <CInput type="tel" id="update-expert-phone-input" name="update-expert-phone-input" value={updateExpertPhoneNumber} onChange={({ target }) => setUpdateExpertPhoneNumber(target.value)} />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
-                        <CLabel col md="4" htmlFor="update-learner-avatar-url">Ảnh đại diện:</CLabel>
+                        <CLabel col md="4" htmlFor="update-expert-avatar-url">Ảnh đại diện:</CLabel>
                         <CCol xs="12" md="8">
-                            <img id="updateLearnerAvt" className="mr-2" src={updateLearnerAvatarUrl} width="80" height="80" />
+                            <img id="updateExpertAvt" className="mr-2" src={updateExpertAvatarUrl} width="80" height="80" />
                             <CButton
                                 color="info"
                                 className="rounded-circle"
                                 onClick={avtUrlUploadOnclick}
                             ><CIcon name="cil-pencil"></CIcon></CButton>
-                            <CInputFile class="d-none" id="updateLearnerAvtUrlInput" name="update-learner-avatar-url" />
+                            <CInputFile class="d-none" id="updateExpertAvtUrlInput" name="update-expert-avatar-url" />
                         </CCol>
                     </CFormGroup>
                     {updateMessage}
@@ -275,4 +275,4 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => {
     );
 }
 
-export default UpdateLearnerModal
+export default UpdateExpertModal

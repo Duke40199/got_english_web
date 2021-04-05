@@ -149,7 +149,7 @@ const AddModeratorModal = ({ show, handleClose }) => {
         >
             <CForm onSubmit={onSubmitAddForm} method="post" encType="multipart/form-data" className="form-horizontal">
                 <CModalHeader closeButton>
-                    <CModalTitle>Thêm mới Quản Trị Viên</CModalTitle>
+                    <CModalTitle>Thêm mới Điều Hành Viên</CModalTitle>
                 </CModalHeader>
                 <CModalBody>
                     <CFormGroup row>
