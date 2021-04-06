@@ -36,7 +36,6 @@ const UpdateCoinBundleModal = ({ selectedCoinBundleId, show, handleClose }) => {
             setUpdateCoinBundleDescription(selectedCoinBundleInfo.description);
             setUpdateCoinBundleQuantity(selectedCoinBundleInfo.quantity);
             setUpdateCoinBundlePrice(selectedCoinBundleInfo.price);
-            console.log(selectedCoinBundleInfo);
         }
     }, [selectedCoinBundleId]);
 
@@ -47,8 +46,7 @@ const UpdateCoinBundleModal = ({ selectedCoinBundleId, show, handleClose }) => {
             "title": updateCoinBundleTitle,
             "description": updateCoinBundleDescription,
             "quantity": parseInt(updateCoinBundleQuantity),
-            "price": parseInt(updateCoinBundlePrice),
-            "price_unit": "VND"
+            "price": parseInt(updateCoinBundlePrice)
         }
 
         const updateCoinBundleResult = await UpdateCoinBundleByIdAPI(selectedCoinBundleId, userInput);

@@ -58,6 +58,7 @@ if (role === "Admin") {
     {
       _tag: 'CSidebarNavItem',
       name: 'Quản lý Đơn Giá',
+      to: '/manage-pricing',
       icon: 'cil-cash',
     },
   ]
