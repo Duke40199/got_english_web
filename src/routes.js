@@ -43,6 +43,7 @@ const ViewExpertFeedback = React.lazy(() => import('./views/pages/manage-expert/
 const ViewCandidateCertification = React.lazy(() => import('./views/pages/view-candidate-certification/ViewCandidateCertification'));
 const ManageCoinBundle = React.lazy(() => import('./views/pages/manage-coin-bundle/ManageCoinBundle'));
 const ManageLearner = React.lazy(() => import('./views/pages/manage-learner/ManageLearner'));
+const ManagePricing = React.lazy(() => import('./views/pages/manage-pricing/ManagePricing'));
 const MyProfile = React.lazy(() => import('./views/pages/my-profile/MyProfile'));
 const Page404 = React.lazy(() => import('./views/pages/page404/Page404'));
 
@@ -93,6 +94,7 @@ const routes = [
   { path: '/view-candidate-certification', name: 'Xem hồ sơ Ứng Viên', component: ViewCandidateCertification, exact: true },
   { path: '/manage-coin-bundle', name: 'Quản lý Gói Coin', component: ManageCoinBundle, exact: true },
   { path: '/manage-learner', name: 'Quản lý Học Viên', component: ManageLearner, exact: true },
+  { path: '/manage-pricing', name: 'Quản lý Đơn Giá', component: ManagePricing, exact: true },
   { path: '/my-profile', name: 'Hồ sơ của tôi', component: MyProfile, exact: true },
   { path: '*', name: '404', component: Page404 },
 ];

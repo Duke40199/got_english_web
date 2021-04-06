@@ -1,107 +1,146 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 import {
-    CBadge,
     CCard,
     CCardBody,
     CCardHeader,
     CCol,
     CDataTable,
     CRow,
-    CInput,
-    CInputGroup,
-    CInputGroupAppend,
     CButton,
     CModal,
     CModalHeader,
     CModalBody,
     CModalFooter,
     CModalTitle,
-    CLabel,
-    CFormGroup,
-    CInputFile,
-    CForm
+    CBadge,
+    CAlert
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
+import UpdateExpertModal from '../manage-expert/UpdateExpertModal';
+import AddExpertModal from '../manage-expert/AddExpertModal';
 
-import DatePicker, { registerLocale } from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import vi from "date-fns/locale/vi";
+import { format, parseISO } from 'date-fns';
+
+import { usePromiseTracker, trackPromise } from "react-promise-tracker";
+
+import { GetExpertInfoListAPI } from '../../../api/user';
 
 import usersData from '../../users/UsersData'
 
-const getBadge = status => {
-    switch (status) {
-        case 'Hoạt động': return 'success'
-        case 'Đã khóa': return 'danger'
-        default: return 'primary'
+const getBadge = isSuspended => {
+    switch (isSuspended) {
+        case false: return 'success'
+        case true: return 'danger'
+        default: return 'success'
     }
 }
+
 const fields = [
-    { key: 'fullname', label: 'Họ và Tên' },
-    { key: 'email', label: 'Địa chỉ Email' },
-    { key: 'birthday', label: 'Ngày sinh' },
-    { key: 'occupation', label: 'Công việc' },
-    { key: 'phone', label: 'Số điện thoại' },
-    { key: 'status', label: 'Trạng thái' },
-    { key: 'rating', label: 'Đánh giá' },
-    { key: 'action', label: '' }]
+    { key: 'fullname', label: 'Họ và tên', _style: { width: '12%' } },
+    { key: 'username', label: 'Tên tài khoản', _style: { width: '12%' } },
+    { key: 'email', label: 'Địa chỉ Email', _style: { width: '18%' } },
+    { key: 'birthday', label: 'Ngày sinh', _style: { width: '10%' } },
+    { key: 'address', label: 'Địa chỉ', _style: { width: '16%' } },
+    { key: 'phone_number', label: 'Số điện thoại', _style: { width: '10%' } },
+    { key: 'is_suspended', label: '', _style: { width: '8%' } },
+    { key: 'average_rating', label: 'Đánh giá', _style: { width: '8%' } },
+    { key: 'action', label: '', _style: { width: '6%' } }]
 
 
 
 const ManageExpert = () => {
-    const [addExpertModal, setAddExpertModalState] = useState(false);
+    const [addExpertModalShow, setAddExpertModalShow] = useState(false);
     const [banExpertModal, setBanExpertModalState] = useState(false);
-    const [expertBirthday, setExpertBirthday] = useState(null);
+    const [updateExpertModalShow, setUpdateExpertModalShow] = useState(false);
+    const [expertInfoList, setExpertInfoList] = useState(null);
+    const [selectedExpertUsername, setSelectedExpertUsername] = useState(null);
 
-    registerLocale("vi", vi);
+    const { promiseInProgress } = usePromiseTracker();
 
-    return (
-        <CRow>
-            <CCol>
-                <CCard>
-                    <CCardHeader align="right">
-                        <CInputGroup>
-                            <CInput type="text" name="searchUserName" placeholder="Nhập tên: v.d Nguyen Van A,..." />
-                            <CInputGroupAppend>
-                                <CButton type="button" color="primary">Tìm kiếm</CButton>
-                            </CInputGroupAppend>
-                        </CInputGroup>
-                        <CButton color="primary" className="mt-2 d-flex align-items-center" onClick={() => setAddExpertModalState(!addExpertModal)}>
-                            <CIcon name="cilPlus" size="sm" className="mr-1"></CIcon>Thêm mới Chuyên Gia</CButton>
-                    </CCardHeader>
-                    <CCardBody>
-                        <CDataTable
-                            items={usersData}
-                            fields={fields}
-                            hover
-                            striped
-                            bordered
-                            size="sm"
-                            itemsPerPage={20}
-                            pagination
-                            scopedSlots={
-                                {
-                                    'status':
+    useEffect(async () => {
+        const expertInfoList = await trackPromise(GetExpertInfoListAPI());
+        setExpertInfoList(expertInfoList);
+    }, [updateExpertModalShow, addExpertModalShow])
+
+    const updateExpertOnclick = (expertUsername) => {
+        //open the update expert modal
+        setUpdateExpertModalShow(true);
+        //set params
+        setSelectedExpertUsername(expertUsername);
+    }
+
+    const hideUpdateModal = () => {
+        setUpdateExpertModalShow(false);
+    }
+
+    const hideAddModal = () => {
+        setAddExpertModalShow(false);
+    }
+
+    //check permission
+    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
+    const canManageExpert = userInfo.admin_details.can_manage_expert;
+    if (canManageExpert) {
+        return (
+            <CRow>
+                <CCol>
+                    <CCard>
+                        <CCardHeader align="right">
+                            <CButton color="primary" className="mt-2 d-flex align-items-center" onClick={() => setAddExpertModalShow(true)}>
+                                <CIcon name="cilPlus" size="sm" className="mr-1"></CIcon>Thêm mới Chuyên Gia</CButton>
+                        </CCardHeader>
+                        <CCardBody className="pt-0 pb-0">
+                            <CDataTable
+                                addTableClasses="text-break"
+                                items={expertInfoList}
+                                fields={fields}
+                                hover
+                                striped
+                                bordered
+                                size="sm"
+                                itemsPerPage={20}
+                                pagination
+                                loading={promiseInProgress}
+                                noItemsView={{ noResults: 'Không có kết quả tìm kiếm trùng khớp', noItems: 'Không có dữ liệu' }}
+                                tableFilter={
+                                    {
+                                        label: "Tìm kiếm:",
+                                        placeholder: "nhập dữ liệu...",
+                                    }
+                                }
+                                scopedSlots={{
+                                    'fullname':
                                         (item) => (
                                             <td>
-                                                <CBadge color={getBadge(item.status)}>
-                                                    {item.status}
+                                                {item.fullname == null ? "" : item.fullname}
+                                            </td>
+                                        ),
+                                    'address':
+                                        (item) => (
+                                            <td>
+                                                {item.address == null ? "" : item.address}
+                                            </td>
+                                        ),
+                                    'phone_number':
+                                        (item) => (
+                                            <td>
+                                                {item.phone_number == null ? "" : item.phone_number}
+                                            </td>
+                                        ),
+                                    'is_suspended':
+                                        (item) => (
+                                            <td>
+                                                <CBadge color={getBadge(item.is_suspended)}>
+                                                    {item.is_suspended ? "Đã khóa" : "Hoạt động"}
                                                 </CBadge>
                                             </td>
                                         ),
-                                    'action':
-                                        (item, index) => {
-                                            return (
-                                                <td className="py-1">
-                                                    <CButton
-                                                        color="danger"
-                                                        size="sm"
-                                                        onClick={() => { setBanExpertModalState(!banExpertModal) }} >Khóa</CButton>
-                                                </td>
-                                            )
-                                        },
-                                    'rating':
+                                    'birthday':
+                                        (item) => (<td>
+                                            {(item.birthday == "" || item.birthday == null) ? "" : format(parseISO(item.birthday), "dd-MM-yyyy")}
+                                        </td>),
+                                    'average_rating':
                                         (item, index) => {
                                             return (
                                                 <td className="py-1"><CButton
@@ -111,124 +150,74 @@ const ManageExpert = () => {
                                                         e.preventDefault();
                                                         window.location.href = '/manage-expert/view-expert-feedback';
                                                     }}
-                                                >{item.rating.toFixed(1)}</CButton>
+                                                >{item.expert_details.average_rating.toFixed(1)}</CButton>
                                                 </td>
                                             )
                                         },
-                                }
-                            }
-                        />
-                    </CCardBody>
-                </CCard>
-            </CCol>
-            {/*POPUP ADD EXPERT*/}
-            <CModal
-                show={addExpertModal}
-                onClose={() => setAddExpertModalState(!addExpertModal)}
-                color="primary"
-            >
-                <CModalHeader closeButton>
-                    <CModalTitle>Thêm mới Chuyên Gia</CModalTitle>
-                </CModalHeader>
-                <CModalBody>
-                    <CForm action="" method="post" encType="multipart/form-data" className="form-horizontal">
-                        <CFormGroup row>
-                            <CCol md="3">
-                                <CLabel htmlFor="expert-id-input">Tên tài khoản</CLabel>
-                            </CCol>
-                            <CCol xs="12" md="9">
-                                <CInput id="expert-id-input" name="expert-id-input" required={true} />
-                            </CCol>
-                        </CFormGroup>
-                        <CFormGroup row>
-                            <CCol md="3">
-                                <CLabel htmlFor="expert-password-input">Mật khẩu</CLabel>
-                            </CCol>
-                            <CCol xs="12" md="9">
-                                <CInput type="password" id="expert-password-input" name="expert-password-input" required={true} />
-                            </CCol>
-                        </CFormGroup>
-                        <CFormGroup row>
-                            <CCol md="3">
-                                <CLabel htmlFor="expert-email-input">Email</CLabel>
-                            </CCol>
-                            <CCol xs="12" md="9">
-                                <CInput type="email" id="expert-email-input" name="expert-email-input" autoComplete="email" required={true} />
-                            </CCol>
-                        </CFormGroup>
-                        <CFormGroup row>
-                            <CCol md="3">
-                                <CLabel htmlFor="expert-birthday-input">Ngày sinh</CLabel>
-                            </CCol>
-                            <CCol xs="12" md="9">
-                                <DatePicker
-                                    className="form-control"
-                                    locale="vi"
-                                    id="expert-birthday-input"
-                                    name="expert-birthday-input"
-                                    selected={expertBirthday}
-                                    placeholderText="Ngày/Tháng/Năm"
-                                    onChange={date => setExpertBirthday(date)}
-                                    required={true}
-                                    dateFormat="dd/MM/yyyy" />
-                            </CCol>
-                        </CFormGroup>
-                        <CFormGroup row>
-                            <CCol md="3">
-                                <CLabel htmlFor="expert-occupation-input">Công việc</CLabel>
-                            </CCol>
-                            <CCol xs="12" md="9">
-                                <CInput type="text" id="expert-occupation-input" name="expert-occupation-input" />
-                            </CCol>
-                        </CFormGroup>
-                        <CFormGroup row>
-                            <CCol md="3">
-                                <CLabel htmlFor="expert-phone-input">Số điện thoại</CLabel>
-                            </CCol>
-                            <CCol xs="12" md="9">
-                                <CInput type="tel" id="expert-phone-input" name="expert-phone-input" />
-                            </CCol>
-                        </CFormGroup>
-                        <CFormGroup row>
-                            <CLabel col md="3" htmlFor="file-input">Ảnh đại diện</CLabel>
-                            <CCol xs="12" md="9">
-                                <CInputFile id="file-input" name="file-input" />
-                            </CCol>
-                        </CFormGroup>
-                    </CForm>
-                </CModalBody>
-                <CModalFooter>
-                    <CButton color="primary" onClick={() => setAddExpertModalState(!addExpertModal)}>
-                        Thêm
-                </CButton>{' '}
-                    <CButton color="secondary" onClick={() => setAddExpertModalState(!addExpertModal)}>
-                        Hủy
-                </CButton>
-                </CModalFooter>
-            </CModal>
-            {/*POPUP BAN Expert*/}
-            <CModal
-                show={banExpertModal}
-                onClose={() => setBanExpertModalState(!banExpertModal)}
-                color="danger"
-            >
-                <CModalHeader closeButton>
-                    <CModalTitle>Khóa Chuyên Gia</CModalTitle>
-                </CModalHeader>
-                <CModalBody>
-                    Bạn chắn chắn muốn khóa Chuyên Gia này chứ?
-                </CModalBody>
-                <CModalFooter>
-                    <CButton color="danger" onClick={() => setBanExpertModalState(!banExpertModal)}>
-                        Khóa
-                </CButton>{' '}
-                    <CButton color="secondary" onClick={() => setBanExpertModalState(!banExpertModal)}>
-                        Hủy
-                </CButton>
-                </CModalFooter>
-            </CModal>
-        </CRow >
-    );
+                                    'action':
+                                        (item, index) => {
+                                            return (
+                                                <td className="py-1">
+
+                                                    <button type="button" className="table-update-button mr-2" data-toggle="tooltip" title="Cập nhật">
+                                                        <CIcon name="cil-pencil" onClick={() => updateExpertOnclick(item.username)}>
+                                                        </CIcon>
+                                                    </button>
+                                                    <button type="button" className="table-ban-button" data-toggle="tooltip" title="Khóa">
+                                                        <CIcon name="cil-lock-locked" onClick={() => { setBanExpertModalState(!banExpertModal) }}>
+                                                        </CIcon>
+                                                    </button>
+                                                </td>
+                                            )
+                                        },
+                                }}
+                            />
+                        </CCardBody>
+                    </CCard>
+                </CCol>
+                {/*POPUP ADD EXPERT*/}
+                {addExpertModalShow ?
+                    <AddExpertModal
+                        show={addExpertModalShow}
+                        handleClose={() => hideAddModal} />
+                    : null}
+                {/*POPUP BAN EXPERT*/}
+                <CModal
+                    show={banExpertModal}
+                    onClose={() => setBanExpertModalState(!banExpertModal)}
+                    color="danger"
+                >
+                    <CModalHeader closeButton>
+                        <CModalTitle>Khóa Học Viên</CModalTitle>
+                    </CModalHeader>
+                    <CModalBody>
+                        Bạn chắn chắn muốn khóa Học Viên này chứ?
+                    </CModalBody>
+                    <CModalFooter>
+                        <CButton color="danger" onClick={() => setBanExpertModalState(!banExpertModal)}>
+                            Khóa
+                    </CButton>{' '}
+                        <CButton color="secondary" onClick={() => setBanExpertModalState(!banExpertModal)}>
+                            Hủy
+                    </CButton>
+                    </CModalFooter>
+                </CModal>
+                {/*POPUP UPDATE EXPERT*/}
+                {(updateExpertModalShow && selectedExpertUsername != null) ?
+                    <UpdateExpertModal
+                        selectedExpertUsername={selectedExpertUsername}
+                        show={updateExpertModalShow}
+                        handleClose={() => hideUpdateModal}
+                    />
+                    : null}
+
+            </CRow >
+        );
+    } else {
+        return (
+            <CAlert color="danger">Bạn không có quyền sử dụng chức năng này!</CAlert>
+        );
+    }
 }
 
 export default ManageExpert

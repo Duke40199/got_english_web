@@ -63,9 +63,9 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
                 setUpdateModeratorBirthday(parseISO(selectedModeratorInfo.birthday));
             }
             setUpdateModeratorAvatarUrl((selectedModeratorInfo.avatar_url == "" || selectedModeratorInfo.avatar_url == null) ? "" : selectedModeratorInfo.avatar_url);
-            setUpdateModeratorCanManageCoinBundle(selectedModeratorInfo.moderator_permissions.can_manage_coin_bundle);
-            setUpdateModeratorCanManagePricing(selectedModeratorInfo.moderator_permissions.can_manage_pricing);
-            setUpdateModeratorCanManageApplicationForm(selectedModeratorInfo.moderator_permissions.can_manage_application_form);
+            setUpdateModeratorCanManageCoinBundle(selectedModeratorInfo.moderator_details.can_manage_coin_bundle);
+            setUpdateModeratorCanManagePricing(selectedModeratorInfo.moderator_details.can_manage_pricing);
+            setUpdateModeratorCanManageApplicationForm(selectedModeratorInfo.moderator_details.can_manage_application_form);
         }
     }, [selectedModeratorUsername]);
 
@@ -132,7 +132,6 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
             userInput = {
                 "fullname": updateModeratorFullname,
                 "username": updateModeratorUsername,
-                "email": updateModeratorEmail,
                 "address": updateModeratorAddress,
                 "phone_number": updateModeratorPhoneNumber,
                 "birthday": ((updateModeratorBirthday != "" && updateModeratorBirthday != null) ? format(updateModeratorBirthday, 'yyyy-MM-dd') : null),
@@ -149,7 +148,6 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
                 "fullname": updateModeratorFullname,
                 "username": updateModeratorUsername,
                 "password": updateModeratorPassword,
-                "email": updateModeratorEmail,
                 "address": updateModeratorAddress,
                 "phone_number": updateModeratorPhoneNumber,
                 "birthday": ((updateModeratorBirthday != "" && updateModeratorBirthday != null) ? format(updateModeratorBirthday, 'yyyy-MM-dd') : null),
@@ -226,7 +224,7 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
                             <CLabel htmlFor="update-moderator-email-input">Email:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="email" id="update-moderator-email-input" name="update-moderator-email-input" autoComplete="email" value={updateModeratorEmail} required={true} onChange={({ target }) => setUpdateModeratorEmail(target.value)} />
+                            <CInput type="email" id="update-moderator-email-input" name="update-moderator-email-input" autoComplete="email" value={updateModeratorEmail} required={true} readOnly/>
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
