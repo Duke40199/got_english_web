@@ -1,6 +1,14 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { useLocation } from "react-router-dom"
+
 import ReactStars from 'react-rating-stars-component'
-import expertFeedbackData from '../view-expert-feedback/ExpertFeedbackData'
+
+import { GetRatingListByExpertIdAPI } from '../../../../api/rating'
+
+import { format, parseISO } from 'date-fns'
+
+import { usePromiseTracker, trackPromise } from "react-promise-tracker";
+
 import {
     CCard,
     CCardBody,
@@ -11,23 +19,51 @@ import {
 } from '@coreui/react'
 
 const fields = [
-    { key: 'expertId', label: 'ID Chuyên Gia' },
-    { key: 'conversationId', label: 'ID Cuộc trò chuyện' },
-    { key: 'point', label: 'Đánh Giá của Người Dùng' },
-    { key: 'content', label: 'Nội dung Đánh Giá' },
-    { key: 'sendTime', label: 'Thời Gian gửi Đánh Giá' }]
+    { key: 'learner_username', label: 'Tên tài khoản Học Viên' },
+    { key: 'used_service', label: 'Dịch vụ Đánh Giá' },
+    { key: 'score', label: 'Đánh Giá của Học Viên' },
+    { key: 'comment', label: 'Nội dung Đánh Giá' },
+    { key: 'updated_at', label: 'Thời Gian gửi Đánh Giá' }]
 
 const ViewExpertFeedback = () => {
+    const useQuery = () => {
+        return new URLSearchParams(useLocation().search);
+    }
+    const query = useQuery();
+    const expertId = query.get("expertId");
+
+    const [selectedExpertRatingList, setSelectedExpertRatingList] = useState(null);
+
+    const { promiseInProgress } = usePromiseTracker();
+
+    useEffect(async () => {
+        const expertRatingList = await trackPromise(GetRatingListByExpertIdAPI(expertId));
+        setSelectedExpertRatingList(expertRatingList);
+        console.log(expertRatingList);
+    }, [expertId])
+
+    const GetUsedService = expertRatingList => {
+        if (expertRatingList.hasOwnProperty("messaging_session")) {
+            return 'Phiên nhắn tin';
+        } else if (expertRatingList.hasOwnProperty("translation_session")) {
+            return 'Phòng phiên dịch';
+        } else if (expertRatingList.hasOwnProperty("private_call_session")) {
+            return 'Phiên gọi trực tuyến';
+        } else {
+            return '';
+        }
+    }
+
     return (
         <CRow>
             <CCol>
                 <CCard>
                     <CCardHeader>
-                        <h3 className="mb-0">Chi tiết Đánh Giá của Chuyên Gia John Doe ( id: expert01 )</h3>
+                        <h3 className="mb-0">Chi tiết Đánh Giá của Chuyên Gia</h3>
                     </CCardHeader>
                     <CCardBody>
                         <CDataTable
-                            items={expertFeedbackData}
+                            items={selectedExpertRatingList}
                             fields={fields}
                             hover
                             striped
@@ -35,17 +71,37 @@ const ViewExpertFeedback = () => {
                             size="sm"
                             itemsPerPage={10}
                             pagination
+                            loading={promiseInProgress}
+                            noItemsView={{ noResults: 'Không có kết quả tìm kiếm trùng khớp', noItems: 'Không có dữ liệu' }}
                             scopedSlots={
                                 {
-                                    'point':
+                                    'learner_username':
+                                        (item) => (
+                                            <td>
+                                                {item.learner.account.username}
+                                            </td>
+                                        ),
+                                    'used_service':
+                                        (item) => (
+                                            <td>
+                                                {GetUsedService(item)}
+                                            </td>
+                                        ),
+                                    'score':
                                         (item) => (
                                             <td>
                                                 <ReactStars
-                                                    value={item.point}
+                                                    value={item.score}
                                                     size={24}
                                                     activeColor="#FFD700"
                                                     edit={false}
                                                 />
+                                            </td>
+                                        ),
+                                    'updated_at':
+                                        (item) => (
+                                            <td>
+                                                {format(parseISO(item.updated_at), 'dd-MM-yyyy HH:mm:ss')}
                                             </td>
                                         ),
                                 }

@@ -23,6 +23,28 @@ export const GetUserInfoAPI = async (username) => {
     return userInfo;
 }
 
+export const GetAdminInfoListAPI = async () => {
+    const token = (JSON.parse(localStorage.getItem("user"))).token;
+    let adminInfoList = null;
+    const onSuccess = data => {
+        adminInfoList = data.data.data;
+    }
+
+    const onFailure = error => {
+        console.log(error);
+    }
+
+    const apiConfig = {
+        headers: { "Authorization": `Bearer ${token}` }
+    }
+
+    await APIKit.get('/accounts?role=Admin', apiConfig)
+        .then(onSuccess)
+        .catch(onFailure);
+
+    return adminInfoList;
+}
+
 export const GetModeratorInfoListAPI = async () => {
     const token = (JSON.parse(localStorage.getItem("user"))).token;
     let moderatorInfoList = null;
@@ -136,7 +158,7 @@ export const CreateUserAPI = async (userInfoJson) => {
     return createData;
 }
 
-export const UpdateModeratorPermission = async (moderatorId, updateInfoJson) => {
+export const UpdateModeratorPermissionByIdAPI = async (moderatorId, updateInfoJson) => {
     const token = (JSON.parse(localStorage.getItem("user"))).token;
     let updateResult = null;
     const onSuccess = response => {
@@ -154,6 +176,30 @@ export const UpdateModeratorPermission = async (moderatorId, updateInfoJson) => 
     }
 
     await APIKit.put('/moderators/' + moderatorId + '/update', updateInfoJson, apiConfig)
+        .then(onSuccess)
+        .catch(onFailure);
+
+    return updateResult;
+}
+
+export const UpdateAdminPermissionByIdAPI = async (adminId, updateInfoJson) => {
+    const token = (JSON.parse(localStorage.getItem("user"))).token;
+    let updateResult = null;
+    const onSuccess = response => {
+        console.log(response.data);
+        updateResult = response.data.success;
+    }
+
+    const onFailure = error => {
+        console.log(error);
+        updateResult = false;
+    }
+
+    const apiConfig = {
+        headers: { "Authorization": `Bearer ${token}` }
+    }
+
+    await APIKit.put('/admins/' + adminId + '/update', updateInfoJson, apiConfig)
         .then(onSuccess)
         .catch(onFailure);
 

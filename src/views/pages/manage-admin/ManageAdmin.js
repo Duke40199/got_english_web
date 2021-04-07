@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import { useHistory } from 'react-router-dom'
 
 import {
     CCard,
@@ -18,14 +17,14 @@ import {
     CAlert
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import UpdateExpertModal from '../manage-expert/UpdateExpertModal';
-import AddExpertModal from '../manage-expert/AddExpertModal';
+import UpdateAdminModal from '../manage-admin/UpdateAdminModal'
+import AddAdminModal from '../manage-admin/AddAdminModal'
 
 import { format, parseISO } from 'date-fns';
 
 import { usePromiseTracker, trackPromise } from "react-promise-tracker";
 
-import { GetExpertInfoListAPI } from '../../../api/user';
+import { GetAdminInfoListAPI } from '../../../api/user';
 
 const getBadge = isSuspended => {
     switch (isSuspended) {
@@ -36,65 +35,61 @@ const getBadge = isSuspended => {
 }
 
 const fields = [
-    { key: 'fullname', label: 'Họ và tên', _style: { width: '12%' } },
+    { key: 'fullname', label: 'Họ và tên', _style: { width: '14%' } },
     { key: 'username', label: 'Tên tài khoản', _style: { width: '12%' } },
-    { key: 'email', label: 'Địa chỉ Email', _style: { width: '18%' } },
+    { key: 'email', label: 'Địa chỉ Email', _style: { width: '20%' } },
     { key: 'birthday', label: 'Ngày sinh', _style: { width: '10%' } },
-    { key: 'address', label: 'Địa chỉ', _style: { width: '16%' } },
+    { key: 'address', label: 'Địa chỉ', _style: { width: '20%' } },
     { key: 'phone_number', label: 'Số điện thoại', _style: { width: '10%' } },
     { key: 'is_suspended', label: '', _style: { width: '8%' } },
-    { key: 'average_rating', label: 'Đánh giá', _style: { width: '8%' } },
+    //{ key: 'status', label: 'Trạng thái' },
     { key: 'action', label: '', _style: { width: '6%' } }]
 
-
-
-const ManageExpert = () => {
-    const history = useHistory();
-
-    const [addExpertModalShow, setAddExpertModalShow] = useState(false);
-    const [banExpertModal, setBanExpertModalState] = useState(false);
-    const [updateExpertModalShow, setUpdateExpertModalShow] = useState(false);
-    const [expertInfoList, setExpertInfoList] = useState(null);
-    const [selectedExpertUsername, setSelectedExpertUsername] = useState(null);
+const ManageAdmin = () => {
+    const [addAdminModalShow, setAddAdminModalShow] = useState(false);
+    const [banAdminModal, setBanAdminModalState] = useState(false);
+    const [updateAdminModalShow, setUpdateAdminModalShow] = useState(false);
+    const [adminInfoList, setAdminInfoList] = useState(null);
+    const [selectedAdminUsername, setSelectedAdminUsername] = useState(null);
 
     const { promiseInProgress } = usePromiseTracker();
 
     useEffect(async () => {
-        const expertInfoList = await trackPromise(GetExpertInfoListAPI());
-        setExpertInfoList(expertInfoList);
-    }, [updateExpertModalShow, addExpertModalShow])
+        const adminInfoList = await trackPromise(GetAdminInfoListAPI());
+        setAdminInfoList(adminInfoList);
+    }, [updateAdminModalShow, addAdminModalShow])
 
-    const updateExpertOnclick = (expertUsername) => {
-        //open the update expert modal
-        setUpdateExpertModalShow(true);
+    const updateAdminOnclick = (adminUsername) => {
+        //open the update admin modal
+        setUpdateAdminModalShow(true);
         //set params
-        setSelectedExpertUsername(expertUsername);
+        setSelectedAdminUsername(adminUsername);
     }
 
     const hideUpdateModal = () => {
-        setUpdateExpertModalShow(false);
+        setUpdateAdminModalShow(false);
     }
 
     const hideAddModal = () => {
-        setAddExpertModalShow(false);
+        setAddAdminModalShow(false);
     }
 
     //check permission
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-    const canManageExpert = userInfo.admin_details.can_manage_expert;
-    if (canManageExpert) {
+    const canManageAdmin = userInfo.admin_details.can_manage_admin;
+    if (canManageAdmin) {
         return (
             <CRow>
                 <CCol>
                     <CCard>
                         <CCardHeader align="right">
-                            <CButton color="primary" className="mt-2 d-flex align-items-center" onClick={() => setAddExpertModalShow(true)}>
-                                <CIcon name="cilPlus" size="sm" className="mr-1"></CIcon>Thêm mới Chuyên Gia</CButton>
+                            <CButton color="primary" className="mt-2 d-flex align-items-center" onClick={() => setAddAdminModalShow(true)}>
+                                <CIcon name="cilPlus" size="sm" className="mr-1"></CIcon>Thêm mới Điều Hành Viên</CButton>
                         </CCardHeader>
                         <CCardBody className="pt-0 pb-0">
                             <CDataTable
                                 addTableClasses="text-break"
-                                items={expertInfoList}
+                                items={adminInfoList}
                                 fields={fields}
                                 hover
                                 striped
@@ -141,72 +136,64 @@ const ManageExpert = () => {
                                         (item) => (<td>
                                             {(item.birthday == "" || item.birthday == null) ? "" : format(parseISO(item.birthday), "dd-MM-yyyy")}
                                         </td>),
-                                    'average_rating':
-                                        (item, index) => {
-                                            return (
-                                                <td className="py-1"><CButton
-                                                    color="warning"
-                                                    size="sm"
-                                                    onClick={() => {
-                                                        history.push("/manage-expert/view-expert-feedback?expertId=" + item.expert_details.id);
-                                                    }}
-                                                >{item.expert_details.average_rating.toFixed(1)}</CButton>
-                                                </td>
-                                            )
-                                        },
                                     'action':
                                         (item, index) => {
-                                            return (
-                                                <td className="py-1">
-
-                                                    <button type="button" className="table-update-button mr-2" data-toggle="tooltip" title="Cập nhật">
-                                                        <CIcon name="cil-pencil" onClick={() => updateExpertOnclick(item.username)}>
-                                                        </CIcon>
-                                                    </button>
-                                                    <button type="button" className="table-ban-button" data-toggle="tooltip" title="Khóa">
-                                                        <CIcon name="cil-lock-locked" onClick={() => { setBanExpertModalState(!banExpertModal) }}>
-                                                        </CIcon>
-                                                    </button>
-                                                </td>
-                                            )
+                                            if (item.id === userInfo.id) {
+                                                return (
+                                                    <td className="py-1"></td>
+                                                );
+                                            } else {
+                                                return (
+                                                    <td className="py-1">
+                                                        <button type="button" className="table-update-button mr-2" data-toggle="tooltip" title="Cập nhật" >
+                                                            <CIcon name="cil-pencil" onClick={() => updateAdminOnclick(item.username)}>
+                                                            </CIcon>
+                                                        </button>
+                                                        <button type="button" className="table-ban-button" data-toggle="tooltip" title="Khóa">
+                                                            <CIcon name="cil-lock-locked" onClick={() => { setBanAdminModalState(!banAdminModal) }}>
+                                                            </CIcon>
+                                                        </button>
+                                                    </td>
+                                                )
+                                            }
                                         },
                                 }}
                             />
                         </CCardBody>
                     </CCard>
                 </CCol>
-                {/*POPUP ADD EXPERT*/}
-                {addExpertModalShow ?
-                    <AddExpertModal
-                        show={addExpertModalShow}
+                {/*POPUP ADD MODERATOR*/}
+                {addAdminModalShow ?
+                    <AddAdminModal
+                        show={addAdminModalShow}
                         handleClose={() => hideAddModal} />
                     : null}
-                {/*POPUP BAN EXPERT*/}
+                {/*POPUP BAN MODERATOR*/}
                 <CModal
-                    show={banExpertModal}
-                    onClose={() => setBanExpertModalState(!banExpertModal)}
+                    show={banAdminModal}
+                    onClose={() => setBanAdminModalState(!banAdminModal)}
                     color="danger"
                 >
                     <CModalHeader closeButton>
-                        <CModalTitle>Khóa Học Viên</CModalTitle>
+                        <CModalTitle>Khóa Điều Hành Viên</CModalTitle>
                     </CModalHeader>
                     <CModalBody>
-                        Bạn chắn chắn muốn khóa Học Viên này chứ?
-                    </CModalBody>
+                        Bạn chắn chắn muốn khóa Điều Hành Viên này chứ?
+                        </CModalBody>
                     <CModalFooter>
-                        <CButton color="danger" onClick={() => setBanExpertModalState(!banExpertModal)}>
+                        <CButton color="danger" onClick={() => setBanAdminModalState(!banAdminModal)}>
                             Khóa
-                    </CButton>{' '}
-                        <CButton color="secondary" onClick={() => setBanExpertModalState(!banExpertModal)}>
+                        </CButton>{' '}
+                        <CButton color="secondary" onClick={() => setBanAdminModalState(!banAdminModal)}>
                             Hủy
-                    </CButton>
+                        </CButton>
                     </CModalFooter>
                 </CModal>
-                {/*POPUP UPDATE EXPERT*/}
-                {(updateExpertModalShow && selectedExpertUsername != null) ?
-                    <UpdateExpertModal
-                        selectedExpertUsername={selectedExpertUsername}
-                        show={updateExpertModalShow}
+                {/*POPUP UPDATE MODERATOR*/}
+                {(updateAdminModalShow && selectedAdminUsername != null) ?
+                    <UpdateAdminModal
+                        selectedAdminUsername={selectedAdminUsername}
+                        show={updateAdminModalShow}
                         handleClose={() => hideUpdateModal}
                     />
                     : null}
@@ -218,6 +205,7 @@ const ManageExpert = () => {
             <CAlert color="danger">Bạn không có quyền sử dụng chức năng này!</CAlert>
         );
     }
+
 }
 
-export default ManageExpert
+export default ManageAdmin
