@@ -3,7 +3,6 @@ import { useHistory } from 'react-router-dom'
 
 import {
     CCol,
-    CRow,
     CInput,
     CButton,
     CModal,
@@ -21,7 +20,7 @@ import {
 import CIcon from '@coreui/icons-react'
 
 
-import { GetUserInfoAPI, UpdateUserInfoByUserIdAPI, UpdateModeratorPermission } from '../../../api/user';
+import { GetUserInfoAPI, UpdateUserInfoByUserIdAPI, UpdateModeratorPermissionByIdAPI } from '../../../api/user';
 import firebase from '../../../firebase/firebase';
 
 import DatePicker, { registerLocale } from "react-datepicker";
@@ -163,7 +162,7 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
         console.log(userInput);
 
         const updateResult = await UpdateUserInfoByUserIdAPI(updateModeratorUUID, userInput);
-        const permissionUpdateResult = await UpdateModeratorPermission(updateModeratorUUID, permissionInput);
+        const permissionUpdateResult = await UpdateModeratorPermissionByIdAPI(updateModeratorUUID, permissionInput);
 
         if (updateResult === true && permissionUpdateResult === true) {
             setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
@@ -224,7 +223,7 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
                             <CLabel htmlFor="update-moderator-email-input">Email:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="email" id="update-moderator-email-input" name="update-moderator-email-input" autoComplete="email" value={updateModeratorEmail} required={true} readOnly/>
+                            <CInput type="email" id="update-moderator-email-input" name="update-moderator-email-input" autoComplete="email" value={updateModeratorEmail} required={true} readOnly />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>

@@ -19,7 +19,7 @@ import {
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 
-import { CreateUserAPI, UpdateUserInfoByUserIdAPI, UpdateModeratorPermission } from '../../../api/user';
+import { CreateUserAPI, UpdateUserInfoByUserIdAPI, UpdateModeratorPermissionByIdAPI } from '../../../api/user';
 import firebase from '../../../firebase/firebase';
 import jwt_decode from 'jwt-decode'
 import DatePicker, { registerLocale } from "react-datepicker";
@@ -125,7 +125,7 @@ const AddModeratorModal = ({ show, handleClose }) => {
             }
 
             const updateModeratorAvt = await UpdateUserInfoByUserIdAPI(newModeratorID, additionalData);
-            const permissionUpdateResult = await UpdateModeratorPermission(newModeratorID, permissionInput);
+            const permissionUpdateResult = await UpdateModeratorPermissionByIdAPI(newModeratorID, permissionInput);
             console.log(newModeratorID, additionalData)
             if (updateModeratorAvt === true && permissionUpdateResult === true) {
                 setAddMessage(<CAlert color="success">Thêm mới thành công!</CAlert>);

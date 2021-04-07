@@ -30,6 +30,12 @@ if (role === "Admin") {
     },
     {
       _tag: 'CSidebarNavItem',
+      name: 'Quản lý Quản Trị Viên',
+      to: '/manage-admin',
+      icon: 'cil-people'
+    },
+    {
+      _tag: 'CSidebarNavItem',
       name: 'Quản lý Điều Hành Viên',
       to: '/manage-moderator',
       icon: 'cil-people'
