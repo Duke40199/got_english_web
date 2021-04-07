@@ -3,17 +3,9 @@ import React, { useState, useEffect } from 'react'
 import {
     CCard,
     CCardBody,
-    CCardHeader,
     CCol,
     CDataTable,
     CRow,
-    CButton,
-    CModal,
-    CModalHeader,
-    CModalBody,
-    CModalFooter,
-    CModalTitle,
-    CBadge,
     CAlert
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
