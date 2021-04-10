@@ -17,12 +17,15 @@ import {
 } from '@coreui/react'
 import { GetPricingInfoByIdAPI, updatePricingInfoByIdAPI } from '../../../api/pricing'
 
-const getServiceName = serviceType => {
-    switch (serviceType) {
-        case 'messaging_session': return 'Phiên nhắn tin'
-        case 'translation_session': return 'Phòng phiên dịch'
-        case 'private_call_session': return 'Phiên gọi trực tuyến'
-        default: return ''
+const defineServiceName = serviceName => {
+    if (serviceName.includes("messaging_session")) {
+        return "Phiên nhắn tin";
+    } else if (serviceName.includes("live_call_session")) {
+        return "Phiên gọi trực tiếp";
+    } else if (serviceName.includes("translation_call_session")) {
+        return "Phòng phiên dịch";
+    } else {
+        return "Không xác định";
     }
 }
 
@@ -41,7 +44,7 @@ const UpdatePricingModal = ({ selectedPricingId, show, handleClose }) => {
         if (selectedPricingId != null) {
             const selectedPricingInfo = await GetPricingInfoByIdAPI(selectedPricingId);
             setUpdatePricingId(selectedPricingInfo.id);
-            setUpdatePricingServiceName(getServiceName(selectedPricingInfo.service_name));
+            setUpdatePricingServiceName(selectedPricingInfo.service_name);
             setUpdatePricingPrice(selectedPricingInfo.price);
             setUpdatePricingPriceUnit(selectedPricingInfo.price_unit);
         }
@@ -90,7 +93,7 @@ const UpdatePricingModal = ({ selectedPricingId, show, handleClose }) => {
                             <CLabel htmlFor="update-pricing-service-name-input">Tên Dịch vụ:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="text" id="update-pricing-service-name-input" name="service-name" value={updatePricingServiceName} readOnly />
+                            <CInput type="text" id="update-pricing-service-name-input" name="service-name" value={defineServiceName(updatePricingServiceName)} readOnly />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
