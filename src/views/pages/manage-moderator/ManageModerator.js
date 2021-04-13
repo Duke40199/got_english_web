@@ -8,17 +8,14 @@ import {
     CDataTable,
     CRow,
     CButton,
-    CModal,
-    CModalHeader,
-    CModalBody,
-    CModalFooter,
-    CModalTitle,
     CBadge,
     CAlert
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import UpdateModeratorModal from '../manage-moderator/UpdateModeratorModal'
 import AddModeratorModal from '../manage-moderator/AddModeratorModal'
+import SuspendModeratorModal from '../manage-moderator/SuspendModeratorModal'
+import UnsuspendModeratorModal from '../manage-moderator/UnsuspendModeratorModal'
 
 import { format, parseISO } from 'date-fns';
 
@@ -47,7 +44,8 @@ const fields = [
 
 const ManageModerator = () => {
     const [addModeratorModalShow, setAddModeratorModalShow] = useState(false);
-    const [banModeratorModal, setBanModeratorModalState] = useState(false);
+    const [suspendModeratorModalShow, setSuspendModeratorModalShow] = useState(false);
+    const [unsuspendModeratorModalShow, setUnsuspendModeratorModalShow] = useState(false);
     const [updateModeratorModalShow, setUpdateModeratorModalShow] = useState(false);
     const [moderatorInfoList, setModeratorInfoList] = useState(null);
     const [selectedModeratorUsername, setSelectedModeratorUsername] = useState(null);
@@ -57,11 +55,25 @@ const ManageModerator = () => {
     useEffect(async () => {
         const moderatorInfoList = await trackPromise(GetModeratorInfoListAPI());
         setModeratorInfoList(moderatorInfoList);
-    }, [updateModeratorModalShow, addModeratorModalShow])
+    }, [updateModeratorModalShow, addModeratorModalShow, suspendModeratorModalShow, unsuspendModeratorModalShow])
 
     const updateModeratorOnclick = (moderatorUsername) => {
         //open the update moderator modal
         setUpdateModeratorModalShow(true);
+        //set params
+        setSelectedModeratorUsername(moderatorUsername);
+    }
+
+    const suspendModeratorOnclick = (moderatorUsername) => {
+        //open the suspend moderator modal
+        setSuspendModeratorModalShow(true);
+        //set params
+        setSelectedModeratorUsername(moderatorUsername);
+    }
+
+    const unsuspendModeratorOnclick = (moderatorUsername) => {
+        //open the unsuspend moderator modal
+        setUnsuspendModeratorModalShow(true);
         //set params
         setSelectedModeratorUsername(moderatorUsername);
     }
@@ -72,6 +84,14 @@ const ManageModerator = () => {
 
     const hideAddModal = () => {
         setAddModeratorModalShow(false);
+    }
+
+    const hideSuspendModal = () => {
+        setSuspendModeratorModalShow(false);
+    }
+
+    const hideUnsuspendModal = () => {
+        setUnsuspendModeratorModalShow(false);
     }
 
     //check permission
@@ -102,7 +122,7 @@ const ManageModerator = () => {
                                 tableFilter={
                                     {
                                         label: "Tìm kiếm:",
-                                        placeholder: "nhập dữ liệu...",
+                                        placeholder: "nhập thông tin tài khoản bất kỳ...",
                                     }
                                 }
                                 scopedSlots={{
@@ -141,14 +161,19 @@ const ManageModerator = () => {
                                             return (
                                                 <td className="py-1">
 
-                                                    <button type="button" className="table-update-button mr-2" data-toggle="tooltip" title="Cập nhật">
+                                                    <button type="button" className="table-action-button mr-2" data-toggle="tooltip" title="Cập nhật">
                                                         <CIcon name="cil-pencil" onClick={() => updateModeratorOnclick(item.username)}>
                                                         </CIcon>
                                                     </button>
-                                                    <button type="button" className="table-ban-button" data-toggle="tooltip" title="Khóa">
-                                                        <CIcon name="cil-lock-locked" onClick={() => { setBanModeratorModalState(!banModeratorModal) }}>
-                                                        </CIcon>
-                                                    </button>
+                                                    {item.is_suspended ?
+                                                        <button type="button" className="table-action-button" data-toggle="tooltip" title="Mở Khóa">
+                                                            <CIcon name="cil-lock-unlocked" onClick={() => unsuspendModeratorOnclick(item.username)}>
+                                                            </CIcon>
+                                                        </button>
+                                                        : <button type="button" className="table-action-button" data-toggle="tooltip" title="Khóa">
+                                                            <CIcon name="cil-lock-locked" onClick={() => suspendModeratorOnclick(item.username)}>
+                                                            </CIcon>
+                                                        </button>}
                                                 </td>
                                             )
                                         },
@@ -163,27 +188,6 @@ const ManageModerator = () => {
                         show={addModeratorModalShow}
                         handleClose={() => hideAddModal} />
                     : null}
-                {/*POPUP BAN MODERATOR*/}
-                <CModal
-                    show={banModeratorModal}
-                    onClose={() => setBanModeratorModalState(!banModeratorModal)}
-                    color="danger"
-                >
-                    <CModalHeader closeButton>
-                        <CModalTitle>Khóa Điều Hành Viên</CModalTitle>
-                    </CModalHeader>
-                    <CModalBody>
-                        Bạn chắn chắn muốn khóa Điều Hành Viên này chứ?
-                    </CModalBody>
-                    <CModalFooter>
-                        <CButton color="danger" onClick={() => setBanModeratorModalState(!banModeratorModal)}>
-                            Khóa
-                    </CButton>{' '}
-                        <CButton color="secondary" onClick={() => setBanModeratorModalState(!banModeratorModal)}>
-                            Hủy
-                    </CButton>
-                    </CModalFooter>
-                </CModal>
                 {/*POPUP UPDATE MODERATOR*/}
                 {(updateModeratorModalShow && selectedModeratorUsername != null) ?
                     <UpdateModeratorModal
@@ -192,7 +196,20 @@ const ManageModerator = () => {
                         handleClose={() => hideUpdateModal}
                     />
                     : null}
-
+                {/*POPUP SUSPEND MODERATOR*/}
+                {suspendModeratorModalShow && selectedModeratorUsername ?
+                    <SuspendModeratorModal
+                        selectedModeratorUsername={selectedModeratorUsername}
+                        show={suspendModeratorModalShow}
+                        handleClose={() => hideSuspendModal}
+                    /> : null}
+                {/*POPUP UNSUSPEND MODERATOR*/}
+                {unsuspendModeratorModalShow && selectedModeratorUsername ?
+                    <UnsuspendModeratorModal
+                        selectedModeratorUsername={selectedModeratorUsername}
+                        show={unsuspendModeratorModalShow}
+                        handleClose={() => hideUnsuspendModal}
+                    /> : null}
             </CRow >
         );
     } else {

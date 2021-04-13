@@ -18,6 +18,8 @@ export const LoginAPI = async idToken => {
     if (error.response != null) {
       if (error.response.status == 403) {
         errorMessage = "Xin kiểm tra lại thông tin đăng nhập.";
+      } else if (error.response.status == 401) {
+        errorMessage = "Tài khoản của bạn đã bị khóa.";
       }
     } else {
       errorMessage = "Đã có một lỗi bất thường xảy ra. Xin hãy liên hệ với Admin để bảo trì hệ thống.";

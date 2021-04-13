@@ -205,3 +205,63 @@ export const UpdateAdminPermissionByIdAPI = async (adminId, updateInfoJson) => {
 
     return updateResult;
 }
+
+export const SuspendUserByIdAPI = async (userId) => {
+    const token = (JSON.parse(localStorage.getItem("user"))).token;
+    let suspendResult = null;
+
+    const onSuccess = response => {
+        console.log(response.data);
+        suspendResult = response.data.success;
+    }
+
+    const onFailure = error => {
+        console.log(error);
+        suspendResult = error.response.data;
+        if ((error.response.data).includes("Account is already suspended.")) {
+            suspendResult = "Tài khoản này đã bị khóa!"
+        } else {
+            suspendResult = "Khóa tài khoản thất bại!"
+        }
+    }
+
+    const apiConfig = {
+        headers: { "Authorization": `Bearer ${token}` }
+    }
+
+    await APIKit.put('/accounts/' + userId + '/suspend', [], apiConfig)
+        .then(onSuccess)
+        .catch(onFailure);
+
+    return suspendResult;
+}
+
+export const UnsuspendUserByIdAPI = async (userId) => {
+    const token = (JSON.parse(localStorage.getItem("user"))).token;
+    let unsuspendResult = null;
+
+    const onSuccess = response => {
+        console.log(response.data);
+        unsuspendResult = response.data.success;
+    }
+
+    const onFailure = error => {
+        console.log(error);
+        unsuspendResult = error.response.data;
+        if ((error.response.data).includes("Account is not yet suspended.")) {
+            unsuspendResult = "Tài khoản này hiện không bị khóa!"
+        } else {
+            unsuspendResult = "Mở khóa tài khoản thất bại!"
+        }
+    }
+
+    const apiConfig = {
+        headers: { "Authorization": `Bearer ${token}` }
+    }
+
+    await APIKit.put('/accounts/' + userId + '/unsuspend', [], apiConfig)
+        .then(onSuccess)
+        .catch(onFailure);
+
+    return unsuspendResult;
+}
