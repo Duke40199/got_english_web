@@ -32,11 +32,14 @@
     bottom: 10px;
     right: 100px;
 }
-.table-update-button, .table-ban-button {
+.table-action-button {
     border: none;
     background-color: transparent;
     padding: 0;
 }
 .permission-input-checkbox {
     margin-left: 1.25rem;
+}
+.c-datatable-filter input {
+    width: 300px !important;
 }

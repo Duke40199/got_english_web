@@ -8,17 +8,14 @@ import {
     CDataTable,
     CRow,
     CButton,
-    CModal,
-    CModalHeader,
-    CModalBody,
-    CModalFooter,
-    CModalTitle,
     CBadge,
     CAlert
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import UpdateAdminModal from '../manage-admin/UpdateAdminModal'
 import AddAdminModal from '../manage-admin/AddAdminModal'
+import SuspendAdminModal from '../manage-admin/SuspendAdminModal'
+import UnsuspendAdminModal from '../manage-admin/UnsuspendAdminModal'
 
 import { format, parseISO } from 'date-fns';
 
@@ -47,7 +44,8 @@ const fields = [
 
 const ManageAdmin = () => {
     const [addAdminModalShow, setAddAdminModalShow] = useState(false);
-    const [banAdminModal, setBanAdminModalState] = useState(false);
+    const [suspendAdminModalShow, setSuspendAdminModalShow] = useState(false);
+    const [unsuspendAdminModalShow, setUnsuspendAdminModalShow] = useState(false);
     const [updateAdminModalShow, setUpdateAdminModalShow] = useState(false);
     const [adminInfoList, setAdminInfoList] = useState(null);
     const [selectedAdminUsername, setSelectedAdminUsername] = useState(null);
@@ -57,11 +55,25 @@ const ManageAdmin = () => {
     useEffect(async () => {
         const adminInfoList = await trackPromise(GetAdminInfoListAPI());
         setAdminInfoList(adminInfoList);
-    }, [updateAdminModalShow, addAdminModalShow])
+    }, [updateAdminModalShow, addAdminModalShow, suspendAdminModalShow, unsuspendAdminModalShow])
 
     const updateAdminOnclick = (adminUsername) => {
         //open the update admin modal
         setUpdateAdminModalShow(true);
+        //set params
+        setSelectedAdminUsername(adminUsername);
+    }
+
+    const suspendAdminOnclick = (adminUsername) => {
+        //open the suspend admin modal
+        setSuspendAdminModalShow(true);
+        //set params
+        setSelectedAdminUsername(adminUsername);
+    }
+
+    const unsuspendAdminOnclick = (adminUsername) => {
+        //open the unsuspend admin modal
+        setUnsuspendAdminModalShow(true);
         //set params
         setSelectedAdminUsername(adminUsername);
     }
@@ -72,6 +84,14 @@ const ManageAdmin = () => {
 
     const hideAddModal = () => {
         setAddAdminModalShow(false);
+    }
+
+    const hideSuspendModal = () => {
+        setSuspendAdminModalShow(false);
+    }
+
+    const hideUnsuspendModal = () => {
+        setUnsuspendAdminModalShow(false);
     }
 
     //check permission
@@ -102,7 +122,7 @@ const ManageAdmin = () => {
                                 tableFilter={
                                     {
                                         label: "Tìm kiếm:",
-                                        placeholder: "nhập dữ liệu...",
+                                        placeholder: "nhập thông tin tài khoản bất kỳ...",
                                     }
                                 }
                                 scopedSlots={{
@@ -145,14 +165,19 @@ const ManageAdmin = () => {
                                             } else {
                                                 return (
                                                     <td className="py-1">
-                                                        <button type="button" className="table-update-button mr-2" data-toggle="tooltip" title="Cập nhật" >
+                                                        <button type="button" className="table-action-button mr-2" data-toggle="tooltip" title="Cập nhật" >
                                                             <CIcon name="cil-pencil" onClick={() => updateAdminOnclick(item.username)}>
                                                             </CIcon>
                                                         </button>
-                                                        <button type="button" className="table-ban-button" data-toggle="tooltip" title="Khóa">
-                                                            <CIcon name="cil-lock-locked" onClick={() => { setBanAdminModalState(!banAdminModal) }}>
-                                                            </CIcon>
-                                                        </button>
+                                                        {item.is_suspended ?
+                                                            <button type="button" className="table-action-button" data-toggle="tooltip" title="Mở Khóa">
+                                                                <CIcon name="cil-lock-unlocked" onClick={() => unsuspendAdminOnclick(item.username)}>
+                                                                </CIcon>
+                                                            </button>
+                                                            : <button type="button" className="table-action-button" data-toggle="tooltip" title="Khóa">
+                                                                <CIcon name="cil-lock-locked" onClick={() => suspendAdminOnclick(item.username)}>
+                                                                </CIcon>
+                                                            </button>}
                                                     </td>
                                                 )
                                             }
@@ -162,34 +187,13 @@ const ManageAdmin = () => {
                         </CCardBody>
                     </CCard>
                 </CCol>
-                {/*POPUP ADD MODERATOR*/}
+                {/*POPUP ADD ADMIN*/}
                 {addAdminModalShow ?
                     <AddAdminModal
                         show={addAdminModalShow}
                         handleClose={() => hideAddModal} />
                     : null}
-                {/*POPUP BAN MODERATOR*/}
-                <CModal
-                    show={banAdminModal}
-                    onClose={() => setBanAdminModalState(!banAdminModal)}
-                    color="danger"
-                >
-                    <CModalHeader closeButton>
-                        <CModalTitle>Khóa Điều Hành Viên</CModalTitle>
-                    </CModalHeader>
-                    <CModalBody>
-                        Bạn chắn chắn muốn khóa Điều Hành Viên này chứ?
-                        </CModalBody>
-                    <CModalFooter>
-                        <CButton color="danger" onClick={() => setBanAdminModalState(!banAdminModal)}>
-                            Khóa
-                        </CButton>{' '}
-                        <CButton color="secondary" onClick={() => setBanAdminModalState(!banAdminModal)}>
-                            Hủy
-                        </CButton>
-                    </CModalFooter>
-                </CModal>
-                {/*POPUP UPDATE MODERATOR*/}
+                {/*POPUP UPDATE ADMIN*/}
                 {(updateAdminModalShow && selectedAdminUsername != null) ?
                     <UpdateAdminModal
                         selectedAdminUsername={selectedAdminUsername}
@@ -197,7 +201,20 @@ const ManageAdmin = () => {
                         handleClose={() => hideUpdateModal}
                     />
                     : null}
-
+                {/*POPUP SUSPEND ADMIN*/}
+                {suspendAdminModalShow && selectedAdminUsername ?
+                    <SuspendAdminModal
+                        selectedAdminUsername={selectedAdminUsername}
+                        show={suspendAdminModalShow}
+                        handleClose={() => hideSuspendModal}
+                    /> : null}
+                {/*POPUP UNSUSPEND ADMIN*/}
+                {unsuspendAdminModalShow && selectedAdminUsername ?
+                    <UnsuspendAdminModal
+                        selectedAdminUsername={selectedAdminUsername}
+                        show={unsuspendAdminModalShow}
+                        handleClose={() => hideUnsuspendModal}
+                    /> : null}
             </CRow >
         );
     } else {

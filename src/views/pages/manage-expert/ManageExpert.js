@@ -9,17 +9,14 @@ import {
     CDataTable,
     CRow,
     CButton,
-    CModal,
-    CModalHeader,
-    CModalBody,
-    CModalFooter,
-    CModalTitle,
     CBadge,
     CAlert
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import UpdateExpertModal from '../manage-expert/UpdateExpertModal';
 import AddExpertModal from '../manage-expert/AddExpertModal';
+import SuspendExpertModal from '../manage-expert/SuspendExpertModal';
+import UnsuspendExpertModal from '../manage-expert/UnsuspendExpertModal';
 
 import { format, parseISO } from 'date-fns';
 
@@ -52,7 +49,8 @@ const ManageExpert = () => {
     const history = useHistory();
 
     const [addExpertModalShow, setAddExpertModalShow] = useState(false);
-    const [banExpertModal, setBanExpertModalState] = useState(false);
+    const [suspendExpertModalShow, setSuspendExpertModalShow] = useState(false);
+    const [unsuspendExpertModalShow, setUnsuspendExpertModalShow] = useState(false);
     const [updateExpertModalShow, setUpdateExpertModalShow] = useState(false);
     const [expertInfoList, setExpertInfoList] = useState(null);
     const [selectedExpertUsername, setSelectedExpertUsername] = useState(null);
@@ -62,7 +60,7 @@ const ManageExpert = () => {
     useEffect(async () => {
         const expertInfoList = await trackPromise(GetExpertInfoListAPI());
         setExpertInfoList(expertInfoList);
-    }, [updateExpertModalShow, addExpertModalShow])
+    }, [updateExpertModalShow, addExpertModalShow, suspendExpertModalShow, unsuspendExpertModalShow])
 
     const updateExpertOnclick = (expertUsername) => {
         //open the update expert modal
@@ -71,12 +69,34 @@ const ManageExpert = () => {
         setSelectedExpertUsername(expertUsername);
     }
 
+    const suspendExpertOnclick = (moderatorUsername) => {
+        //open the suspend moderator modal
+        setSuspendExpertModalShow(true);
+        //set params
+        setSelectedExpertUsername(moderatorUsername);
+    }
+
+    const unsuspendExpertOnclick = (moderatorUsername) => {
+        //open the unsuspend moderator modal
+        setUnsuspendExpertModalShow(true);
+        //set params
+        setSelectedExpertUsername(moderatorUsername);
+    }
+
     const hideUpdateModal = () => {
         setUpdateExpertModalShow(false);
     }
 
     const hideAddModal = () => {
         setAddExpertModalShow(false);
+    }
+
+    const hideSuspendModal = () => {
+        setSuspendExpertModalShow(false);
+    }
+
+    const hideUnsuspendModal = () => {
+        setUnsuspendExpertModalShow(false);
     }
 
     //check permission
@@ -107,7 +127,7 @@ const ManageExpert = () => {
                                 tableFilter={
                                     {
                                         label: "Tìm kiếm:",
-                                        placeholder: "nhập dữ liệu...",
+                                        placeholder: "nhập thông tin tài khoản bất kỳ...",
                                     }
                                 }
                                 scopedSlots={{
@@ -159,14 +179,19 @@ const ManageExpert = () => {
                                             return (
                                                 <td className="py-1">
 
-                                                    <button type="button" className="table-update-button mr-2" data-toggle="tooltip" title="Cập nhật">
+                                                    <button type="button" className="table-action-button mr-2" data-toggle="tooltip" title="Cập nhật">
                                                         <CIcon name="cil-pencil" onClick={() => updateExpertOnclick(item.username)}>
                                                         </CIcon>
                                                     </button>
-                                                    <button type="button" className="table-ban-button" data-toggle="tooltip" title="Khóa">
-                                                        <CIcon name="cil-lock-locked" onClick={() => { setBanExpertModalState(!banExpertModal) }}>
-                                                        </CIcon>
-                                                    </button>
+                                                    {item.is_suspended ?
+                                                        <button type="button" className="table-action-button" data-toggle="tooltip" title="Mở Khóa">
+                                                            <CIcon name="cil-lock-unlocked" onClick={() => unsuspendExpertOnclick(item.username)}>
+                                                            </CIcon>
+                                                        </button>
+                                                        : <button type="button" className="table-action-button" data-toggle="tooltip" title="Khóa">
+                                                            <CIcon name="cil-lock-locked" onClick={() => suspendExpertOnclick(item.username)}>
+                                                            </CIcon>
+                                                        </button>}
                                                 </td>
                                             )
                                         },
@@ -181,27 +206,6 @@ const ManageExpert = () => {
                         show={addExpertModalShow}
                         handleClose={() => hideAddModal} />
                     : null}
-                {/*POPUP BAN EXPERT*/}
-                <CModal
-                    show={banExpertModal}
-                    onClose={() => setBanExpertModalState(!banExpertModal)}
-                    color="danger"
-                >
-                    <CModalHeader closeButton>
-                        <CModalTitle>Khóa Học Viên</CModalTitle>
-                    </CModalHeader>
-                    <CModalBody>
-                        Bạn chắn chắn muốn khóa Học Viên này chứ?
-                    </CModalBody>
-                    <CModalFooter>
-                        <CButton color="danger" onClick={() => setBanExpertModalState(!banExpertModal)}>
-                            Khóa
-                    </CButton>{' '}
-                        <CButton color="secondary" onClick={() => setBanExpertModalState(!banExpertModal)}>
-                            Hủy
-                    </CButton>
-                    </CModalFooter>
-                </CModal>
                 {/*POPUP UPDATE EXPERT*/}
                 {(updateExpertModalShow && selectedExpertUsername != null) ?
                     <UpdateExpertModal
@@ -210,7 +214,20 @@ const ManageExpert = () => {
                         handleClose={() => hideUpdateModal}
                     />
                     : null}
-
+                {/*POPUP SUSPEND EXPERT*/}
+                {suspendExpertModalShow && selectedExpertUsername ?
+                    <SuspendExpertModal
+                        selectedExpertUsername={selectedExpertUsername}
+                        show={suspendExpertModalShow}
+                        handleClose={() => hideSuspendModal}
+                    /> : null}
+                {/*POPUP UNSUSPEND EXPERT*/}
+                {unsuspendExpertModalShow && selectedExpertUsername ?
+                    <UnsuspendExpertModal
+                        selectedExpertUsername={selectedExpertUsername}
+                        show={unsuspendExpertModalShow}
+                        handleClose={() => hideUnsuspendModal}
+                    /> : null}
             </CRow >
         );
     } else {

@@ -2,12 +2,11 @@ import React, { useState } from 'react'
 import { useHistory } from 'react-router-dom'
 import { LoginAPI, GetMyProfileAPI } from '../../../api/login'
 import jwt_decode from 'jwt-decode'
-import util from 'util';
+
 import {
   CButton,
   CCard,
   CCardBody,
-  CCardGroup,
   CCol,
   CContainer,
   CForm,
@@ -20,6 +19,7 @@ import {
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { signInWithEmailAndPasswordHandler } from 'src/firebase/firebase'
+import { usePromiseTracker, trackPromise } from "react-promise-tracker";
 
 const Login = () => {
   //initial state
@@ -29,11 +29,14 @@ const Login = () => {
   const [error, setError] = useState();
   const history = useHistory();
 
+  const { promiseInProgress } = usePromiseTracker();
+
   const onPressLogin = async e => {
     e.preventDefault();
 
-    const idToken = await signInWithEmailAndPasswordHandler(email, password);
-    const loginResult = await LoginAPI(idToken);
+    const idToken = await trackPromise(signInWithEmailAndPasswordHandler(email, password));
+    const loginResult = await trackPromise(LoginAPI(idToken));
+    console.log(loginResult);
 
     if (loginResult.userData != null) {
       //role check
@@ -91,6 +94,11 @@ const Login = () => {
                     />
                   </CInputGroup>
                   {error != null ? <CAlert color="danger">{error}</CAlert> : null}
+                  {promiseInProgress ?
+                    <div className="spinner-border text-primary mb-3">
+                    </div> :
+                    null
+                  }
                   <CRow>
                     <CCol xs="6">
                       <CButton color="primary" className="px-4" type="Submit">Đăng Nhập</CButton>

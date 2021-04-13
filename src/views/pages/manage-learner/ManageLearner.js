@@ -19,6 +19,8 @@ import {
 import CIcon from '@coreui/icons-react'
 import UpdateLearnerModal from '../manage-learner/UpdateLearnerModal';
 import AddLearnerModal from '../manage-learner/AddLearnerModal';
+import SuspendLearnerModal from '../manage-learner/SuspendLearnerModal';
+import UnsuspendLearnerModal from '../manage-learner/UnsuspendLearnerModal';
 
 import { format, parseISO } from 'date-fns';
 
@@ -47,7 +49,8 @@ const fields = [
 
 const ManageLearner = () => {
     const [addLearnerModalShow, setAddLearnerModalShow] = useState(false);
-    const [banLearnerModal, setBanLearnerModalState] = useState(false);
+    const [suspendLearnerModalShow, setSuspendLearnerModalShow] = useState(false);
+    const [unsuspendLearnerModalShow, setUnsuspendLearnerModalShow] = useState(false);
     const [updateLearnerModalShow, setUpdateLearnerModalShow] = useState(false);
     const [learnerInfoList, setLearnerInfoList] = useState(null);
     const [selectedLearnerUsername, setSelectedLearnerUsername] = useState(null);
@@ -57,7 +60,7 @@ const ManageLearner = () => {
     useEffect(async () => {
         const learnerInfoList = await trackPromise(GetLearnerInfoListAPI());
         setLearnerInfoList(learnerInfoList);
-    }, [updateLearnerModalShow, addLearnerModalShow])
+    }, [updateLearnerModalShow, addLearnerModalShow, suspendLearnerModalShow, unsuspendLearnerModalShow])
 
     const updateLearnerOnclick = (learnerUsername) => {
         //open the update learner modal
@@ -66,12 +69,34 @@ const ManageLearner = () => {
         setSelectedLearnerUsername(learnerUsername);
     }
 
+    const suspendLearnerOnclick = (moderatorUsername) => {
+        //open the suspend moderator modal
+        setSuspendLearnerModalShow(true);
+        //set params
+        setSelectedLearnerUsername(moderatorUsername);
+    }
+
+    const unsuspendLearnerOnclick = (moderatorUsername) => {
+        //open the unsuspend moderator modal
+        setUnsuspendLearnerModalShow(true);
+        //set params
+        setSelectedLearnerUsername(moderatorUsername);
+    }
+
     const hideUpdateModal = () => {
         setUpdateLearnerModalShow(false);
     }
 
     const hideAddModal = () => {
         setAddLearnerModalShow(false);
+    }
+
+    const hideSuspendModal = () => {
+        setSuspendLearnerModalShow(false);
+    }
+
+    const hideUnsuspendModal = () => {
+        setUnsuspendLearnerModalShow(false);
     }
 
     //check permission
@@ -102,7 +127,7 @@ const ManageLearner = () => {
                                 tableFilter={
                                     {
                                         label: "Tìm kiếm:",
-                                        placeholder: "nhập dữ liệu...",
+                                        placeholder: "nhập thông tin tài khoản bất kỳ...",
                                     }
                                 }
                                 scopedSlots={{
@@ -141,14 +166,19 @@ const ManageLearner = () => {
                                             return (
                                                 <td className="py-1">
 
-                                                    <button type="button" className="table-update-button mr-2" data-toggle="tooltip" title="Cập nhật">
+                                                    <button type="button" className="table-action-button mr-2" data-toggle="tooltip" title="Cập nhật">
                                                         <CIcon name="cil-pencil" onClick={() => updateLearnerOnclick(item.username)}>
                                                         </CIcon>
                                                     </button>
-                                                    <button type="button" className="table-ban-button" data-toggle="tooltip" title="Khóa">
-                                                        <CIcon name="cil-lock-locked" onClick={() => { setBanLearnerModalState(!banLearnerModal) }}>
-                                                        </CIcon>
-                                                    </button>
+                                                    {item.is_suspended ?
+                                                        <button type="button" className="table-action-button" data-toggle="tooltip" title="Mở Khóa">
+                                                            <CIcon name="cil-lock-unlocked" onClick={() => unsuspendLearnerOnclick(item.username)}>
+                                                            </CIcon>
+                                                        </button>
+                                                        : <button type="button" className="table-action-button" data-toggle="tooltip" title="Khóa">
+                                                            <CIcon name="cil-lock-locked" onClick={() => suspendLearnerOnclick(item.username)}>
+                                                            </CIcon>
+                                                        </button>}
                                                 </td>
                                             )
                                         },
@@ -163,27 +193,6 @@ const ManageLearner = () => {
                         show={addLearnerModalShow}
                         handleClose={() => hideAddModal} />
                     : null}
-                {/*POPUP BAN LEARNER*/}
-                <CModal
-                    show={banLearnerModal}
-                    onClose={() => setBanLearnerModalState(!banLearnerModal)}
-                    color="danger"
-                >
-                    <CModalHeader closeButton>
-                        <CModalTitle>Khóa Học Viên</CModalTitle>
-                    </CModalHeader>
-                    <CModalBody>
-                        Bạn chắn chắn muốn khóa Học Viên này chứ?
-                    </CModalBody>
-                    <CModalFooter>
-                        <CButton color="danger" onClick={() => setBanLearnerModalState(!banLearnerModal)}>
-                            Khóa
-                    </CButton>{' '}
-                        <CButton color="secondary" onClick={() => setBanLearnerModalState(!banLearnerModal)}>
-                            Hủy
-                    </CButton>
-                    </CModalFooter>
-                </CModal>
                 {/*POPUP UPDATE LEARNER*/}
                 {(updateLearnerModalShow && selectedLearnerUsername != null) ?
                     <UpdateLearnerModal
@@ -192,7 +201,20 @@ const ManageLearner = () => {
                         handleClose={() => hideUpdateModal}
                     />
                     : null}
-
+                {/*POPUP SUSPEND LEARNER*/}
+                {suspendLearnerModalShow && selectedLearnerUsername ?
+                    <SuspendLearnerModal
+                        selectedLearnerUsername={selectedLearnerUsername}
+                        show={suspendLearnerModalShow}
+                        handleClose={() => hideSuspendModal}
+                    /> : null}
+                {/*POPUP UNSUSPEND LEARNER*/}
+                {unsuspendLearnerModalShow && selectedLearnerUsername ?
+                    <UnsuspendLearnerModal
+                        selectedLearnerUsername={selectedLearnerUsername}
+                        show={unsuspendLearnerModalShow}
+                        handleClose={() => hideUnsuspendModal}
+                    /> : null}
             </CRow >
         );
     } else {
