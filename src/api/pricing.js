@@ -89,7 +89,7 @@ export const GetPricingInfoByIdAPI = async (pricingId) => {
     return pricingInfo;
 }
 
-export const updatePricingInfoByIdAPI = async (pricingId, updateInfoJson) => {
+export const UpdatePricingInfoByIdAPI = async (pricingId, updateInfoJson) => {
     const token = (JSON.parse(localStorage.getItem("user"))).token;
     let updateResult = null;
     const onSuccess = response => {
@@ -111,4 +111,52 @@ export const updatePricingInfoByIdAPI = async (pricingId, updateInfoJson) => {
         .catch(onFailure);
 
     return updateResult;
+}
+
+export const AddPricingInfoAPI = async (addInfoJson) => {
+    const token = (JSON.parse(localStorage.getItem("user"))).token;
+    let addResult = null;
+    const onSuccess = response => {
+        console.log(response.data);
+        addResult = response.data.success;
+    }
+
+    const onFailure = error => {
+        console.log(error);
+        addResult = false;
+    }
+
+    const apiConfig = {
+        headers: { "Authorization": `Bearer ${token}` }
+    }
+
+    await APIKit.post('/pricings', addInfoJson, apiConfig)
+        .then(onSuccess)
+        .catch(onFailure);
+
+    return addResult;
+}
+
+export const DeletePricingByIdAPI = async (pricingId) => {
+    const token = (JSON.parse(localStorage.getItem("user"))).token;
+    let deleteResult = null;
+    const onSuccess = response => {
+        console.log(response.data);
+        deleteResult = response.data.success;
+    }
+
+    const onFailure = error => {
+        console.log(error);
+        deleteResult = false;
+    }
+
+    const apiConfig = {
+        headers: { "Authorization": `Bearer ${token}` }
+    }
+
+    await APIKit.delete('/pricings/' + pricingId + "/delete", apiConfig)
+        .then(onSuccess)
+        .catch(onFailure);
+
+    return deleteResult;
 }

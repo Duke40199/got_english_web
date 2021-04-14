@@ -15,15 +15,15 @@ import {
     CForm,
     CAlert
 } from '@coreui/react'
-import { GetPricingInfoByIdAPI, updatePricingInfoByIdAPI } from '../../../api/pricing'
+import { GetPricingInfoByIdAPI, UpdatePricingInfoByIdAPI } from '../../../api/pricing'
 
 const defineServiceName = serviceName => {
     if (serviceName.includes("messaging_session")) {
         return "Phiên nhắn tin";
     } else if (serviceName.includes("live_call_session")) {
-        return "Phiên gọi trực tiếp";
+        return "Phiên gọi trực tuyến";
     } else if (serviceName.includes("translation_call_session")) {
-        return "Phòng phiên dịch";
+        return "Phòng phiên dịch trực tuyến";
     } else {
         return "Không xác định";
     }
@@ -57,7 +57,7 @@ const UpdatePricingModal = ({ selectedPricingId, show, handleClose }) => {
             "price": parseInt(updatePricingPrice)
         }
 
-        const updatePricingResult = await updatePricingInfoByIdAPI(selectedPricingId, userInput);
+        const updatePricingResult = await UpdatePricingInfoByIdAPI(selectedPricingId, userInput);
         console.log(updatePricingResult, userInput);
 
         if (updatePricingResult === true) {
@@ -77,7 +77,7 @@ const UpdatePricingModal = ({ selectedPricingId, show, handleClose }) => {
         >
             <CForm onSubmit={onSubmitUpdateForm} method="post" encType="multipart/form-data" className="form-horizontal">
                 <CModalHeader closeButton>
-                    <CModalTitle>Cập nhật Gói Coin</CModalTitle>
+                    <CModalTitle>Cập nhật Đơn Giá</CModalTitle>
                 </CModalHeader>
                 <CModalBody>
                     <CFormGroup row>
