@@ -7,10 +7,13 @@ import {
     CDataTable,
     CRow,
     CAlert,
-    CCardHeader
+    CCardHeader,
+    CButton
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import UpdatePricingModal from '../manage-pricing/UpdatePricingModal';
+import AddPricingModal from '../manage-pricing/AddPricingModal';
+import DeletePricingModal from '../manage-pricing/DeletePricingModal';
 
 import { format, parseISO } from 'date-fns';
 
@@ -24,14 +27,17 @@ import {
 
 const fields = [
     { key: 'price', label: 'Đơn giá', _style: { width: '14%' } },
-    { key: 'created_at', label: 'Thời gian tạo', _style: { width: '26%' } },
-    { key: 'updated_at', label: 'Thời gian cập nhật', _style: { width: '26%' } },
-    { key: 'action', label: '', _style: { width: '4%' } }
+    { key: 'created_at', label: 'Thời gian tạo', _style: { width: '25%' } },
+    { key: 'updated_at', label: 'Thời gian cập nhật', _style: { width: '25%' } },
+    { key: 'action', label: '', _style: { width: '6%' } }
 ]
 
 const ManagePricing = () => {
     const [updatePricingModalShow, setUpdatePricingModalShow] = useState(false);
+    const [addPricingModalShow, setAddPricingModalShow] = useState(false);
+    const [deletePricingModalShow, setDeletePricingModalShow] = useState(false);
     const [selectedPricingId, setSelectedPricingId] = useState(null);
+    const [selectedServiceName, setSelectedServiceName] = useState(null);
     const [messagingSessionPricingInfoList, setMessagingSessionPricingInfoList] = useState(null);
     const [liveCallSessionPricingInfoList, setLiveCallSessionPricingInfoList] = useState(null);
     const [translationCallSessionPricingInfoList, setTranslationCallSessionPricingInfoList] = useState(null);
@@ -45,17 +51,39 @@ const ManagePricing = () => {
         setMessagingSessionPricingInfoList(messagingSessionPricingInfoList);
         setLiveCallSessionPricingInfoList(liveCallSessionPricingInfoList);
         setTranslationCallSessionPricingInfoList(translationCallSessionPricingInfoList);
-    }, [updatePricingModalShow])
+    }, [updatePricingModalShow, addPricingModalShow])
 
     const updatePricingOnclick = (pricingId) => {
-        //open the update pricing mocal
+        //open the update pricing modal
         setUpdatePricingModalShow(true);
+        //set params
+        setSelectedPricingId(pricingId);
+    }
+
+    const addPricingOnclick = (serviceName) => {
+        //open the add pricing modal
+        setAddPricingModalShow(true);
+        //set params
+        setSelectedServiceName(serviceName);
+    }
+
+    const deletePricingOnclick = (pricingId) => {
+        //open the delete pricing modal
+        setDeletePricingModalShow(true);
         //set params
         setSelectedPricingId(pricingId);
     }
 
     const hideUpdateModal = () => {
         setUpdatePricingModalShow(false);
+    }
+
+    const hideAddModal = () => {
+        setAddPricingModalShow(false);
+    }
+
+    const hideDeleteModal = () => {
+        setDeletePricingModalShow(false);
     }
 
     //check permission
@@ -82,12 +110,6 @@ const ManagePricing = () => {
                                 pagination
                                 loading={promiseInProgress}
                                 noItemsView={{ noResults: 'Không có kết quả tìm kiếm trùng khớp', noItems: 'Không có dữ liệu' }}
-                                tableFilter={
-                                    {
-                                        label: "Tìm kiếm:",
-                                        placeholder: "nhập dữ liệu...",
-                                    }
-                                }
                                 scopedSlots={{
                                     'price':
                                         (item, index) => {
@@ -118,7 +140,7 @@ const ManagePricing = () => {
                                             return (
                                                 <td className="py-1">
 
-                                                    <button type="button" className="table-update-button mr-2" data-toggle="tooltip" title="Cập nhật">
+                                                    <button type="button" className="table-action-button mr-2" data-toggle="tooltip" title="Cập nhật">
                                                         <CIcon name="cil-pencil" onClick={() => updatePricingOnclick(item.id)}>
                                                         </CIcon>
                                                     </button>
@@ -132,6 +154,8 @@ const ManagePricing = () => {
                     <CCard>
                         <CCardHeader>
                             <h3 className="m-0">Đơn giá dịch vụ Phiên Gọi Trực Tuyến:</h3>
+                            <CButton color="primary" className="mt-2 d-flex align-items-center" onClick={() => addPricingOnclick("live_call_session")}>
+                                <CIcon name="cilPlus" size="sm" className="mr-1" ></CIcon>Thêm mới Đơn Giá dịch vụ Phiên Gọi Trực Tuyến</CButton>
                         </CCardHeader>
                         <CCardBody className="pt-0 pb-0">
                             <CDataTable
@@ -146,12 +170,6 @@ const ManagePricing = () => {
                                 pagination
                                 loading={promiseInProgress}
                                 noItemsView={{ noResults: 'Không có kết quả tìm kiếm trùng khớp', noItems: 'Không có dữ liệu' }}
-                                tableFilter={
-                                    {
-                                        label: "Tìm kiếm:",
-                                        placeholder: "nhập dữ liệu...",
-                                    }
-                                }
                                 scopedSlots={{
                                     'price':
                                         (item, index) => {
@@ -182,8 +200,12 @@ const ManagePricing = () => {
                                             return (
                                                 <td className="py-1">
 
-                                                    <button type="button" className="table-update-button mr-2" data-toggle="tooltip" title="Cập nhật">
+                                                    <button type="button" className="table-action-button mr-2" data-toggle="tooltip" title="Cập nhật">
                                                         <CIcon name="cil-pencil" onClick={() => updatePricingOnclick(item.id)}>
+                                                        </CIcon>
+                                                    </button>
+                                                    <button type="button" className="table-action-button mr-2" data-toggle="tooltip" title="Xóa">
+                                                        <CIcon name="cil-x" onClick={() => deletePricingOnclick(item.id)}>
                                                         </CIcon>
                                                     </button>
                                                 </td>
@@ -196,6 +218,8 @@ const ManagePricing = () => {
                     <CCard>
                         <CCardHeader>
                             <h3 className="m-0">Đơn giá dịch vụ Phòng Phiên Dịch Trực Tuyến:</h3>
+                            <CButton color="primary" className="mt-2 d-flex align-items-center" onClick={() => addPricingOnclick("translation_call_session")}>
+                                <CIcon name="cilPlus" size="sm" className="mr-1" ></CIcon>Thêm mới Đơn Giá dịch vụ Phòng Phiên Dịch</CButton>
                         </CCardHeader>
                         <CCardBody className="pt-0 pb-0">
                             <CDataTable
@@ -210,12 +234,6 @@ const ManagePricing = () => {
                                 pagination
                                 loading={promiseInProgress}
                                 noItemsView={{ noResults: 'Không có kết quả tìm kiếm trùng khớp', noItems: 'Không có dữ liệu' }}
-                                tableFilter={
-                                    {
-                                        label: "Tìm kiếm:",
-                                        placeholder: "nhập dữ liệu...",
-                                    }
-                                }
                                 scopedSlots={{
                                     'price':
                                         (item, index) => {
@@ -246,8 +264,12 @@ const ManagePricing = () => {
                                             return (
                                                 <td className="py-1">
 
-                                                    <button type="button" className="table-update-button mr-2" data-toggle="tooltip" title="Cập nhật">
+                                                    <button type="button" className="table-action-button mr-2" data-toggle="tooltip" title="Cập nhật">
                                                         <CIcon name="cil-pencil" onClick={() => updatePricingOnclick(item.id)}>
+                                                        </CIcon>
+                                                    </button>
+                                                    <button type="button" className="table-action-button mr-2" data-toggle="tooltip" title="Xóa">
+                                                        <CIcon name="cil-x" onClick={() => deletePricingOnclick(item.id)}>
                                                         </CIcon>
                                                     </button>
                                                 </td>
@@ -266,7 +288,22 @@ const ManagePricing = () => {
                         handleClose={() => hideUpdateModal}
                     />
                     : null}
-
+                {/* POPUP ADD PRICING */}
+                {(addPricingModalShow && selectedServiceName != null) ?
+                    <AddPricingModal
+                        selectedPricingServiceName={selectedServiceName}
+                        show={addPricingModalShow}
+                        handleClose={() => hideAddModal}
+                    />
+                    : null}
+                {/* POPUP DELETE PRICING */}
+                {(deletePricingModalShow && selectedPricingId != null) ?
+                    <DeletePricingModal
+                        selectedPricingId={selectedPricingId}
+                        show={deletePricingModalShow}
+                        handleClose={() => hideDeleteModal}
+                    />
+                    : null}
             </CRow >
         );
     } else {

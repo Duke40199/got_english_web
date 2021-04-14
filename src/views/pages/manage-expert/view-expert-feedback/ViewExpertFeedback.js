@@ -45,12 +45,12 @@ const ViewExpertFeedback = () => {
     const GetUsedService = expertRatingList => {
         if (expertRatingList.hasOwnProperty("messaging_session")) {
             return 'Phiên nhắn tin';
-        } else if (expertRatingList.hasOwnProperty("translation_session")) {
+        } else if (expertRatingList.hasOwnProperty("translation_call_session")) {
             return 'Phòng phiên dịch';
-        } else if (expertRatingList.hasOwnProperty("private_call_session")) {
+        } else if (expertRatingList.hasOwnProperty("live_call_session")) {
             return 'Phiên gọi trực tuyến';
         } else {
-            return '';
+            return 'Dịch vụ Không xác định';
         }
     }
 
