@@ -14,7 +14,7 @@ import {
 
 import { GetUserInfoAPI, SuspendUserByIdAPI } from '../../../api/user';
 
-const SuspendLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => {
+const SuspendLearnerModal = ({ selectedLearnerUsername, show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [suspendLearnerUUID, setSuspendLearnerUUID] = useState("");
     const [suspendLearnerUsername, setSuspendLearnerUsername] = useState("");
     const [suspendMessage, setSuspendMessage] = useState(null);
@@ -34,6 +34,7 @@ const SuspendLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => 
         const suspendResult = await SuspendUserByIdAPI(suspendLearnerUUID);
         if (suspendResult === true) {
             setSuspendMessage(<CAlert color="success">Khóa tài khoản thành công!</CAlert>);
+            setRefreshDataFlag(!refreshDataFlag);
         } else {
             setSuspendMessage(<CAlert color="danger">{suspendResult}</CAlert>);
         }

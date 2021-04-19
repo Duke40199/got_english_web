@@ -25,7 +25,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import vi from "date-fns/locale/vi";
 import { format, parseISO } from 'date-fns';
 
-const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => {
+const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const history = useHistory();
 
     const [updateLearnerUUID, setUpdateLearnerUUID] = useState("");
@@ -142,7 +142,7 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => {
 
         if (updateResult === true) {
             setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
-            history.push("/manage-learner");
+            setRefreshDataFlag(!refreshDataFlag);
         } else {
             setUpdateMessage(<CAlert color="danger">Cập nhật thất bại!</CAlert>);
         }

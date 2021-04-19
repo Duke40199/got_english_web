@@ -54,13 +54,14 @@ const ManageExpert = () => {
     const [updateExpertModalShow, setUpdateExpertModalShow] = useState(false);
     const [expertInfoList, setExpertInfoList] = useState(null);
     const [selectedExpertUsername, setSelectedExpertUsername] = useState(null);
+    const [refreshDataFlag, setRefreshDataFlag] = useState(false);
 
     const { promiseInProgress } = usePromiseTracker();
 
     useEffect(async () => {
         const expertInfoList = await trackPromise(GetExpertInfoListAPI());
         setExpertInfoList(expertInfoList);
-    }, [updateExpertModalShow, addExpertModalShow, suspendExpertModalShow, unsuspendExpertModalShow])
+    }, [refreshDataFlag])
 
     const updateExpertOnclick = (expertUsername) => {
         //open the update expert modal
@@ -204,7 +205,9 @@ const ManageExpert = () => {
                 {addExpertModalShow ?
                     <AddExpertModal
                         show={addExpertModalShow}
-                        handleClose={() => hideAddModal} />
+                        handleClose={() => hideAddModal}
+                        refreshDataFlag={refreshDataFlag}
+                        setRefreshDataFlag={setRefreshDataFlag} />
                     : null}
                 {/*POPUP UPDATE EXPERT*/}
                 {(updateExpertModalShow && selectedExpertUsername != null) ?
@@ -212,6 +215,8 @@ const ManageExpert = () => {
                         selectedExpertUsername={selectedExpertUsername}
                         show={updateExpertModalShow}
                         handleClose={() => hideUpdateModal}
+                        refreshDataFlag={refreshDataFlag}
+                        setRefreshDataFlag={setRefreshDataFlag}
                     />
                     : null}
                 {/*POPUP SUSPEND EXPERT*/}
@@ -220,6 +225,8 @@ const ManageExpert = () => {
                         selectedExpertUsername={selectedExpertUsername}
                         show={suspendExpertModalShow}
                         handleClose={() => hideSuspendModal}
+                        refreshDataFlag={refreshDataFlag}
+                        setRefreshDataFlag={setRefreshDataFlag}
                     /> : null}
                 {/*POPUP UNSUSPEND EXPERT*/}
                 {unsuspendExpertModalShow && selectedExpertUsername ?
@@ -227,6 +234,8 @@ const ManageExpert = () => {
                         selectedExpertUsername={selectedExpertUsername}
                         show={unsuspendExpertModalShow}
                         handleClose={() => hideUnsuspendModal}
+                        refreshDataFlag={refreshDataFlag}
+                        setRefreshDataFlag={setRefreshDataFlag}
                     /> : null}
             </CRow >
         );

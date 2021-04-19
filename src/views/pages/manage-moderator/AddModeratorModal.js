@@ -27,7 +27,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import vi from "date-fns/locale/vi";
 import { format } from 'date-fns';
 
-const AddModeratorModal = ({ show, handleClose }) => {
+const AddModeratorModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const history = useHistory();
 
     const [addModeratorFullname, setAddModeratorFullname] = useState("");
@@ -129,7 +129,7 @@ const AddModeratorModal = ({ show, handleClose }) => {
             console.log(newModeratorID, additionalData)
             if (updateModeratorAvt === true && permissionUpdateResult === true) {
                 setAddMessage(<CAlert color="success">Thêm mới thành công!</CAlert>);
-                history.push("/manage-moderator");
+                setRefreshDataFlag(!refreshDataFlag);
             } else {
                 setAddMessage(<CAlert color="danger">Thêm mới thành công! Tuy nhiên phần thông tin cập nhật đã gặp sự cố. Hãy sử dụng chức năng Cập nhật để cập nhật lại thông tin.</CAlert>);
             }
@@ -284,7 +284,7 @@ const AddModeratorModal = ({ show, handleClose }) => {
                         Thêm
                 </CButton>
                     <CButton color="secondary" onClick={handleClose()}>
-                        Hủy
+                        Đóng
                 </CButton>
                 </CModalFooter>
             </CForm>

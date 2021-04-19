@@ -26,7 +26,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import vi from "date-fns/locale/vi";
 import { format } from 'date-fns';
 
-const AddExpertModal = ({ show, handleClose }) => {
+const AddExpertModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const history = useHistory();
 
     const [addExpertFullname, setAddExpertFullname] = useState("");
@@ -119,7 +119,7 @@ const AddExpertModal = ({ show, handleClose }) => {
             console.log(newExpertID, additionalData)
             if (updateExpertAvt === true) {
                 setAddMessage(<CAlert color="success">Thêm mới thành công!</CAlert>);
-                history.push("/manage-expert");
+                setRefreshDataFlag(!refreshDataFlag);
             } else {
                 setAddMessage(<CAlert color="danger">Thêm mới thành công! Tuy nhiên phần thông tin cập nhật đã gặp sự cố. Hãy sử dụng chức năng Cập nhật để cập nhật lại thông tin.</CAlert>);
             }
@@ -240,7 +240,7 @@ const AddExpertModal = ({ show, handleClose }) => {
                         Thêm
                 </CButton>
                     <CButton color="secondary" onClick={handleClose()}>
-                        Hủy
+                        Đóng
                 </CButton>
                 </CModalFooter>
             </CForm>

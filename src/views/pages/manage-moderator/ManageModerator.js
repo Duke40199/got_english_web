@@ -49,13 +49,14 @@ const ManageModerator = () => {
     const [updateModeratorModalShow, setUpdateModeratorModalShow] = useState(false);
     const [moderatorInfoList, setModeratorInfoList] = useState(null);
     const [selectedModeratorUsername, setSelectedModeratorUsername] = useState(null);
+    const [refreshDataFlag, setRefreshDataFlag] = useState(false);
 
     const { promiseInProgress } = usePromiseTracker();
 
     useEffect(async () => {
         const moderatorInfoList = await trackPromise(GetModeratorInfoListAPI());
         setModeratorInfoList(moderatorInfoList);
-    }, [updateModeratorModalShow, addModeratorModalShow, suspendModeratorModalShow, unsuspendModeratorModalShow])
+    }, [refreshDataFlag])
 
     const updateModeratorOnclick = (moderatorUsername) => {
         //open the update moderator modal
@@ -186,7 +187,9 @@ const ManageModerator = () => {
                 {addModeratorModalShow ?
                     <AddModeratorModal
                         show={addModeratorModalShow}
-                        handleClose={() => hideAddModal} />
+                        handleClose={() => hideAddModal}
+                        refreshDataFlag={refreshDataFlag}
+                        setRefreshDataFlag={setRefreshDataFlag} />
                     : null}
                 {/*POPUP UPDATE MODERATOR*/}
                 {(updateModeratorModalShow && selectedModeratorUsername != null) ?
@@ -194,6 +197,8 @@ const ManageModerator = () => {
                         selectedModeratorUsername={selectedModeratorUsername}
                         show={updateModeratorModalShow}
                         handleClose={() => hideUpdateModal}
+                        refreshDataFlag={refreshDataFlag}
+                        setRefreshDataFlag={setRefreshDataFlag}
                     />
                     : null}
                 {/*POPUP SUSPEND MODERATOR*/}
@@ -202,6 +207,8 @@ const ManageModerator = () => {
                         selectedModeratorUsername={selectedModeratorUsername}
                         show={suspendModeratorModalShow}
                         handleClose={() => hideSuspendModal}
+                        refreshDataFlag={refreshDataFlag}
+                        setRefreshDataFlag={setRefreshDataFlag}
                     /> : null}
                 {/*POPUP UNSUSPEND MODERATOR*/}
                 {unsuspendModeratorModalShow && selectedModeratorUsername ?
@@ -209,6 +216,8 @@ const ManageModerator = () => {
                         selectedModeratorUsername={selectedModeratorUsername}
                         show={unsuspendModeratorModalShow}
                         handleClose={() => hideUnsuspendModal}
+                        refreshDataFlag={refreshDataFlag}
+                        setRefreshDataFlag={setRefreshDataFlag}
                     /> : null}
             </CRow >
         );

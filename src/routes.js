@@ -41,7 +41,7 @@ const ManageAdmin = React.lazy(() => import('./views/pages/manage-admin/ManageAd
 const ManageModerator = React.lazy(() => import('./views/pages/manage-moderator/ManageModerator'));
 const ManageExpert = React.lazy(() => import('./views/pages/manage-expert/ManageExpert'));
 const ViewExpertFeedback = React.lazy(() => import('./views/pages/manage-expert/view-expert-feedback/ViewExpertFeedback'));
-const ViewCandidateCertification = React.lazy(() => import('./views/pages/view-candidate-certification/ViewCandidateCertification'));
+const ViewApplicationForm = React.lazy(() => import('./views/pages/view-application-form/ViewApplicationForm'));
 const ManageCoinBundle = React.lazy(() => import('./views/pages/manage-coin-bundle/ManageCoinBundle'));
 const ManageLearner = React.lazy(() => import('./views/pages/manage-learner/ManageLearner'));
 const ManagePricing = React.lazy(() => import('./views/pages/manage-pricing/ManagePricing'));
@@ -93,7 +93,7 @@ const routes = [
   { path: '/manage-moderator', name: 'Quản lý Điều Hành Viên', component: ManageModerator, exact: true },
   { path: '/manage-expert', exact: true, name: 'Quản lý Chuyên Gia', component: ManageExpert },
   { path: '/manage-expert/view-expert-feedback', name: 'Xem chi tiết Đánh Giá của Chuyên Gia', component: ViewExpertFeedback },
-  { path: '/view-candidate-certification', name: 'Xem hồ sơ Ứng Viên', component: ViewCandidateCertification, exact: true },
+  { path: '/view-application-form', name: 'Xem hồ sơ Ứng Viên', component: ViewApplicationForm, exact: true },
   { path: '/manage-coin-bundle', name: 'Quản lý Gói Coin', component: ManageCoinBundle, exact: true },
   { path: '/manage-learner', name: 'Quản lý Học Viên', component: ManageLearner, exact: true },
   { path: '/manage-pricing', name: 'Quản lý Đơn Giá', component: ManagePricing, exact: true },

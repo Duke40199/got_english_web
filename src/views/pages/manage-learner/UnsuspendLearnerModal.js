@@ -13,7 +13,7 @@ import {
 
 import { GetUserInfoAPI, UnsuspendUserByIdAPI } from '../../../api/user';
 
-const UnsuspendLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => {
+const UnsuspendLearnerModal = ({ selectedLearnerUsername, show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [unsuspendLearnerUUID, setUnsuspendLearnerUUID] = useState("");
     const [unsuspendLearnerUsername, setUnsuspendLearnerUsername] = useState("");
     const [unsuspendMessage, setUnsuspendMessage] = useState(null);
@@ -32,9 +32,10 @@ const UnsuspendLearnerModal = ({ selectedLearnerUsername, show, handleClose }) =
 
         const unsuspendResult = await UnsuspendUserByIdAPI(unsuspendLearnerUUID);
         if (unsuspendResult === true) {
-            setUnsuspendMessage(<CAlert color="success">Mở khóa tài khoản thành công!</CAlert>)
+            setUnsuspendMessage(<CAlert color="success">Mở khóa tài khoản thành công!</CAlert>);
+            setRefreshDataFlag(!refreshDataFlag);
         } else {
-            setUnsuspendMessage(<CAlert color="danger">{unsuspendResult}</CAlert>)
+            setUnsuspendMessage(<CAlert color="danger">{unsuspendResult}</CAlert>);
         }
     }
 

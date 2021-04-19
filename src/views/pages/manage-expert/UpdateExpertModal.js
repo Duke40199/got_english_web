@@ -14,10 +14,11 @@ import {
     CFormGroup,
     CInputFile,
     CForm,
-    CAlert
+    CAlert,
+    CInputCheckbox
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { GetUserInfoAPI, UpdateUserInfoByUserIdAPI } from '../../../api/user';
+import { GetUserInfoAPI, UpdateExpertPermissionByIdAPI, UpdateUserInfoByUserIdAPI } from '../../../api/user';
 import firebase from '../../../firebase/firebase';
 
 import DatePicker, { registerLocale } from "react-datepicker";
@@ -25,7 +26,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import vi from "date-fns/locale/vi";
 import { format, parseISO } from 'date-fns';
 
-const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose }) => {
+const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const history = useHistory();
 
     const [updateExpertUUID, setUpdateExpertUUID] = useState("");
@@ -37,6 +38,9 @@ const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose }) => {
     const [updateExpertPhoneNumber, setUpdateExpertPhoneNumber] = useState("");
     const [updateExpertBirthday, setUpdateExpertBirthday] = useState("");
     const [updateExpertAvatarUrl, setUpdateExpertAvatarUrl] = useState("");
+    const [updateExpertCanChat, setUpdateExpertCanChat] = useState(false);
+    const [updateExpertCanJoinTranslationSession, setUpdateExpertCanJoinTranslationSession] = useState(false);
+    const [updateExpertCanJoinLiveCallSession, setUpdateExpertCanJoinLiveCallSession] = useState(false);
     const [updateMessage, setUpdateMessage] = useState(null);
 
     //this useEffect will be executed every time the modal show
@@ -54,7 +58,10 @@ const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose }) => {
             } else {
                 setUpdateExpertBirthday(parseISO(selectedExpertInfo.birthday));
             }
-            setUpdateExpertAvatarUrl(selectedExpertInfo.avatar_url == "" || selectedExpertInfo == null ? "" : selectedExpertInfo.avatar_url);
+            setUpdateExpertAvatarUrl((selectedExpertInfo.avatar_url == "" || selectedExpertInfo.avatar_url == null) ? "" : selectedExpertInfo.avatar_url);
+            setUpdateExpertCanChat(selectedExpertInfo.expert_details.can_chat);
+            setUpdateExpertCanJoinTranslationSession(selectedExpertInfo.expert_details.can_join_translation_session);
+            setUpdateExpertCanJoinLiveCallSession(selectedExpertInfo.expert_details.can_join_live_call_session);
         }
     }, [selectedExpertUsername]);
 
@@ -105,6 +112,7 @@ const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose }) => {
         e.preventDefault();
 
         let userInput = {};
+        let permissionInput = {};
 
         //check if uploaded file is blob file from local
         const isBlob = updateExpertAvatarUrl.includes("blob:");
@@ -125,6 +133,11 @@ const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose }) => {
                 "birthday": ((updateExpertBirthday == "" || updateExpertBirthday == null) ? null : format(updateExpertBirthday, 'yyyy-MM-dd')),
                 "avatar_url": newAvtSrc,
             }
+            permissionInput = {
+                "can_chat": updateExpertCanChat,
+                "can_join_live_call_session": updateExpertCanJoinLiveCallSession,
+                "can_join_translation_session": updateExpertCanJoinTranslationSession
+            }
         } else {
             userInput = {
                 "fullname": updateExpertFullname,
@@ -135,14 +148,21 @@ const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose }) => {
                 "birthday": ((updateExpertBirthday == "" || updateExpertBirthday == null) ? null : format(updateExpertBirthday, 'yyyy-MM-dd')),
                 "avatar_url": newAvtSrc,
             }
+            permissionInput = {
+                "can_chat": updateExpertCanChat,
+                "can_join_live_call_session": updateExpertCanJoinLiveCallSession,
+                "can_join_translation_session": updateExpertCanJoinTranslationSession
+            }
         }
 
-        const updateResult = await UpdateUserInfoByUserIdAPI(updateExpertUUID, userInput);
-        console.log(updateResult, userInput);
+        console.log(userInput);
 
-        if (updateResult === true) {
+        const updateResult = await UpdateUserInfoByUserIdAPI(updateExpertUUID, userInput);
+        const permissionUpdateResult = await UpdateExpertPermissionByIdAPI(updateExpertUUID, permissionInput);
+
+        if (updateResult === true && permissionUpdateResult === true) {
             setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
-            history.push("/manage-expert");
+            setRefreshDataFlag(!refreshDataFlag);
         } else {
             setUpdateMessage(<CAlert color="danger">Cập nhật thất bại!</CAlert>);
         }
@@ -249,6 +269,41 @@ const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose }) => {
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
+                        <CCol md="4">
+                            <CLabel htmlFor="update-expert-permission">Quyền hạn:</CLabel>
+                        </CCol>
+                        <CCol xs="12" md="8">
+                            <CLabel htmlFor="update-expert-can-chat"
+                                className="w-100 permission-input-checkbox">
+                                <CInputCheckbox
+                                    id="update-expert-can-chat"
+                                    name="update-expert-can-chat"
+                                    checked={updateExpertCanChat}
+                                    onChange={({ target }) => setUpdateExpertCanChat(target.checked)} />
+                                Tham gia Phiên Nhắn Tin
+                                </CLabel>
+                            <CLabel htmlFor="update-expert-can-join-live-call-session"
+                                className="w-100 permission-input-checkbox">
+                                <CInputCheckbox
+                                    id="update-expert-can-join-live-call-session"
+                                    name="update-expert-can-join-live-call-session"
+                                    checked={updateExpertCanJoinLiveCallSession}
+                                    onChange={({ target }) => setUpdateExpertCanJoinLiveCallSession(target.checked)} />
+                                Tham gia Phiên Gọi Trực Tuyến
+                                </CLabel>
+                            <CLabel htmlFor="update-expert-can-join-translation-session"
+                                className="w-100 permission-input-checkbox">
+                                <CInputCheckbox
+                                    id="update-expert-can-join-translation-session"
+                                    name="update-expert-can-join-translation-session"
+                                    checked={updateExpertCanJoinTranslationSession}
+                                    onChange={({ target }) => setUpdateExpertCanJoinTranslationSession(target.checked)}
+                                />
+                                Tham gia Phòng Phiên Dịch
+                                </CLabel>
+                        </CCol>
+                    </CFormGroup>
+                    <CFormGroup row>
                         <CLabel col md="4" htmlFor="update-expert-avatar-url">Ảnh đại diện:</CLabel>
                         <CCol xs="12" md="8">
                             <img id="updateExpertAvt" className="mr-2" src={updateExpertAvatarUrl} width="80" height="80" />
@@ -267,7 +322,7 @@ const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose }) => {
                         Cập nhật
                         </CButton>
                     <CButton color="secondary" onClick={handleClose()}>
-                        Hủy
+                        Đóng
                         </CButton>
                 </CModalFooter>
             </CForm>

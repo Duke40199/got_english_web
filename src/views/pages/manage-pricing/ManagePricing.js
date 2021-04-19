@@ -22,13 +22,14 @@ import { usePromiseTracker, trackPromise } from "react-promise-tracker";
 import {
     GetMessagingSessionPricingInfoListAPI,
     GetLiveCallSessionPricingInfoListAPI,
-    GetTranslationCallSessionPricingInfoListAPI
+    GetTranslationCallSessionPricingInfoListAPI,
+    GetCoinValuePricingInfoListAPI
 } from '../../../api/pricing';
 
 const fields = [
-    { key: 'price', label: 'Đơn giá', _style: { width: '14%' } },
-    { key: 'created_at', label: 'Thời gian tạo', _style: { width: '25%' } },
-    { key: 'updated_at', label: 'Thời gian cập nhật', _style: { width: '25%' } },
+    { key: 'price', label: 'Đơn giá', _style: { width: '20%' } },
+    { key: 'created_at', label: 'Thời gian tạo', _style: { width: '22%' } },
+    { key: 'updated_at', label: 'Thời gian cập nhật', _style: { width: '22%' } },
     { key: 'action', label: '', _style: { width: '6%' } }
 ]
 
@@ -38,6 +39,7 @@ const ManagePricing = () => {
     const [deletePricingModalShow, setDeletePricingModalShow] = useState(false);
     const [selectedPricingId, setSelectedPricingId] = useState(null);
     const [selectedServiceName, setSelectedServiceName] = useState(null);
+    const [coinValuePricingInfoList, setCoinValuePricingInfoList] = useState(null);
     const [messagingSessionPricingInfoList, setMessagingSessionPricingInfoList] = useState(null);
     const [liveCallSessionPricingInfoList, setLiveCallSessionPricingInfoList] = useState(null);
     const [translationCallSessionPricingInfoList, setTranslationCallSessionPricingInfoList] = useState(null);
@@ -45,13 +47,15 @@ const ManagePricing = () => {
     const { promiseInProgress } = usePromiseTracker();
 
     useEffect(async () => {
+        const coinValuePricingInfoList = await trackPromise(GetCoinValuePricingInfoListAPI());
         const messagingSessionPricingInfoList = await trackPromise(GetMessagingSessionPricingInfoListAPI());
         const liveCallSessionPricingInfoList = await trackPromise(GetLiveCallSessionPricingInfoListAPI());
         const translationCallSessionPricingInfoList = await trackPromise(GetTranslationCallSessionPricingInfoListAPI());
+        setCoinValuePricingInfoList(coinValuePricingInfoList);
         setMessagingSessionPricingInfoList(messagingSessionPricingInfoList);
         setLiveCallSessionPricingInfoList(liveCallSessionPricingInfoList);
         setTranslationCallSessionPricingInfoList(translationCallSessionPricingInfoList);
-    }, [updatePricingModalShow, addPricingModalShow])
+    }, [updatePricingModalShow, addPricingModalShow, deletePricingModalShow])
 
     const updatePricingOnclick = (pricingId) => {
         //open the update pricing modal
@@ -93,6 +97,64 @@ const ManagePricing = () => {
         return (
             <CRow>
                 <CCol>
+                    <CCard>
+                        <CCardHeader>
+                            <h3 className="m-0">Đơn giá Coin:</h3>
+                        </CCardHeader>
+                        <CCardBody className="pt-0 pb-0">
+                            <CDataTable
+                                addTableClasses="text-break"
+                                items={coinValuePricingInfoList}
+                                fields={fields}
+                                hover
+                                striped
+                                bordered
+                                size="sm"
+                                itemsPerPage={20}
+                                pagination
+                                loading={promiseInProgress}
+                                noItemsView={{ noResults: 'Không có kết quả tìm kiếm trùng khớp', noItems: 'Không có dữ liệu' }}
+                                scopedSlots={{
+                                    'price':
+                                        (item, index) => {
+                                            return (
+                                                <td className="py-1">
+                                                    {item.quantity + " " + item.quantity_unit + " = " + item.price + " " + item.price_unit}
+                                                </td>
+                                            );
+                                        },
+                                    'created_at':
+                                        (item, index) => {
+                                            return (
+                                                <td className="py-1">
+                                                    {(item.created_at == null || item.created_at == "") ? "" : format(parseISO(item.created_at), 'dd-MM-yyyy hh:mm:ss')}
+                                                </td>
+                                            );
+                                        },
+                                    'updated_at':
+                                        (item, index) => {
+                                            return (
+                                                <td className="py-1">
+                                                    {(item.updated_at == null || item.updated_at == "") ? "" : format(parseISO(item.updated_at), 'dd-MM-yyyy hh:mm:ss')}
+                                                </td>
+                                            );
+                                        },
+                                    'action':
+                                        (item, index) => {
+                                            return (
+                                                <td className="py-1">
+
+                                                    <button type="button" className="table-action-button mr-2" data-toggle="tooltip" title="Cập nhật">
+                                                        <CIcon name="cil-pencil" onClick={() => updatePricingOnclick(item.id)}>
+                                                        </CIcon>
+                                                    </button>
+                                                </td>
+                                            )
+                                        },
+                                }}
+                            />
+                        </CCardBody>
+                    </CCard>
                     <CCard>
                         <CCardHeader>
                             <h3 className="m-0">Đơn giá dịch vụ Phiên Nhắn Tin:</h3>

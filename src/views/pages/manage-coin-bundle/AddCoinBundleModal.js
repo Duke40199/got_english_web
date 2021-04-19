@@ -92,7 +92,6 @@ const AddCoinBundleModal = ({ show, handleClose }) => {
                                 type="number"
                                 id="coin-bundle-price-input"
                                 name="coin-bundle-price-input"
-                                step="10000"
                                 min="0"
                                 onChange={({ target }) => setAddCoinBundlePrice(target.value)}
                                 required />
@@ -100,7 +99,7 @@ const AddCoinBundleModal = ({ show, handleClose }) => {
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="coin-bundle-price-unit-input">Đơn vị:</CLabel>
+                            <CLabel htmlFor="coin-bundle-price-unit-input">Đơn vị Giá:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
                             <CInput id="coin-bundle-price-unit-input" name="coin-bundle-price-unit-input"

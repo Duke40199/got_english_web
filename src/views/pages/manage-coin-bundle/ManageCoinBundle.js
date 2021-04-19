@@ -8,38 +8,30 @@ import {
     CRow,
     CButton,
     CCardHeader,
-    CBadge,
     CAlert
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import AddCoinBundleModal from '../manage-coin-bundle/AddCoinBundleModal';
 import UpdateCoinBundleModal from '../manage-coin-bundle/UpdateCoinBundleModal';
+import DeleteCoinBundleModal from '../manage-coin-bundle/DeleteCoinBundleModal';
 
 import { usePromiseTracker, trackPromise } from "react-promise-tracker";
 
 import { GetCoinBundleInfoListAPI } from '../../../api/coin-bundle'
 
-const getBadge = isDeleted => {
-    switch (isDeleted) {
-        case false: return 'success'
-        case true: return 'danger'
-        default: return 'primary'
-    }
-}
-
 const fields = [
-    { key: 'title', label: 'Tên Gói', _style: { width: '15%' } },
-    { key: 'description', label: 'Nội dung Gói', _style: { width: '35%' } },
+    { key: 'title', label: 'Tên Gói', _style: { width: '20%' } },
+    { key: 'description', label: 'Nội dung Gói', _style: { width: '40%' } },
     { key: 'quantity', label: 'Số lượng Coin', _style: { width: '12%' } },
     { key: 'price', label: 'Giá', _style: { width: '13%' } },
     { key: 'price_unit', label: 'Đơn vị', _style: { width: '10%' } },
-    { key: 'is_deleted', label: '', _style: { width: '10%' } },
     { key: 'action', label: '', _style: { width: '5%' } }
 ]
 
 const ManageCoinBundle = () => {
     const [addCoinBundleModalShow, setAddCoinBundleModalShow] = useState(false);
     const [updateCoinBundleModalShow, setUpdateCoinBundleModalShow] = useState(false);
+    const [deleteCoinBundleModalShow, setDeleteCoinBundleModalShow] = useState(false);
     const [coinBundleInfoList, setCoinBundleInfoList] = useState(null);
     const [selectedCoinBundleId, setSelectedCoinBundleId] = useState(null);
 
@@ -48,11 +40,18 @@ const ManageCoinBundle = () => {
     useEffect(async () => {
         const coinBundleInfoList = await trackPromise(GetCoinBundleInfoListAPI());
         setCoinBundleInfoList(coinBundleInfoList);
-    }, [updateCoinBundleModalShow, addCoinBundleModalShow]);
+    }, [updateCoinBundleModalShow, addCoinBundleModalShow, deleteCoinBundleModalShow]);
 
     const updateCoinBundleOnclick = (coinBundleId) => {
         //open the update coin bundle modal
         setUpdateCoinBundleModalShow(true);
+        //set params
+        setSelectedCoinBundleId(coinBundleId);
+    }
+
+    const deleteCoinBundleOnclick = (coinBundleId) => {
+        //open the delete coin bundle modal
+        setDeleteCoinBundleModalShow(true);
         //set params
         setSelectedCoinBundleId(coinBundleId);
     }
@@ -65,6 +64,10 @@ const ManageCoinBundle = () => {
         setAddCoinBundleModalShow(false);
     }
 
+    const hideDeleteModal = () => {
+        setDeleteCoinBundleModalShow(false);
+    }
+
     //check permission
     const userInfo = JSON.parse(localStorage.getItem("userInfo"));
     const canManageCoinBundle = userInfo.moderator_details.can_manage_coin_bundle;
@@ -73,7 +76,8 @@ const ManageCoinBundle = () => {
             <CRow>
                 <CCol>
                     <CCard>
-                        <CCardHeader align="right">
+                        <CCardHeader>
+                            <h3 className="m-0">Danh sách Gói Coin:</h3>
                             <CButton color="primary" className="mt-2 d-flex align-items-center" onClick={() => setAddCoinBundleModalShow(true)}>
                                 <CIcon name="cilPlus" size="sm" className="mr-1"></CIcon>Thêm mới Gói Coin</CButton>
                         </CCardHeader>
@@ -93,29 +97,21 @@ const ManageCoinBundle = () => {
                                 tableFilter={
                                     {
                                         label: "Tìm kiếm:",
-                                        placeholder: "nhập dữ liệu...",
+                                        placeholder: "nhập thông tin Gói Coin cần tìm...",
                                     }
                                 }
                                 scopedSlots={{
-                                    'is_deleted':
-                                        (item) => (
-                                            <td>
-                                                <CBadge color={getBadge(item.is_deleted)}>
-                                                    {item.is_suspended ? "Đã khóa" : "Hoạt động"}
-                                                </CBadge>
-                                            </td>
-                                        ),
                                     'action':
                                         (item, index) => {
                                             return (
                                                 <td className="py-1">
 
-                                                    <button type="button" className="table-update-button mr-2" data-toggle="tooltip" title="Cập nhật">
+                                                    <button type="button" className="table-action-button mr-2" data-toggle="tooltip" title="Cập nhật">
                                                         <CIcon name="cil-pencil" onClick={() => updateCoinBundleOnclick(item.id)}>
                                                         </CIcon>
                                                     </button>
-                                                    <button type="button" className="table-ban-button" data-toggle="tooltip" title="Khóa">
-                                                        <CIcon name="cil-lock-locked" >
+                                                    <button type="button" className="table-action-button" data-toggle="tooltip" title="Xóa">
+                                                        <CIcon name="cil-X" onClick={() => deleteCoinBundleOnclick(item.id)}>
                                                         </CIcon>
                                                     </button>
                                                 </td>
@@ -138,6 +134,13 @@ const ManageCoinBundle = () => {
                         selectedCoinBundleId={selectedCoinBundleId}
                         show={updateCoinBundleModalShow}
                         handleClose={() => hideUpdateModal} />
+                    : null}
+                {/*POPUP DELETE COIN BUNDLE*/}
+                {deleteCoinBundleModalShow && selectedCoinBundleId != null ?
+                    <DeleteCoinBundleModal
+                        selectedCoinBundleId={selectedCoinBundleId}
+                        show={deleteCoinBundleModalShow}
+                        handleClose={() => hideDeleteModal} />
                     : null}
             </CRow>
         )

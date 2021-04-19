@@ -13,7 +13,7 @@ import {
 
 import { GetUserInfoAPI, UnsuspendUserByIdAPI } from '../../../api/user';
 
-const UnsuspendModeratorModal = ({ selectedModeratorUsername, show, handleClose }) => {
+const UnsuspendModeratorModal = ({ selectedModeratorUsername, show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [unsuspendModeratorUUID, setUnsuspendModeratorUUID] = useState("");
     const [unsuspendModeratorUsername, setUnsuspendModeratorUsername] = useState("");
     const [unsuspendMessage, setUnsuspendMessage] = useState(null);
@@ -32,9 +32,10 @@ const UnsuspendModeratorModal = ({ selectedModeratorUsername, show, handleClose 
 
         const unsuspendResult = await UnsuspendUserByIdAPI(unsuspendModeratorUUID);
         if (unsuspendResult === true) {
-            setUnsuspendMessage(<CAlert color="success">Mở khóa tài khoản thành công!</CAlert>)
+            setUnsuspendMessage(<CAlert color="success">Mở khóa tài khoản thành công!</CAlert>);
+            setRefreshDataFlag(!refreshDataFlag);
         } else {
-            setUnsuspendMessage(<CAlert color="danger">{unsuspendResult}</CAlert>)
+            setUnsuspendMessage(<CAlert color="danger">{unsuspendResult}</CAlert>);
         }
     }
 
@@ -57,7 +58,7 @@ const UnsuspendModeratorModal = ({ selectedModeratorUsername, show, handleClose 
                         Mở khóa
                 </CButton>
                     <CButton color="secondary" onClick={handleClose()}>
-                        Hủy
+                        Đóng
                 </CButton>
                 </CModalFooter>
             </CForm>

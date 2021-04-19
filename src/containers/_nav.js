@@ -53,7 +53,7 @@ if (role === "Admin") {
       _tag: 'CSidebarNavItem',
       name: 'Xem hồ sơ Ứng Viên',
       icon: 'cil-address-book',
-      to: '/view-candidate-certification',
+      to: '/view-application-form',
     },
     {
       _tag: 'CSidebarNavItem',

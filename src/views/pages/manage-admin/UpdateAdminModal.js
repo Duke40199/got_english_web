@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import { useHistory } from 'react-router-dom'
 
 import {
     CCol,
@@ -28,9 +27,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import vi from "date-fns/locale/vi";
 import { format, parseISO } from 'date-fns';
 
-const UpdateAdminModal = ({ selectedAdminUsername, show, handleClose }) => {
-    const history = useHistory();
-
+const UpdateAdminModal = ({ selectedAdminUsername, show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [updateAdminUUID, setUpdateAdminUUID] = useState("");
     const [updateAdminFullname, setUpdateAdminFullname] = useState("");
     const [updateAdminUsername, setUpdateAdminUsername] = useState("");
@@ -169,7 +166,7 @@ const UpdateAdminModal = ({ selectedAdminUsername, show, handleClose }) => {
 
         if (updateResult === true && permissionUpdateResult === true) {
             setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
-            history.push("/manage-admin");
+            setRefreshDataFlag(!refreshDataFlag);
         } else {
             setUpdateMessage(<CAlert color="danger">Cập nhật thất bại!</CAlert>);
         }

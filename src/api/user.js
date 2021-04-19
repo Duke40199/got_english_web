@@ -206,6 +206,30 @@ export const UpdateAdminPermissionByIdAPI = async (adminId, updateInfoJson) => {
     return updateResult;
 }
 
+export const UpdateExpertPermissionByIdAPI = async (expertId, updateInfoJson) => {
+    const token = (JSON.parse(localStorage.getItem("user"))).token;
+    let updateResult = null;
+    const onSuccess = response => {
+        console.log(response.data);
+        updateResult = response.data.success;
+    }
+
+    const onFailure = error => {
+        console.log(error);
+        updateResult = false;
+    }
+
+    const apiConfig = {
+        headers: { "Authorization": `Bearer ${token}` }
+    }
+
+    await APIKit.put('/experts/' + expertId + '/update', updateInfoJson, apiConfig)
+        .then(onSuccess)
+        .catch(onFailure);
+
+    return updateResult;
+}
+
 export const SuspendUserByIdAPI = async (userId) => {
     const token = (JSON.parse(localStorage.getItem("user"))).token;
     let suspendResult = null;

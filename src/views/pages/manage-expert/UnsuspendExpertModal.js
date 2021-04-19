@@ -13,7 +13,7 @@ import {
 
 import { GetUserInfoAPI, UnsuspendUserByIdAPI } from '../../../api/user';
 
-const UnsuspendExpertModal = ({ selectedExpertUsername, show, handleClose }) => {
+const UnsuspendExpertModal = ({ selectedExpertUsername, show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [unsuspendExpertUUID, setUnsuspendExpertUUID] = useState("");
     const [unsuspendExpertUsername, setUnsuspendExpertUsername] = useState("");
     const [unsuspendMessage, setUnsuspendMessage] = useState(null);
@@ -32,6 +32,7 @@ const UnsuspendExpertModal = ({ selectedExpertUsername, show, handleClose }) => 
 
         const unsuspendResult = await UnsuspendUserByIdAPI(unsuspendExpertUUID);
         if (unsuspendResult === true) {
+            setRefreshDataFlag(!refreshDataFlag);
             setUnsuspendMessage(<CAlert color="success">Mở khóa tài khoản thành công!</CAlert>)
         } else {
             setUnsuspendMessage(<CAlert color="danger">{unsuspendResult}</CAlert>)
@@ -57,7 +58,7 @@ const UnsuspendExpertModal = ({ selectedExpertUsername, show, handleClose }) => 
                         Mở khóa
                 </CButton>
                     <CButton color="secondary" onClick={handleClose()}>
-                        Hủy
+                        Đóng
                 </CButton>
                 </CModalFooter>
             </CForm>

@@ -13,7 +13,7 @@ import {
 
 import { GetUserInfoAPI, UnsuspendUserByIdAPI } from '../../../api/user';
 
-const UnsuspendAdminModal = ({ selectedAdminUsername, show, handleClose }) => {
+const UnsuspendAdminModal = ({ selectedAdminUsername, show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [unsuspendAdminUUID, setUnsuspendAdminUUID] = useState("");
     const [unsuspendAdminUsername, setUnsuspendAdminUsername] = useState("");
     const [unsuspendMessage, setUnsuspendMessage] = useState(null);
@@ -32,9 +32,10 @@ const UnsuspendAdminModal = ({ selectedAdminUsername, show, handleClose }) => {
 
         const unsuspendResult = await UnsuspendUserByIdAPI(unsuspendAdminUUID);
         if (unsuspendResult === true) {
-            setUnsuspendMessage(<CAlert color="success">Mở khóa tài khoản thành công!</CAlert>)
+            setUnsuspendMessage(<CAlert color="success">Mở khóa tài khoản thành công!</CAlert>);
+            setRefreshDataFlag(!refreshDataFlag);
         } else {
-            setUnsuspendMessage(<CAlert color="danger">{unsuspendResult}</CAlert>)
+            setUnsuspendMessage(<CAlert color="danger">{unsuspendResult}</CAlert>);
         }
     }
 

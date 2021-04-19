@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { useHistory } from 'react-router-dom'
 
 import {
     CCol,
@@ -27,9 +26,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import vi from "date-fns/locale/vi";
 import { format } from 'date-fns';
 
-const AddAdminModal = ({ show, handleClose }) => {
-    const history = useHistory();
-
+const AddAdminModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [addAdminFullname, setAddAdminFullname] = useState("");
     const [addAdminUsername, setAddAdminUsername] = useState("");
     const [addAdminPassword, setAddAdminPassword] = useState("");
@@ -131,7 +128,7 @@ const AddAdminModal = ({ show, handleClose }) => {
             console.log(newAdminID, additionalData)
             if (updateAdminAvt === true && permissionUpdateResult === true) {
                 setAddMessage(<CAlert color="success">Thêm mới thành công!</CAlert>);
-                history.push("/manage-admin");
+                setRefreshDataFlag(!refreshDataFlag);
             } else {
                 setAddMessage(<CAlert color="danger">Thêm mới thành công! Tuy nhiên phần thông tin cập nhật đã gặp sự cố. Hãy sử dụng chức năng Cập nhật để cập nhật lại thông tin.</CAlert>);
             }

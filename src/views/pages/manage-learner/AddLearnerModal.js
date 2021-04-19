@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { useHistory } from 'react-router-dom'
 
 import {
     CCol,
@@ -26,9 +25,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import vi from "date-fns/locale/vi";
 import { format } from 'date-fns';
 
-const AddLearnerModal = ({ show, handleClose }) => {
-    const history = useHistory();
-
+const AddLearnerModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [addLearnerFullname, setAddLearnerFullname] = useState("");
     const [addLearnerUsername, setAddLearnerUsername] = useState("");
     const [addLearnerPassword, setAddLearnerPassword] = useState("");
@@ -119,7 +116,7 @@ const AddLearnerModal = ({ show, handleClose }) => {
             console.log(newLearnerID, additionalData)
             if (updateLearnerAvt === true) {
                 setAddMessage(<CAlert color="success">Thêm mới thành công!</CAlert>);
-                history.push("/manage-learner");
+                setRefreshDataFlag(!refreshDataFlag);
             } else {
                 setAddMessage(<CAlert color="danger">Thêm mới thành công! Tuy nhiên phần thông tin cập nhật đã gặp sự cố. Hãy sử dụng chức năng Cập nhật để cập nhật lại thông tin.</CAlert>);
             }

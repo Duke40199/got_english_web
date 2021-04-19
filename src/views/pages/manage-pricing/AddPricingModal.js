@@ -19,13 +19,16 @@ import {
 
 import { AddPricingInfoAPI } from '../../../api/pricing';
 
-const defineServiceName = serviceName => {
-    if (serviceName.includes("messaging_session")) {
-        return "Phiên nhắn tin";
-    } else if (serviceName.includes("live_call_session")) {
-        return "Phiên gọi trực tuyến";
-    } else if (serviceName.includes("translation_call_session")) {
-        return "Phòng phiên dịch trực tuyến";
+const definePricingName = pricingName => {
+    if (pricingName.includes("coin_value")) {
+        return "Coin";
+    }
+    else if (pricingName.includes("messaging_session")) {
+        return "Dịch vụ Phiên nhắn tin";
+    } else if (pricingName.includes("live_call_session")) {
+        return "Dịch vụ Phiên gọi trực tuyến";
+    } else if (pricingName.includes("translation_call_session")) {
+        return "Dịch vụ Phòng phiên dịch trực tuyến";
     } else {
         return "Không xác định";
     }
@@ -34,7 +37,7 @@ const defineServiceName = serviceName => {
 const AddPricingModal = ({ selectedPricingServiceName, show, handleClose }) => {
     const history = useHistory();
 
-    const [addPricingServiceName] = useState(selectedPricingServiceName);
+    const [addPricingName] = useState(selectedPricingServiceName);
     const [addPricingQuantity, setAddPricingQuantity] = useState("");
     const [addPricingQuantityUnit] = useState("phút");
     const [addPricingPrice, setAddPricingPrice] = useState("");
@@ -45,7 +48,7 @@ const AddPricingModal = ({ selectedPricingServiceName, show, handleClose }) => {
         e.preventDefault();
 
         const userInput = {
-            "service_name": addPricingServiceName,
+            "pricing_name": addPricingName,
             "quantity": parseInt(addPricingQuantity),
             "quantity_unit": addPricingQuantityUnit,
             "price": parseInt(addPricingPrice),
@@ -77,10 +80,10 @@ const AddPricingModal = ({ selectedPricingServiceName, show, handleClose }) => {
                 <CModalBody>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="add-pricing-service-name-input">Tên Dịch vụ:</CLabel>
+                            <CLabel htmlFor="add-pricing-service-name-input">Tên Đơn giá:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="text" id="add-pricing-service-name-input" name="service-name" value={defineServiceName(addPricingServiceName)} readOnly />
+                            <CInput type="text" id="add-pricing-service-name-input" name="service-name" value={definePricingName(addPricingName)} readOnly />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>

@@ -1,5 +1,27 @@
 import APIKit from './APIKit';
 
+export const GetCoinValuePricingInfoListAPI = async () => {
+    const token = (JSON.parse(localStorage.getItem("user"))).token;
+    let pricingInfoList = null;
+    const onSuccess = data => {
+        pricingInfoList = data.data.data;
+    }
+
+    const onFailure = error => {
+        console.log(error);
+    }
+
+    const apiConfig = {
+        headers: { "Authorization": `Bearer ${token}` }
+    }
+
+    await APIKit.get('/pricings?pricing_name=coin_value', apiConfig)
+        .then(onSuccess)
+        .catch(onFailure);
+
+    return pricingInfoList;
+}
+
 export const GetMessagingSessionPricingInfoListAPI = async () => {
     const token = (JSON.parse(localStorage.getItem("user"))).token;
     let pricingInfoList = null;
@@ -15,7 +37,7 @@ export const GetMessagingSessionPricingInfoListAPI = async () => {
         headers: { "Authorization": `Bearer ${token}` }
     }
 
-    await APIKit.get('/pricings?service_name=messaging_session', apiConfig)
+    await APIKit.get('/pricings?pricing_name=messaging_session', apiConfig)
         .then(onSuccess)
         .catch(onFailure);
 
@@ -37,7 +59,7 @@ export const GetLiveCallSessionPricingInfoListAPI = async () => {
         headers: { "Authorization": `Bearer ${token}` }
     }
 
-    await APIKit.get('/pricings?service_name=live_call_session', apiConfig)
+    await APIKit.get('/pricings?pricing_name=live_call_session', apiConfig)
         .then(onSuccess)
         .catch(onFailure);
 
@@ -59,7 +81,7 @@ export const GetTranslationCallSessionPricingInfoListAPI = async () => {
         headers: { "Authorization": `Bearer ${token}` }
     }
 
-    await APIKit.get('/pricings?service_name=translation_call_session', apiConfig)
+    await APIKit.get('/pricings?pricing_name=translation_call_session', apiConfig)
         .then(onSuccess)
         .catch(onFailure);
 

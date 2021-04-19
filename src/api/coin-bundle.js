@@ -97,3 +97,32 @@ export const CreateCoinBundleAPI = async (coinBundleInfoJson) => {
 
     return createResult;
 }
+
+export const DeleteCoinBundleByIdAPI = async (coinBundleId) => {
+    const token = (JSON.parse(localStorage.getItem("user"))).token;
+    let deleteResult = null;
+
+    const onSuccess = response => {
+        console.log(response.data);
+        deleteResult = response.data.success;
+    }
+
+    const onFailure = error => {
+        console.log(error);
+        if ((error.response.data).includes("coin bundle not found or already deleted")) {
+            deleteResult = "Gói Coin này không tìm thấy hoặc đã bị xóa!"
+        } else {
+            deleteResult = "Xóa Gói Coin thất bại!"
+        }
+    }
+
+    const apiConfig = {
+        headers: { "Authorization": `Bearer ${token}` }
+    }
+
+    await APIKit.delete('/coin-bundles/' + coinBundleId + "/delete", apiConfig)
+        .then(onSuccess)
+        .catch(onFailure);
+
+    return deleteResult;
+}

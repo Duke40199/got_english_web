@@ -109,12 +109,12 @@ const UpdateCoinBundleModal = ({ selectedCoinBundleId, show, handleClose }) => {
                             <CLabel htmlFor="update-coin-bundle-price-input">Giá:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="number" id="update-coin-bundle-price-input" min="0" step="10000" name="price" value={updateCoinBundlePrice} onChange={({ target }) => setUpdateCoinBundlePrice(target.value)} />
+                            <CInput type="number" id="update-coin-bundle-price-input" min="0" name="price" value={updateCoinBundlePrice} onChange={({ target }) => setUpdateCoinBundlePrice(target.value)} />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="update-coin-bundle-price-unit-input">Nội dung Gói:</CLabel>
+                            <CLabel htmlFor="update-coin-bundle-price-unit-input">Đơn vị Giá:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
                             <CInput type="text" id="update-coin-bundle-price-unit-input" name="price-unit" value="VND" readOnly />

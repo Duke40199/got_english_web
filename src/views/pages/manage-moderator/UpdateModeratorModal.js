@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import { useHistory } from 'react-router-dom'
 
 import {
     CCol,
@@ -29,9 +28,7 @@ import vi from "date-fns/locale/vi";
 import { format, parseISO } from 'date-fns';
 
 
-const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) => {
-    const history = useHistory();
-
+const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [updateModeratorUUID, setUpdateModeratorUUID] = useState("");
     const [updateModeratorFullname, setUpdateModeratorFullname] = useState("");
     const [updateModeratorUsername, setUpdateModeratorUsername] = useState("");
@@ -166,7 +163,7 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
 
         if (updateResult === true && permissionUpdateResult === true) {
             setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
-            history.push("/manage-moderator");
+            setRefreshDataFlag(!refreshDataFlag);
         } else {
             setUpdateMessage(<CAlert color="danger">Cập nhật thất bại!</CAlert>);
         }
@@ -326,7 +323,7 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
                         Cập nhật
                         </CButton>
                     <CButton color="secondary" onClick={handleClose()}>
-                        Hủy
+                        Đóng
                         </CButton>
                 </CModalFooter>
             </CForm>

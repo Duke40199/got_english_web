@@ -13,7 +13,7 @@ import {
 
 import { GetUserInfoAPI, SuspendUserByIdAPI } from '../../../api/user';
 
-const SuspendAdminModal = ({ selectedAdminUsername, show, handleClose }) => {
+const SuspendAdminModal = ({ selectedAdminUsername, show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [suspendAdminUUID, setSuspendAdminUUID] = useState("");
     const [suspendAdminUsername, setSuspendAdminUsername] = useState("");
     const [suspendMessage, setSuspendMessage] = useState(null);
@@ -33,6 +33,7 @@ const SuspendAdminModal = ({ selectedAdminUsername, show, handleClose }) => {
         const suspendResult = await SuspendUserByIdAPI(suspendAdminUUID);
         if (suspendResult === true) {
             setSuspendMessage(<CAlert color="success">Khóa tài khoản thành công!</CAlert>);
+            setRefreshDataFlag(!refreshDataFlag);
         } else {
             setSuspendMessage(<CAlert color="danger">{suspendResult}</CAlert>);
         }

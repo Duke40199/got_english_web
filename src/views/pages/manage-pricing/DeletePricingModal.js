@@ -41,17 +41,17 @@ const DeletePricingModal = ({ selectedPricingId, show, handleClose }) => {
         >
             <CForm onSubmit={onSubmitDeleteForm} method="post" encType="multipart/form-data" className="form-horizontal">
                 <CModalHeader closeButton>
-                    <CModalTitle>Xóa Đơn Giá</CModalTitle>
+                    <CModalTitle>Xóa Đơn Giá ( id: {selectedPricingId} )</CModalTitle>
                 </CModalHeader>
                 <CModalBody>
-                    {deleteMessage ? deleteMessage : "Bạn chắc chắn muốn xóa Đơn Giá ( id: " + selectedPricingId + " ) này chứ?"}
+                    {deleteMessage ? deleteMessage : "Bạn chắc chắn muốn xóa Đơn Giá này chứ?"}
                 </CModalBody>
                 <CModalFooter>
                     <CButton color="danger" type="submit">
                         Xóa
                 </CButton>
                     <CButton color="secondary" onClick={handleClose()}>
-                        Hủy
+                        Đóng
                 </CButton>
                 </CModalFooter>
             </CForm>
