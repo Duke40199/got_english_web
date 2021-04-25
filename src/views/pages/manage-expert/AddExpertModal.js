@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { useHistory } from 'react-router-dom'
 
 import {
     CCol,
@@ -14,11 +13,12 @@ import {
     CFormGroup,
     CInputFile,
     CForm,
-    CAlert
+    CAlert,
+    CInputCheckbox
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 
-import { CreateUserAPI, UpdateUserInfoByUserIdAPI } from '../../../api/user';
+import { CreateUserAPI, UpdateUserInfoByUserIdAPI, UpdateExpertPermissionByIdAPI } from '../../../api/user';
 import firebase from '../../../firebase/firebase';
 import jwt_decode from 'jwt-decode'
 import DatePicker, { registerLocale } from "react-datepicker";
@@ -26,9 +26,9 @@ import "react-datepicker/dist/react-datepicker.css";
 import vi from "date-fns/locale/vi";
 import { format } from 'date-fns';
 
-const AddExpertModal = ({ show, handleClose }) => {
-    const history = useHistory();
+import { usePromiseTracker, trackPromise } from "react-promise-tracker";
 
+const AddExpertModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [addExpertFullname, setAddExpertFullname] = useState("");
     const [addExpertUsername, setAddExpertUsername] = useState("");
     const [addExpertPassword, setAddExpertPassword] = useState("");
@@ -37,9 +37,14 @@ const AddExpertModal = ({ show, handleClose }) => {
     const [addExpertPhoneNumber, setAddExpertPhoneNumber] = useState("");
     const [addExpertBirthday, setAddExpertBirthday] = useState("");
     const [addExpertAvatarUrl, setAddExpertAvatarUrl] = useState("");
+    const [addExpertCanChat, setAddExpertCanChat] = useState(false);
+    const [addExpertCanJoinTranslationSession, setAddExpertCanJoinTranslationSession] = useState(false);
+    const [addExpertCanJoinLiveCallSession, setAddExpertCanJoinLiveCallSession] = useState(false);
     const [addMessage, setAddMessage] = useState(null);
 
-    const uploadToStorage = async (imageURL, updateExpertUUID) => {
+    const { promiseInProgress } = usePromiseTracker();
+
+    const uploadToStorage = async (imageURL, addExpertUUID) => {
         let blob = await new Promise((resolve, reject) => {
             const xhr = new XMLHttpRequest();
             xhr.onload = function () {
@@ -54,7 +59,7 @@ const AddExpertModal = ({ show, handleClose }) => {
         });
 
         const storageRef = firebase.storage().ref();
-        const imagesRef = storageRef.child('uploads/' + updateExpertUUID);
+        const imagesRef = storageRef.child('uploads/' + addExpertUUID);
         const snapshot = await imagesRef.put(blob);
         const remoteUri = await snapshot.ref.getDownloadURL();
 
@@ -92,7 +97,7 @@ const AddExpertModal = ({ show, handleClose }) => {
             "role_name": "Expert"
         };
 
-        const addExpertResult = await CreateUserAPI(userInput);
+        const addExpertResult = await trackPromise(CreateUserAPI(userInput));
         console.log(addExpertResult, userInput);
 
         if (addExpertResult.success === true) {
@@ -103,7 +108,7 @@ const AddExpertModal = ({ show, handleClose }) => {
             let newAvtSrc = addExpertAvatarUrl;
             if (isBlob) {
                 //upload local image to Firebase Storage
-                newAvtSrc = await uploadToStorage(addExpertAvatarUrl, newExpertID);
+                newAvtSrc = await trackPromise(uploadToStorage(addExpertAvatarUrl, newExpertID));
             } else {
                 //do nothing
             }
@@ -114,12 +119,18 @@ const AddExpertModal = ({ show, handleClose }) => {
                 "birthday": ((addExpertBirthday == "" || addExpertBirthday == null) ? null : format(addExpertBirthday, 'yyyy-MM-dd')),
                 "avatar_url": newAvtSrc
             }
+            const permissionInput = {
+                "can_chat": addExpertCanChat,
+                "can_join_live_call_session": addExpertCanJoinLiveCallSession,
+                "can_join_translation_session": addExpertCanJoinTranslationSession
+            }
 
-            const updateExpertAvt = await UpdateUserInfoByUserIdAPI(newExpertID, additionalData);
+            const addExpertAvt = await trackPromise(UpdateUserInfoByUserIdAPI(newExpertID, additionalData));
+            const permissionAddResult = await trackPromise(UpdateExpertPermissionByIdAPI(newExpertID, permissionInput));
             console.log(newExpertID, additionalData)
-            if (updateExpertAvt === true) {
+            if (addExpertAvt === true && permissionAddResult === true) {
                 setAddMessage(<CAlert color="success">Thêm mới thành công!</CAlert>);
-                history.push("/manage-expert");
+                setRefreshDataFlag(!refreshDataFlag);
             } else {
                 setAddMessage(<CAlert color="danger">Thêm mới thành công! Tuy nhiên phần thông tin cập nhật đã gặp sự cố. Hãy sử dụng chức năng Cập nhật để cập nhật lại thông tin.</CAlert>);
             }
@@ -222,6 +233,41 @@ const AddExpertModal = ({ show, handleClose }) => {
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
+                        <CCol md="4">
+                            <CLabel htmlFor="add-expert-permission">Quyền hạn:</CLabel>
+                        </CCol>
+                        <CCol xs="12" md="8">
+                            <CLabel htmlFor="add-expert-can-chat"
+                                className="w-100 permission-input-checkbox">
+                                <CInputCheckbox
+                                    id="add-expert-can-chat"
+                                    name="add-expert-can-chat"
+                                    checked={addExpertCanChat}
+                                    onChange={({ target }) => setAddExpertCanChat(target.checked)} />
+                                Tham gia Phiên Nhắn Tin
+                                </CLabel>
+                            <CLabel htmlFor="add-expert-can-join-live-call-session"
+                                className="w-100 permission-input-checkbox">
+                                <CInputCheckbox
+                                    id="add-expert-can-join-live-call-session"
+                                    name="add-expert-can-join-live-call-session"
+                                    checked={addExpertCanJoinLiveCallSession}
+                                    onChange={({ target }) => setAddExpertCanJoinLiveCallSession(target.checked)} />
+                                Tham gia Phiên Gọi Trực Tuyến
+                                </CLabel>
+                            <CLabel htmlFor="add-expert-can-join-translation-session"
+                                className="w-100 permission-input-checkbox">
+                                <CInputCheckbox
+                                    id="add-expert-can-join-translation-session"
+                                    name="add-expert-can-join-translation-session"
+                                    checked={addExpertCanJoinTranslationSession}
+                                    onChange={({ target }) => setAddExpertCanJoinTranslationSession(target.checked)}
+                                />
+                                Tham gia Phòng Phiên Dịch
+                                </CLabel>
+                        </CCol>
+                    </CFormGroup>
+                    <CFormGroup row>
                         <CLabel col md="4" htmlFor="expert-avatar-url">Ảnh đại diện:</CLabel>
                         <CCol xs="12" md="8">
                             <img id="addExpertAvt" className="mr-2" src={addExpertAvatarUrl} width="80" height="80" />
@@ -236,11 +282,11 @@ const AddExpertModal = ({ show, handleClose }) => {
                     {addMessage}
                 </CModalBody>
                 <CModalFooter>
-                    <CButton color="primary" type="submit">
+                    <CButton color="primary" type="submit" disabled={promiseInProgress}>
                         Thêm
                 </CButton>
                     <CButton color="secondary" onClick={handleClose()}>
-                        Hủy
+                        Đóng
                 </CButton>
                 </CModalFooter>
             </CForm>

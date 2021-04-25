@@ -49,13 +49,14 @@ const ManageAdmin = () => {
     const [updateAdminModalShow, setUpdateAdminModalShow] = useState(false);
     const [adminInfoList, setAdminInfoList] = useState(null);
     const [selectedAdminUsername, setSelectedAdminUsername] = useState(null);
+    const [refreshDataFlag, setRefreshDataFlag] = useState(false);
 
     const { promiseInProgress } = usePromiseTracker();
 
     useEffect(async () => {
         const adminInfoList = await trackPromise(GetAdminInfoListAPI());
         setAdminInfoList(adminInfoList);
-    }, [updateAdminModalShow, addAdminModalShow, suspendAdminModalShow, unsuspendAdminModalShow])
+    }, [refreshDataFlag])
 
     const updateAdminOnclick = (adminUsername) => {
         //open the update admin modal
@@ -102,9 +103,10 @@ const ManageAdmin = () => {
             <CRow>
                 <CCol>
                     <CCard>
-                        <CCardHeader align="right">
+                        <CCardHeader>
+                            <h3 className="m-0">Danh sách Quản Trị Viên</h3>
                             <CButton color="primary" className="mt-2 d-flex align-items-center" onClick={() => setAddAdminModalShow(true)}>
-                                <CIcon name="cilPlus" size="sm" className="mr-1"></CIcon>Thêm mới Điều Hành Viên</CButton>
+                                <CIcon name="cilPlus" size="sm" className="mr-1"></CIcon>Thêm mới Quản Trị Viên</CButton>
                         </CCardHeader>
                         <CCardBody className="pt-0 pb-0">
                             <CDataTable
@@ -191,7 +193,10 @@ const ManageAdmin = () => {
                 {addAdminModalShow ?
                     <AddAdminModal
                         show={addAdminModalShow}
-                        handleClose={() => hideAddModal} />
+                        handleClose={() => hideAddModal}
+                        refreshDataFlag={refreshDataFlag}
+                        setRefreshDataFlag={setRefreshDataFlag}
+                    />
                     : null}
                 {/*POPUP UPDATE ADMIN*/}
                 {(updateAdminModalShow && selectedAdminUsername != null) ?
@@ -199,6 +204,8 @@ const ManageAdmin = () => {
                         selectedAdminUsername={selectedAdminUsername}
                         show={updateAdminModalShow}
                         handleClose={() => hideUpdateModal}
+                        refreshDataFlag={refreshDataFlag}
+                        setRefreshDataFlag={setRefreshDataFlag}
                     />
                     : null}
                 {/*POPUP SUSPEND ADMIN*/}
@@ -207,6 +214,8 @@ const ManageAdmin = () => {
                         selectedAdminUsername={selectedAdminUsername}
                         show={suspendAdminModalShow}
                         handleClose={() => hideSuspendModal}
+                        refreshDataFlag={refreshDataFlag}
+                        setRefreshDataFlag={setRefreshDataFlag}
                     /> : null}
                 {/*POPUP UNSUSPEND ADMIN*/}
                 {unsuspendAdminModalShow && selectedAdminUsername ?
@@ -214,6 +223,8 @@ const ManageAdmin = () => {
                         selectedAdminUsername={selectedAdminUsername}
                         show={unsuspendAdminModalShow}
                         handleClose={() => hideUnsuspendModal}
+                        refreshDataFlag={refreshDataFlag}
+                        setRefreshDataFlag={setRefreshDataFlag}
                     /> : null}
             </CRow >
         );

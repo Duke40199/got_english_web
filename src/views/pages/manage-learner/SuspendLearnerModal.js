@@ -11,29 +11,35 @@ import {
     CForm
 } from '@coreui/react'
 
+import { usePromiseTracker, trackPromise } from "react-promise-tracker";
 
 import { GetUserInfoAPI, SuspendUserByIdAPI } from '../../../api/user';
 
-const SuspendLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => {
+const SuspendLearnerModal = ({ selectedLearnerUsername, show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [suspendLearnerUUID, setSuspendLearnerUUID] = useState("");
     const [suspendLearnerUsername, setSuspendLearnerUsername] = useState("");
     const [suspendMessage, setSuspendMessage] = useState(null);
 
+    const { promiseInProgress } = usePromiseTracker();
+
     //this useEffect will be executed every time the modal show
     useEffect(async () => {
         if (selectedLearnerUsername != null) {
-            const selectedLearnerInfo = await GetUserInfoAPI(selectedLearnerUsername);
-            setSuspendLearnerUUID(selectedLearnerInfo.id);
-            setSuspendLearnerUsername(selectedLearnerInfo.username);
+            const selectedLearnerInfo = await trackPromise(GetUserInfoAPI(selectedLearnerUsername));
+            if (selectedLearnerInfo != null) {
+                setSuspendLearnerUUID(selectedLearnerInfo.id);
+                setSuspendLearnerUsername(selectedLearnerInfo.username);
+            }
         }
-    });
+    }, [selectedLearnerUsername]);
 
     const onSubmitSuspendForm = async (e) => {
         e.preventDefault();
 
-        const suspendResult = await SuspendUserByIdAPI(suspendLearnerUUID);
+        const suspendResult = await trackPromise(SuspendUserByIdAPI(suspendLearnerUUID));
         if (suspendResult === true) {
             setSuspendMessage(<CAlert color="success">Khóa tài khoản thành công!</CAlert>);
+            setRefreshDataFlag(!refreshDataFlag);
         } else {
             setSuspendMessage(<CAlert color="danger">{suspendResult}</CAlert>);
         }
@@ -54,11 +60,11 @@ const SuspendLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => 
                     {suspendMessage ? suspendMessage : "Bạn chắc chắn muốn khóa Học Viên này chứ?"}
                 </CModalBody>
                 <CModalFooter>
-                    <CButton color="danger" type="submit">
+                    <CButton color="danger" type="submit" disabled={promiseInProgress}>
                         Khóa
                 </CButton>
                     <CButton color="secondary" onClick={handleClose()}>
-                        Hủy
+                        Đóng
                 </CButton>
                 </CModalFooter>
             </CForm>

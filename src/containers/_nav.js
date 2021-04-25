@@ -53,7 +53,7 @@ if (role === "Admin") {
       _tag: 'CSidebarNavItem',
       name: 'Xem hồ sơ Ứng Viên',
       icon: 'cil-address-book',
-      to: '/view-candidate-certification',
+      to: '/view-application-form',
     },
     {
       _tag: 'CSidebarNavItem',
@@ -67,6 +67,12 @@ if (role === "Admin") {
       to: '/manage-pricing',
       icon: 'cil-cash',
     },
+    {
+      _tag: 'CSidebarNavItem',
+      name: 'Quản lý Chiết Khấu',
+      to: '/manage-exchange-rate',
+      icon: 'cil-balance-scale',
+    }
   ]
 }
 

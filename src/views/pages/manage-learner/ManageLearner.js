@@ -8,11 +8,6 @@ import {
     CDataTable,
     CRow,
     CButton,
-    CModal,
-    CModalHeader,
-    CModalBody,
-    CModalFooter,
-    CModalTitle,
     CBadge,
     CAlert
 } from '@coreui/react'
@@ -54,13 +49,14 @@ const ManageLearner = () => {
     const [updateLearnerModalShow, setUpdateLearnerModalShow] = useState(false);
     const [learnerInfoList, setLearnerInfoList] = useState(null);
     const [selectedLearnerUsername, setSelectedLearnerUsername] = useState(null);
+    const [refreshDataFlag, setRefreshDataFlag] = useState(false);
 
     const { promiseInProgress } = usePromiseTracker();
 
     useEffect(async () => {
         const learnerInfoList = await trackPromise(GetLearnerInfoListAPI());
         setLearnerInfoList(learnerInfoList);
-    }, [updateLearnerModalShow, addLearnerModalShow, suspendLearnerModalShow, unsuspendLearnerModalShow])
+    }, [refreshDataFlag])
 
     const updateLearnerOnclick = (learnerUsername) => {
         //open the update learner modal
@@ -107,7 +103,8 @@ const ManageLearner = () => {
             <CRow>
                 <CCol>
                     <CCard>
-                        <CCardHeader align="right">
+                        <CCardHeader>
+                        <h3 className="m-0">Danh sách Học Viên</h3>
                             <CButton color="primary" className="mt-2 d-flex align-items-center" onClick={() => setAddLearnerModalShow(true)}>
                                 <CIcon name="cilPlus" size="sm" className="mr-1"></CIcon>Thêm mới Học Viên</CButton>
                         </CCardHeader>
@@ -191,7 +188,9 @@ const ManageLearner = () => {
                 {addLearnerModalShow ?
                     <AddLearnerModal
                         show={addLearnerModalShow}
-                        handleClose={() => hideAddModal} />
+                        handleClose={() => hideAddModal}
+                        refreshDataFlag={refreshDataFlag}
+                        setRefreshDataFlag={setRefreshDataFlag} />
                     : null}
                 {/*POPUP UPDATE LEARNER*/}
                 {(updateLearnerModalShow && selectedLearnerUsername != null) ?
@@ -199,6 +198,8 @@ const ManageLearner = () => {
                         selectedLearnerUsername={selectedLearnerUsername}
                         show={updateLearnerModalShow}
                         handleClose={() => hideUpdateModal}
+                        refreshDataFlag={refreshDataFlag}
+                        setRefreshDataFlag={setRefreshDataFlag}
                     />
                     : null}
                 {/*POPUP SUSPEND LEARNER*/}
@@ -207,6 +208,8 @@ const ManageLearner = () => {
                         selectedLearnerUsername={selectedLearnerUsername}
                         show={suspendLearnerModalShow}
                         handleClose={() => hideSuspendModal}
+                        refreshDataFlag={refreshDataFlag}
+                        setRefreshDataFlag={setRefreshDataFlag}
                     /> : null}
                 {/*POPUP UNSUSPEND LEARNER*/}
                 {unsuspendLearnerModalShow && selectedLearnerUsername ?
@@ -214,6 +217,8 @@ const ManageLearner = () => {
                         selectedLearnerUsername={selectedLearnerUsername}
                         show={unsuspendLearnerModalShow}
                         handleClose={() => hideUnsuspendModal}
+                        refreshDataFlag={refreshDataFlag}
+                        setRefreshDataFlag={setRefreshDataFlag}
                     /> : null}
             </CRow >
         );

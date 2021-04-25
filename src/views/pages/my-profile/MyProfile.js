@@ -19,6 +19,8 @@ import { UpdateUserInfoByUserIdAPI } from '../../../api/user';
 import { GetMyProfileAPI } from '../../../api/login'
 import firebase from '../../../firebase/firebase';
 
+import { usePromiseTracker, trackPromise } from "react-promise-tracker";
+
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import vi from "date-fns/locale/vi";
@@ -32,12 +34,14 @@ const MyProfile = () => {
     const [fullname, setFullname] = useState(userInfo.fullname);
     const [username, setUsername] = useState(userInfo.username);
     const [password, setPassword] = useState("");
-    const [email, setEmail] = useState(userInfo.email);
+    const [email] = useState(userInfo.email);
     const [address, setAddress] = useState(userInfo.address);
     const [phoneNumber, setPhoneNumber] = useState(userInfo.phone_number);
     const [birthday, setBirthday] = useState((userInfo.birthday == "" || userInfo.birthday == null) ? "" : parseISO(userInfo.birthday));
     const [avtSrc, setAvtSrc] = useState((userInfo.avatar_url == "" || userInfo.avatar_url == null) ? "" : userInfo.avatar_url);
     const [updateMessage, setUpdateMessage] = useState(null);
+
+    const { promiseInProgress } = usePromiseTracker();
 
     const uploadToStorage = async (imageURL) => {
         let blob = await new Promise((resolve, reject) => {
@@ -92,7 +96,7 @@ const MyProfile = () => {
         let newAvtSrc = avtSrc;
         if (isBlob) {
             //upload local image to Firebase Storage
-            newAvtSrc = await uploadToStorage(avtSrc);
+            newAvtSrc = await trackPromise(uploadToStorage(avtSrc));
         } else {
             //do nothing
         }
@@ -120,7 +124,7 @@ const MyProfile = () => {
 
         console.log(userInput);
 
-        const updateResult = await UpdateUserInfoByUserIdAPI(userInfo.id, userInput);
+        const updateResult = await trackPromise(UpdateUserInfoByUserIdAPI(userInfo.id, userInput));
 
         if (updateResult === true) {
             setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
@@ -130,7 +134,7 @@ const MyProfile = () => {
                 history.push("/");
             } else {
                 //refresh data
-                const newUserInfo = await GetMyProfileAPI();
+                const newUserInfo = await trackPromise(GetMyProfileAPI());
                 localStorage.setItem("userInfo", JSON.stringify(newUserInfo));
                 history.push("/my-profile");
             }
@@ -239,7 +243,7 @@ const MyProfile = () => {
                                 </CRow>
                                 <CRow className="mt-2 text-center">
                                     <CCol>
-                                        <CButton className="mr-2" color="success" type="submit">Cập nhật</CButton>
+                                        <CButton className="mr-2" color="success" type="submit" disabled={promiseInProgress}>Cập nhật</CButton>
                                         <CButton color="secondary" onClick={() => history.push("/")}>Trở về Trang Chủ</CButton >
                                     </CCol>
                                 </CRow>

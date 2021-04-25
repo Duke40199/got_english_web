@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import { useHistory } from 'react-router-dom'
 
 import {
     CCol,
@@ -28,10 +27,9 @@ import "react-datepicker/dist/react-datepicker.css";
 import vi from "date-fns/locale/vi";
 import { format, parseISO } from 'date-fns';
 
+import { usePromiseTracker, trackPromise } from "react-promise-tracker";
 
-const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) => {
-    const history = useHistory();
-
+const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [updateModeratorUUID, setUpdateModeratorUUID] = useState("");
     const [updateModeratorFullname, setUpdateModeratorFullname] = useState("");
     const [updateModeratorUsername, setUpdateModeratorUsername] = useState("");
@@ -44,27 +42,33 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
     const [updateModeratorCanManageCoinBundle, setUpdateModeratorCanManageCoinBundle] = useState(false);
     const [updateModeratorCanManagePricing, setUpdateModeratorCanManagePricing] = useState(false);
     const [updateModeratorCanManageApplicationForm, setUpdateModeratorCanManageApplicationForm] = useState(false);
+    const [updateModeratorCanManageExchangeRate, setUpdateModeratorCanManageExchangeRate] = useState(false);
     const [updateMessage, setUpdateMessage] = useState(null);
+
+    const { promiseInProgress } = usePromiseTracker();
 
     //this useEffect will be executed every time the modal show
     useEffect(async () => {
         if (selectedModeratorUsername != null) {
-            const selectedModeratorInfo = await GetUserInfoAPI(selectedModeratorUsername);
-            setUpdateModeratorUUID(selectedModeratorInfo.id);
-            setUpdateModeratorFullname(selectedModeratorInfo.fullname);
-            setUpdateModeratorUsername(selectedModeratorInfo.username);
-            setUpdateModeratorEmail(selectedModeratorInfo.email);
-            setUpdateModeratorAddress(selectedModeratorInfo.address);
-            setUpdateModeratorPhoneNumber(selectedModeratorInfo.phone_number);
-            if (selectedModeratorInfo.birthday == "" || selectedModeratorInfo.birthday == null) {
-                setUpdateModeratorBirthday("");
-            } else {
-                setUpdateModeratorBirthday(parseISO(selectedModeratorInfo.birthday));
+            const selectedModeratorInfo = await trackPromise(GetUserInfoAPI(selectedModeratorUsername));
+            if (selectedModeratorInfo != null) {
+                setUpdateModeratorUUID(selectedModeratorInfo.id);
+                setUpdateModeratorFullname(selectedModeratorInfo.fullname);
+                setUpdateModeratorUsername(selectedModeratorInfo.username);
+                setUpdateModeratorEmail(selectedModeratorInfo.email);
+                setUpdateModeratorAddress(selectedModeratorInfo.address);
+                setUpdateModeratorPhoneNumber(selectedModeratorInfo.phone_number);
+                if (selectedModeratorInfo.birthday == "" || selectedModeratorInfo.birthday == null) {
+                    setUpdateModeratorBirthday("");
+                } else {
+                    setUpdateModeratorBirthday(parseISO(selectedModeratorInfo.birthday));
+                }
+                setUpdateModeratorAvatarUrl((selectedModeratorInfo.avatar_url == "" || selectedModeratorInfo.avatar_url == null) ? "" : selectedModeratorInfo.avatar_url);
+                setUpdateModeratorCanManageCoinBundle(selectedModeratorInfo.moderator_details.can_manage_coin_bundle);
+                setUpdateModeratorCanManagePricing(selectedModeratorInfo.moderator_details.can_manage_pricing);
+                setUpdateModeratorCanManageApplicationForm(selectedModeratorInfo.moderator_details.can_manage_application_form);
+                setUpdateModeratorCanManageExchangeRate(selectedModeratorInfo.moderator_details.can_manage_exchange_rate);
             }
-            setUpdateModeratorAvatarUrl((selectedModeratorInfo.avatar_url == "" || selectedModeratorInfo.avatar_url == null) ? "" : selectedModeratorInfo.avatar_url);
-            setUpdateModeratorCanManageCoinBundle(selectedModeratorInfo.moderator_details.can_manage_coin_bundle);
-            setUpdateModeratorCanManagePricing(selectedModeratorInfo.moderator_details.can_manage_pricing);
-            setUpdateModeratorCanManageApplicationForm(selectedModeratorInfo.moderator_details.can_manage_application_form);
         }
     }, [selectedModeratorUsername]);
 
@@ -122,7 +126,7 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
         let newAvtSrc = updateModeratorAvatarUrl;
         if (isBlob) {
             //upload local image to Firebase Storage
-            newAvtSrc = await uploadToStorage(updateModeratorAvatarUrl);
+            newAvtSrc = await trackPromise(uploadToStorage(updateModeratorAvatarUrl));
         } else {
             //do nothing
         }
@@ -140,7 +144,8 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
             permissionInput = {
                 "can_manage_coin_bundle": updateModeratorCanManageCoinBundle,
                 "can_manage_pricing": updateModeratorCanManagePricing,
-                "can_manage_application_form": updateModeratorCanManageApplicationForm
+                "can_manage_application_form": updateModeratorCanManageApplicationForm,
+                "can_manage_exchange_rate": updateModeratorCanManageExchangeRate
             }
         } else {
             userInput = {
@@ -155,18 +160,19 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
             permissionInput = {
                 "can_manage_coin_bundle": updateModeratorCanManageCoinBundle,
                 "can_manage_pricing": updateModeratorCanManagePricing,
-                "can_manage_application_form": updateModeratorCanManageApplicationForm
+                "can_manage_application_form": updateModeratorCanManageApplicationForm,
+                "can_manage_exchange_rate": updateModeratorCanManageExchangeRate
             }
         }
 
         console.log(userInput);
 
-        const updateResult = await UpdateUserInfoByUserIdAPI(updateModeratorUUID, userInput);
-        const permissionUpdateResult = await UpdateModeratorPermissionByIdAPI(updateModeratorUUID, permissionInput);
+        const updateResult = await trackPromise(UpdateUserInfoByUserIdAPI(updateModeratorUUID, userInput));
+        const permissionUpdateResult = await trackPromise(UpdateModeratorPermissionByIdAPI(updateModeratorUUID, permissionInput));
 
         if (updateResult === true && permissionUpdateResult === true) {
             setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
-            history.push("/manage-moderator");
+            setRefreshDataFlag(!refreshDataFlag);
         } else {
             setUpdateMessage(<CAlert color="danger">Cập nhật thất bại!</CAlert>);
         }
@@ -305,6 +311,16 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
                                 />
                                 Quản lý Hồ sơ Ứng Viên
                                 </CLabel>
+                            <CLabel htmlFor="update-moderator-can-manage-exchange-rate-input"
+                                className="w-100 permission-input-checkbox">
+                                <CInputCheckbox
+                                    id="update-moderator-can-manage-exchange-rate-input"
+                                    name="update-moderator-can-manage-exchange-rate-input"
+                                    checked={updateModeratorCanManageExchangeRate}
+                                    onChange={({ target }) => setUpdateModeratorCanManageExchangeRate(target.checked)}
+                                />
+                                Quản lý Chiết Khấu
+                                </CLabel>
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -322,11 +338,11 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose }) 
                     {updateMessage}
                 </CModalBody>
                 <CModalFooter>
-                    <CButton color="success" type="submit">
+                    <CButton color="success" type="submit" disabled={promiseInProgress}>
                         Cập nhật
                         </CButton>
                     <CButton color="secondary" onClick={handleClose()}>
-                        Hủy
+                        Đóng
                         </CButton>
                 </CModalFooter>
             </CForm>

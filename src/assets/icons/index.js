@@ -135,7 +135,8 @@ import {
   cilBook,
   cilCash,
   cilAddressBook,
-  cilLockUnlocked
+  cilLockUnlocked,
+  cilBalanceScale
 } from '@coreui/icons'
 
 export const icons = Object.assign({}, {
@@ -241,7 +242,8 @@ export const icons = Object.assign({}, {
   cilBook,
   cilCash,
   cilAddressBook,
-  cilLockUnlocked
+  cilLockUnlocked,
+  cilBalanceScale
 }, {
   cifUs,
   cifBr,

@@ -11,30 +11,38 @@ import {
     CForm
 } from '@coreui/react'
 
+import { usePromiseTracker, trackPromise } from "react-promise-tracker";
+
 import { GetUserInfoAPI, UnsuspendUserByIdAPI } from '../../../api/user';
 
-const UnsuspendExpertModal = ({ selectedExpertUsername, show, handleClose }) => {
+const UnsuspendExpertModal = ({ selectedExpertUsername, show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [unsuspendExpertUUID, setUnsuspendExpertUUID] = useState("");
     const [unsuspendExpertUsername, setUnsuspendExpertUsername] = useState("");
     const [unsuspendMessage, setUnsuspendMessage] = useState(null);
 
+    const { promiseInProgress } = usePromiseTracker();
+
     //this useEffect will be executed every time the modal show
     useEffect(async () => {
         if (selectedExpertUsername != null) {
-            const selectedExpertInfo = await GetUserInfoAPI(selectedExpertUsername);
-            setUnsuspendExpertUUID(selectedExpertInfo.id);
-            setUnsuspendExpertUsername(selectedExpertInfo.username);
+            const selectedExpertInfo = await trackPromise(GetUserInfoAPI(selectedExpertUsername));
+            if (selectedExpertInfo != null) {
+                setUnsuspendExpertUUID(selectedExpertInfo.id);
+                setUnsuspendExpertUsername(selectedExpertInfo.username);
+            }
         }
-    });
+    }, [selectedExpertUsername]);
 
     const onSubmitUnsuspendForm = async (e) => {
         e.preventDefault();
 
         const unsuspendResult = await UnsuspendUserByIdAPI(unsuspendExpertUUID);
         if (unsuspendResult === true) {
-            setUnsuspendMessage(<CAlert color="success">Mở khóa tài khoản thành công!</CAlert>)
+
+            setUnsuspendMessage(<CAlert color="success">Mở khóa tài khoản thành công!</CAlert>);
+            setRefreshDataFlag(!refreshDataFlag);
         } else {
-            setUnsuspendMessage(<CAlert color="danger">{unsuspendResult}</CAlert>)
+            setUnsuspendMessage(<CAlert color="danger">{unsuspendResult}</CAlert>);
         }
     }
 
@@ -53,11 +61,11 @@ const UnsuspendExpertModal = ({ selectedExpertUsername, show, handleClose }) => 
                     {unsuspendMessage ? unsuspendMessage : "Bạn chắc chắn muốn mở khóa cho Điều Hành Viên này chứ?"}
                 </CModalBody>
                 <CModalFooter>
-                    <CButton color="warning" type="submit">
+                    <CButton color="warning" type="submit" disabled={promiseInProgress}>
                         Mở khóa
                 </CButton>
                     <CButton color="secondary" onClick={handleClose()}>
-                        Hủy
+                        Đóng
                 </CButton>
                 </CModalFooter>
             </CForm>

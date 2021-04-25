@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { useHistory } from 'react-router-dom'
 
 import {
     CCol,
@@ -19,45 +18,58 @@ import {
 
 import { AddPricingInfoAPI } from '../../../api/pricing';
 
-const defineServiceName = serviceName => {
-    if (serviceName.includes("messaging_session")) {
-        return "Phiên nhắn tin";
-    } else if (serviceName.includes("live_call_session")) {
-        return "Phiên gọi trực tuyến";
-    } else if (serviceName.includes("translation_call_session")) {
-        return "Phòng phiên dịch trực tuyến";
+import { usePromiseTracker, trackPromise } from "react-promise-tracker";
+
+const definePricingName = pricingName => {
+    if (pricingName.includes("coin_value")) {
+        return "Coin";
+    }
+    else if (pricingName.includes("messaging_session")) {
+        return "Dịch vụ Phiên nhắn tin";
+    } else if (pricingName.includes("live_call_session")) {
+        return "Dịch vụ Phiên gọi trực tuyến";
+    } else if (pricingName.includes("translation_call_session")) {
+        return "Dịch vụ Phòng phiên dịch trực tuyến";
     } else {
         return "Không xác định";
     }
 }
 
-const AddPricingModal = ({ selectedPricingServiceName, show, handleClose }) => {
-    const history = useHistory();
+const defineQuantityUnitName = quantityUnitName => {
+    if (quantityUnitName.includes("minutes")) {
+        return 'phút';
+    } else {
+        return 'Không xác định';
+    }
+}
 
-    const [addPricingServiceName] = useState(selectedPricingServiceName);
+const AddPricingModal = ({ selectedPricingServiceName, show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
+    const [addPricingName] = useState(selectedPricingServiceName);
     const [addPricingQuantity, setAddPricingQuantity] = useState("");
-    const [addPricingQuantityUnit] = useState("phút");
+    const [addPricingQuantityUnit] = useState("minutes");
     const [addPricingPrice, setAddPricingPrice] = useState("");
     const [addPricingPriceUnit] = useState("coin(s)");
     const [addMessage, setAddMessage] = useState(null);
+
+    const { promiseInProgress } = usePromiseTracker();
 
     const onSubmitAddForm = async (e) => {
         e.preventDefault();
 
         const userInput = {
-            "service_name": addPricingServiceName,
+            "pricing_name": addPricingName,
             "quantity": parseInt(addPricingQuantity),
             "quantity_unit": addPricingQuantityUnit,
             "price": parseInt(addPricingPrice),
             "price_unit": addPricingPriceUnit
         }
 
-        const addPricingResult = await AddPricingInfoAPI(userInput);
+        const addPricingResult = await trackPromise(AddPricingInfoAPI(userInput));
         console.log(addPricingResult, userInput);
 
         if (addPricingResult === true) {
             setAddMessage(<CAlert color="success">Thêm mới thành công!</CAlert>);
-            history.push("/manage-pricing");
+            setRefreshDataFlag(!refreshDataFlag);
         } else {
             setAddMessage(<CAlert color="danger">Thêm mới thất bại!</CAlert>)
         }
@@ -77,10 +89,10 @@ const AddPricingModal = ({ selectedPricingServiceName, show, handleClose }) => {
                 <CModalBody>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="add-pricing-service-name-input">Tên Dịch vụ:</CLabel>
+                            <CLabel htmlFor="add-pricing-service-name-input">Tên Đơn giá:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="text" id="add-pricing-service-name-input" name="service-name" value={defineServiceName(addPricingServiceName)} readOnly />
+                            <CInput type="text" id="add-pricing-service-name-input" name="service-name" value={definePricingName(addPricingName)} readOnly />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -90,7 +102,7 @@ const AddPricingModal = ({ selectedPricingServiceName, show, handleClose }) => {
                         <CCol xs="12" md="8">
                             <CRow className="m-0">
                                 <CInput type="number" id="add-pricing-quantity-input" className="w-25 mr-2" name="quantity" onChange={({ target }) => setAddPricingQuantity(target.value)} required />
-                                {addPricingQuantityUnit}
+                                {defineQuantityUnitName(addPricingQuantityUnit)}
                             </CRow>
                         </CCol>
                     </CFormGroup>
@@ -108,11 +120,11 @@ const AddPricingModal = ({ selectedPricingServiceName, show, handleClose }) => {
                     {addMessage}
                 </CModalBody>
                 <CModalFooter>
-                    <CButton color="primary" type="submit">
+                    <CButton color="primary" type="submit" disabled={promiseInProgress}>
                         Thêm
                         </CButton>
                     <CButton color="secondary" onClick={handleClose()}>
-                        Hủy
+                        Đóng
                         </CButton>
                 </CModalFooter>
             </CForm>

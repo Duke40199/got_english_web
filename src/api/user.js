@@ -111,6 +111,28 @@ export const GetExpertInfoListAPI = async () => {
     return learnerInfoList;
 }
 
+export const GetExpertInfoByIdAPI = async (expertId) => {
+    const token = (JSON.parse(localStorage.getItem("user"))).token;
+    let expertInfo = null;
+    const onSuccess = data => {
+        expertInfo = data.data.data;
+    }
+
+    const onFailure = error => {
+        console.log(error);
+    }
+
+    const apiConfig = {
+        headers: { "Authorization": `Bearer ${token}` }
+    }
+
+    await APIKit.get('/experts?id=' + expertId, apiConfig)
+        .then(onSuccess)
+        .catch(onFailure);
+
+    return expertInfo;
+}
+
 export const UpdateUserInfoByUserIdAPI = async (userID, updateInfoJson) => {
     const token = (JSON.parse(localStorage.getItem("user"))).token;
     let updateResult = null;
@@ -200,6 +222,30 @@ export const UpdateAdminPermissionByIdAPI = async (adminId, updateInfoJson) => {
     }
 
     await APIKit.put('/admins/' + adminId + '/update', updateInfoJson, apiConfig)
+        .then(onSuccess)
+        .catch(onFailure);
+
+    return updateResult;
+}
+
+export const UpdateExpertPermissionByIdAPI = async (expertId, updateInfoJson) => {
+    const token = (JSON.parse(localStorage.getItem("user"))).token;
+    let updateResult = null;
+    const onSuccess = response => {
+        console.log(response.data);
+        updateResult = response.data.success;
+    }
+
+    const onFailure = error => {
+        console.log(error);
+        updateResult = false;
+    }
+
+    const apiConfig = {
+        headers: { "Authorization": `Bearer ${token}` }
+    }
+
+    await APIKit.put('/experts/' + expertId + '/update', updateInfoJson, apiConfig)
         .then(onSuccess)
         .catch(onFailure);
 

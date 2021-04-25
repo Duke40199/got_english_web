@@ -18,7 +18,7 @@ import {
   CAlert
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { signInWithEmailAndPasswordHandler } from 'src/firebase/firebase'
+import { signInWithEmailAndPasswordHandler } from 'src/firebase/firebase';
 import { usePromiseTracker, trackPromise } from "react-promise-tracker";
 
 const Login = () => {
@@ -26,7 +26,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState();
-  const [error, setError] = useState();
+  const [loginMessage, setLoginMessage] = useState(null);
   const history = useHistory();
 
   const { promiseInProgress } = usePromiseTracker();
@@ -42,6 +42,7 @@ const Login = () => {
       //role check
       const role = (jwt_decode(loginResult.userData.token)).claims.role_name;
       if (role === "Admin" || role === "Moderator") {
+        setLoginMessage(<CAlert color="success">Đăng nhập thành công! Xin chờ trong giây lát...</CAlert>);
         // set the state of the user
         setUser(loginResult.userData);
         // store the user in localStorage
@@ -52,10 +53,10 @@ const Login = () => {
         // reload the page
         history.go(0);
       } else {
-        setError("Tài khoản của bạn không có quyền truy cập hệ thống này!");
+        setLoginMessage(<CAlert color="danger">Tài khoản của bạn không có quyền truy cập hệ thống này!</CAlert>);
       }
     } else {
-      setError(loginResult.errorMessage);
+      setLoginMessage(<CAlert color="danger">{loginResult.errorMessage}</CAlert>);
     }
   };
 
@@ -93,15 +94,14 @@ const Login = () => {
                       onChange={({ target }) => setPassword(target.value)}
                     />
                   </CInputGroup>
-                  {error != null ? <CAlert color="danger">{error}</CAlert> : null}
                   {promiseInProgress ?
                     <div className="spinner-border text-primary mb-3">
                     </div> :
-                    null
+                    (loginMessage != null && loginMessage != "") ? loginMessage : null
                   }
                   <CRow>
                     <CCol xs="6">
-                      <CButton color="primary" className="px-4" type="Submit">Đăng Nhập</CButton>
+                      <CButton color="primary" className="px-4" type="Submit" disabled={promiseInProgress}>Đăng Nhập</CButton>
                     </CCol>
                     <CCol xs="6" className="text-right">
                       <CButton color="link" className="px-0">Quên mật khẩu?</CButton>

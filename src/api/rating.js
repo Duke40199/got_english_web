@@ -12,7 +12,9 @@ export const GetRatingListByExpertIdAPI = async (expertId) => {
     }
 
     const apiConfig = {
-        headers: { "Authorization": `Bearer ${token}` }
+        headers: {
+            "Authorization": `Bearer ${token}`
+        }
     }
 
     await APIKit.get('/ratings?expert_id=' + expertId, apiConfig)

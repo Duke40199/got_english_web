@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import { useHistory } from 'react-router-dom'
 
 import {
     CCol,
@@ -13,40 +12,51 @@ import {
     CLabel,
     CFormGroup,
     CForm,
-    CAlert
+    CAlert,
+    CRow
 } from '@coreui/react'
 import { GetPricingInfoByIdAPI, UpdatePricingInfoByIdAPI } from '../../../api/pricing'
 
-const defineServiceName = serviceName => {
-    if (serviceName.includes("messaging_session")) {
-        return "Phiên nhắn tin";
-    } else if (serviceName.includes("live_call_session")) {
-        return "Phiên gọi trực tuyến";
-    } else if (serviceName.includes("translation_call_session")) {
-        return "Phòng phiên dịch trực tuyến";
+import { usePromiseTracker, trackPromise } from "react-promise-tracker";
+
+const definePricingName = pricingName => {
+    if (pricingName.includes("coin_value")) {
+        return "Coin";
+    }
+    else if (pricingName.includes("messaging_session")) {
+        return "Dịch vụ Phiên nhắn tin";
+    } else if (pricingName.includes("live_call_session")) {
+        return "Dịch vụ Phiên gọi trực tuyến";
+    } else if (pricingName.includes("translation_call_session")) {
+        return "Dịch vụ Phòng phiên dịch trực tuyến";
     } else {
         return "Không xác định";
     }
 }
 
-const UpdatePricingModal = ({ selectedPricingId, show, handleClose }) => {
-    const history = useHistory();
-
+const UpdatePricingModal = ({ selectedPricingId, show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [updatePricingId, setUpdatePricingId] = useState("");
-    const [updatePricingServiceName, setUpdatePricingServiceName] = useState("");
+    const [updatePricingName, setUpdatePricingName] = useState("");
+    const [updatePricingQuantity, setUpdatePricingQuantity] = useState("");
+    const [updatePricingQuantityUnit, setUpdatePricingQuantityUnit] = useState("");
     const [updatePricingPrice, setUpdatePricingPrice] = useState("");
     const [updatePricingPriceUnit, setUpdatePricingPriceUnit] = useState("");
     const [updateMessage, setUpdateMessage] = useState(null);
 
+    const { promiseInProgress } = usePromiseTracker();
 
     //this useEffect will be executed every time the modal show
     useEffect(async () => {
         if (selectedPricingId != null) {
-            const selectedPricingInfo = await GetPricingInfoByIdAPI(selectedPricingId);
-            setUpdatePricingId(selectedPricingInfo.id);
-            setUpdatePricingServiceName(selectedPricingInfo.service_name);
-            setUpdatePricingPrice(selectedPricingInfo.price);
-            setUpdatePricingPriceUnit(selectedPricingInfo.price_unit);
+            const selectedPricingInfo = await trackPromise(GetPricingInfoByIdAPI(selectedPricingId));
+            if (selectedPricingInfo != null) {
+                setUpdatePricingId(selectedPricingInfo.id);
+                setUpdatePricingName(selectedPricingInfo.pricing_name);
+                setUpdatePricingQuantity(selectedPricingInfo.quantity);
+                setUpdatePricingQuantityUnit(selectedPricingInfo.quantity_unit)
+                setUpdatePricingPrice(selectedPricingInfo.price);
+                setUpdatePricingPriceUnit(selectedPricingInfo.price_unit);
+            }
         }
     }, [selectedPricingId]);
 
@@ -57,12 +67,12 @@ const UpdatePricingModal = ({ selectedPricingId, show, handleClose }) => {
             "price": parseInt(updatePricingPrice)
         }
 
-        const updatePricingResult = await UpdatePricingInfoByIdAPI(selectedPricingId, userInput);
+        const updatePricingResult = await trackPromise(UpdatePricingInfoByIdAPI(selectedPricingId, userInput));
         console.log(updatePricingResult, userInput);
 
         if (updatePricingResult === true) {
             setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
-            history.push("/manage-pricing");
+            setRefreshDataFlag(!refreshDataFlag);
         } else {
             setUpdateMessage(<CAlert color="danger">Cập nhật thất bại!</CAlert>);
         }
@@ -90,10 +100,10 @@ const UpdatePricingModal = ({ selectedPricingId, show, handleClose }) => {
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="update-pricing-service-name-input">Tên Dịch vụ:</CLabel>
+                            <CLabel htmlFor="update-pricing-name-input">Tên Đơn giá:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="text" id="update-pricing-service-name-input" name="service-name" value={defineServiceName(updatePricingServiceName)} readOnly />
+                            <CInput type="text" id="update-pricing-name-input" name="service-name" value={definePricingName(updatePricingName)} readOnly />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -101,25 +111,19 @@ const UpdatePricingModal = ({ selectedPricingId, show, handleClose }) => {
                             <CLabel htmlFor="update-pricing-price-input">Đơn giá:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="number" step="10" id="update-pricing-price-input" name="price" value={updatePricingPrice} onChange={({ target }) => setUpdatePricingPrice(target.value)} required />
-                        </CCol>
-                    </CFormGroup>
-                    <CFormGroup row>
-                        <CCol md="4">
-                            <CLabel htmlFor="update-pricing-price-unit-input">Đơn vị:</CLabel>
-                        </CCol>
-                        <CCol xs="12" md="8">
-                            <CInput id="update-pricing-price-unit-input" name="price-unit" value={updatePricingPriceUnit} readOnly />
+                            <CRow className="m-0 align-items-center">
+                                <CInput className="w-25 mr-2" type="number" id="update-pricing-price-input" name="price" value={updatePricingPrice} onChange={({ target }) => setUpdatePricingPrice(target.value)} required /> {updatePricingPriceUnit} = {updatePricingQuantity} {updatePricingQuantityUnit}
+                            </CRow>
                         </CCol>
                     </CFormGroup>
                     {updateMessage}
                 </CModalBody>
                 <CModalFooter>
-                    <CButton color="success" type="submit">
+                    <CButton color="success" type="submit" disabled={promiseInProgress}>
                         Cập nhật
                         </CButton>
                     <CButton color="secondary" onClick={handleClose()}>
-                        Hủy
+                        Đóng
                         </CButton>
                 </CModalFooter>
             </CForm>

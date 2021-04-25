@@ -11,30 +11,37 @@ import {
     CForm
 } from '@coreui/react'
 
+import { usePromiseTracker, trackPromise } from "react-promise-tracker";
+
 import { GetUserInfoAPI, UnsuspendUserByIdAPI } from '../../../api/user';
 
-const UnsuspendModeratorModal = ({ selectedModeratorUsername, show, handleClose }) => {
+const UnsuspendModeratorModal = ({ selectedModeratorUsername, show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [unsuspendModeratorUUID, setUnsuspendModeratorUUID] = useState("");
     const [unsuspendModeratorUsername, setUnsuspendModeratorUsername] = useState("");
     const [unsuspendMessage, setUnsuspendMessage] = useState(null);
 
+    const { promiseInProgress } = usePromiseTracker();
+
     //this useEffect will be executed every time the modal show
     useEffect(async () => {
         if (selectedModeratorUsername != null) {
-            const selectedModeratorInfo = await GetUserInfoAPI(selectedModeratorUsername);
-            setUnsuspendModeratorUUID(selectedModeratorInfo.id);
-            setUnsuspendModeratorUsername(selectedModeratorInfo.username);
+            const selectedModeratorInfo = await trackPromise(GetUserInfoAPI(selectedModeratorUsername));
+            if (selectedModeratorInfo != null) {
+                setUnsuspendModeratorUUID(selectedModeratorInfo.id);
+                setUnsuspendModeratorUsername(selectedModeratorInfo.username);
+            }
         }
-    });
+    }, [selectedModeratorUsername]);
 
     const onSubmitUnsuspendForm = async (e) => {
         e.preventDefault();
 
-        const unsuspendResult = await UnsuspendUserByIdAPI(unsuspendModeratorUUID);
+        const unsuspendResult = await trackPromise(UnsuspendUserByIdAPI(unsuspendModeratorUUID));
         if (unsuspendResult === true) {
-            setUnsuspendMessage(<CAlert color="success">Mở khóa tài khoản thành công!</CAlert>)
+            setUnsuspendMessage(<CAlert color="success">Mở khóa tài khoản thành công!</CAlert>);
+            setRefreshDataFlag(!refreshDataFlag);
         } else {
-            setUnsuspendMessage(<CAlert color="danger">{unsuspendResult}</CAlert>)
+            setUnsuspendMessage(<CAlert color="danger">{unsuspendResult}</CAlert>);
         }
     }
 
@@ -53,11 +60,11 @@ const UnsuspendModeratorModal = ({ selectedModeratorUsername, show, handleClose 
                     {unsuspendMessage ? unsuspendMessage : "Bạn chắc chắn muốn mở khóa cho Điều Hành Viên này chứ?"}
                 </CModalBody>
                 <CModalFooter>
-                    <CButton color="warning" type="submit">
+                    <CButton color="warning" type="submit" disabled={promiseInProgress}>
                         Mở khóa
                 </CButton>
                     <CButton color="secondary" onClick={handleClose()}>
-                        Hủy
+                        Đóng
                 </CButton>
                 </CModalFooter>
             </CForm>

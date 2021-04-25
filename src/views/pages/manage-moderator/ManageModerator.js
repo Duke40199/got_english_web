@@ -39,7 +39,6 @@ const fields = [
     { key: 'address', label: 'Địa chỉ', _style: { width: '20%' } },
     { key: 'phone_number', label: 'Số điện thoại', _style: { width: '10%' } },
     { key: 'is_suspended', label: '', _style: { width: '8%' } },
-    //{ key: 'status', label: 'Trạng thái' },
     { key: 'action', label: '', _style: { width: '6%' } }]
 
 const ManageModerator = () => {
@@ -49,13 +48,14 @@ const ManageModerator = () => {
     const [updateModeratorModalShow, setUpdateModeratorModalShow] = useState(false);
     const [moderatorInfoList, setModeratorInfoList] = useState(null);
     const [selectedModeratorUsername, setSelectedModeratorUsername] = useState(null);
+    const [refreshDataFlag, setRefreshDataFlag] = useState(false);
 
     const { promiseInProgress } = usePromiseTracker();
 
     useEffect(async () => {
         const moderatorInfoList = await trackPromise(GetModeratorInfoListAPI());
         setModeratorInfoList(moderatorInfoList);
-    }, [updateModeratorModalShow, addModeratorModalShow, suspendModeratorModalShow, unsuspendModeratorModalShow])
+    }, [refreshDataFlag])
 
     const updateModeratorOnclick = (moderatorUsername) => {
         //open the update moderator modal
@@ -102,7 +102,8 @@ const ManageModerator = () => {
             <CRow>
                 <CCol>
                     <CCard>
-                        <CCardHeader align="right">
+                        <CCardHeader>
+                            <h3 className="m-0">Danh sách Điều Hành Viên</h3>
                             <CButton color="primary" className="mt-2 d-flex align-items-center" onClick={() => setAddModeratorModalShow(true)}>
                                 <CIcon name="cilPlus" size="sm" className="mr-1"></CIcon>Thêm mới Điều Hành Viên</CButton>
                         </CCardHeader>
@@ -186,7 +187,9 @@ const ManageModerator = () => {
                 {addModeratorModalShow ?
                     <AddModeratorModal
                         show={addModeratorModalShow}
-                        handleClose={() => hideAddModal} />
+                        handleClose={() => hideAddModal}
+                        refreshDataFlag={refreshDataFlag}
+                        setRefreshDataFlag={setRefreshDataFlag} />
                     : null}
                 {/*POPUP UPDATE MODERATOR*/}
                 {(updateModeratorModalShow && selectedModeratorUsername != null) ?
@@ -194,6 +197,8 @@ const ManageModerator = () => {
                         selectedModeratorUsername={selectedModeratorUsername}
                         show={updateModeratorModalShow}
                         handleClose={() => hideUpdateModal}
+                        refreshDataFlag={refreshDataFlag}
+                        setRefreshDataFlag={setRefreshDataFlag}
                     />
                     : null}
                 {/*POPUP SUSPEND MODERATOR*/}
@@ -202,6 +207,8 @@ const ManageModerator = () => {
                         selectedModeratorUsername={selectedModeratorUsername}
                         show={suspendModeratorModalShow}
                         handleClose={() => hideSuspendModal}
+                        refreshDataFlag={refreshDataFlag}
+                        setRefreshDataFlag={setRefreshDataFlag}
                     /> : null}
                 {/*POPUP UNSUSPEND MODERATOR*/}
                 {unsuspendModeratorModalShow && selectedModeratorUsername ?
@@ -209,6 +216,8 @@ const ManageModerator = () => {
                         selectedModeratorUsername={selectedModeratorUsername}
                         show={unsuspendModeratorModalShow}
                         handleClose={() => hideUnsuspendModal}
+                        refreshDataFlag={refreshDataFlag}
+                        setRefreshDataFlag={setRefreshDataFlag}
                     /> : null}
             </CRow >
         );

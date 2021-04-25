@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import { useHistory } from 'react-router-dom'
 
 import {
     CCol,
@@ -25,9 +24,9 @@ import "react-datepicker/dist/react-datepicker.css";
 import vi from "date-fns/locale/vi";
 import { format, parseISO } from 'date-fns';
 
-const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => {
-    const history = useHistory();
+import { usePromiseTracker, trackPromise } from "react-promise-tracker";
 
+const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [updateLearnerUUID, setUpdateLearnerUUID] = useState("");
     const [updateLearnerFullname, setUpdateLearnerFullname] = useState("");
     const [updateLearnerUsername, setUpdateLearnerUsername] = useState("");
@@ -39,22 +38,26 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => {
     const [updateLearnerAvatarUrl, setUpdateLearnerAvatarUrl] = useState("");
     const [updateMessage, setUpdateMessage] = useState(null);
 
+    const { promiseInProgress } = usePromiseTracker();
+
     //this useEffect will be executed every time the modal show
     useEffect(async () => {
         if (selectedLearnerUsername != null) {
-            const selectedLearnerInfo = await GetUserInfoAPI(selectedLearnerUsername);
-            setUpdateLearnerUUID(selectedLearnerInfo.id);
-            setUpdateLearnerFullname(selectedLearnerInfo.fullname);
-            setUpdateLearnerUsername(selectedLearnerInfo.username);
-            setUpdateLearnerEmail(selectedLearnerInfo.email);
-            setUpdateLearnerAddress(selectedLearnerInfo.address);
-            setUpdateLearnerPhoneNumber(selectedLearnerInfo.phone_number);
-            if (selectedLearnerInfo.birthday == "" || selectedLearnerInfo.birthday == null) {
-                setUpdateLearnerBirthday("");
-            } else {
-                setUpdateLearnerBirthday(parseISO(selectedLearnerInfo.birthday));
+            const selectedLearnerInfo = await trackPromise(GetUserInfoAPI(selectedLearnerUsername));
+            if (selectedLearnerInfo) {
+                setUpdateLearnerUUID(selectedLearnerInfo.id);
+                setUpdateLearnerFullname(selectedLearnerInfo.fullname);
+                setUpdateLearnerUsername(selectedLearnerInfo.username);
+                setUpdateLearnerEmail(selectedLearnerInfo.email);
+                setUpdateLearnerAddress(selectedLearnerInfo.address);
+                setUpdateLearnerPhoneNumber(selectedLearnerInfo.phone_number);
+                if (selectedLearnerInfo.birthday == "" || selectedLearnerInfo.birthday == null) {
+                    setUpdateLearnerBirthday("");
+                } else {
+                    setUpdateLearnerBirthday(parseISO(selectedLearnerInfo.birthday));
+                }
+                setUpdateLearnerAvatarUrl(selectedLearnerInfo.avatar_url == "" || selectedLearnerInfo == null ? "" : selectedLearnerInfo.avatar_url);
             }
-            setUpdateLearnerAvatarUrl(selectedLearnerInfo.avatar_url == "" || selectedLearnerInfo == null ? "" : selectedLearnerInfo.avatar_url);
         }
     }, [selectedLearnerUsername]);
 
@@ -111,7 +114,7 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => {
         let newAvtSrc = updateLearnerAvatarUrl;
         if (isBlob) {
             //upload local image to Firebase Storage
-            newAvtSrc = await uploadToStorage(updateLearnerAvatarUrl);
+            newAvtSrc = await trackPromise(uploadToStorage(updateLearnerAvatarUrl));
         } else {
             //do nothing
         }
@@ -137,12 +140,12 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => {
             }
         }
 
-        const updateResult = await UpdateUserInfoByUserIdAPI(updateLearnerUUID, userInput);
+        const updateResult = await trackPromise(UpdateUserInfoByUserIdAPI(updateLearnerUUID, userInput));
         console.log(updateResult, userInput);
 
         if (updateResult === true) {
             setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
-            history.push("/manage-learner");
+            setRefreshDataFlag(!refreshDataFlag);
         } else {
             setUpdateMessage(<CAlert color="danger">Cập nhật thất bại!</CAlert>);
         }
@@ -263,11 +266,11 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose }) => {
                     {updateMessage}
                 </CModalBody>
                 <CModalFooter>
-                    <CButton color="success" type="submit">
+                    <CButton color="success" type="submit" disabled={promiseInProgress}>
                         Cập nhật
                         </CButton>
                     <CButton color="secondary" onClick={handleClose()}>
-                        Hủy
+                        Đóng
                         </CButton>
                 </CModalFooter>
             </CForm>

@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { useHistory } from 'react-router-dom'
 
 import {
     CCol,
@@ -19,6 +18,8 @@ import {
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 
+import { usePromiseTracker, trackPromise } from "react-promise-tracker";
+
 import { CreateUserAPI, UpdateUserInfoByUserIdAPI, UpdateAdminPermissionByIdAPI } from '../../../api/user';
 import firebase from '../../../firebase/firebase';
 import jwt_decode from 'jwt-decode'
@@ -27,9 +28,7 @@ import "react-datepicker/dist/react-datepicker.css";
 import vi from "date-fns/locale/vi";
 import { format } from 'date-fns';
 
-const AddAdminModal = ({ show, handleClose }) => {
-    const history = useHistory();
-
+const AddAdminModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [addAdminFullname, setAddAdminFullname] = useState("");
     const [addAdminUsername, setAddAdminUsername] = useState("");
     const [addAdminPassword, setAddAdminPassword] = useState("");
@@ -43,6 +42,8 @@ const AddAdminModal = ({ show, handleClose }) => {
     const [addAdminCanManageModerator, setAddAdminCanManageModerator] = useState(false);
     const [addAdminCanManageAdmin, setAddAdminCanManageAdmin] = useState(false);
     const [addMessage, setAddMessage] = useState(null);
+
+    const { promiseInProgress } = usePromiseTracker();
 
     const uploadToStorage = async (imageURL, updateAdminUUID) => {
         let blob = await new Promise((resolve, reject) => {
@@ -97,7 +98,7 @@ const AddAdminModal = ({ show, handleClose }) => {
             "role_name": "Admin"
         };
 
-        const addAdminResult = await CreateUserAPI(userInput);
+        const addAdminResult = await trackPromise(CreateUserAPI(userInput));
         console.log(addAdminResult, userInput);
 
         if (addAdminResult.success === true) {
@@ -108,7 +109,7 @@ const AddAdminModal = ({ show, handleClose }) => {
             let newAvtSrc = addAdminAvatarUrl;
             if (isBlob) {
                 //upload local image to Firebase Storage
-                newAvtSrc = await uploadToStorage(addAdminAvatarUrl, newAdminID);
+                newAvtSrc = await trackPromise(uploadToStorage(addAdminAvatarUrl, newAdminID));
             } else {
                 //do nothing
             }
@@ -126,12 +127,12 @@ const AddAdminModal = ({ show, handleClose }) => {
                 "can_manage_admin": addAdminCanManageAdmin
             }
 
-            const updateAdminAvt = await UpdateUserInfoByUserIdAPI(newAdminID, additionalData);
-            const permissionUpdateResult = await UpdateAdminPermissionByIdAPI(newAdminID, permissionInput);
+            const updateAdminAvt = await trackPromise(UpdateUserInfoByUserIdAPI(newAdminID, additionalData));
+            const permissionUpdateResult = await trackPromise(UpdateAdminPermissionByIdAPI(newAdminID, permissionInput));
             console.log(newAdminID, additionalData)
             if (updateAdminAvt === true && permissionUpdateResult === true) {
                 setAddMessage(<CAlert color="success">Thêm mới thành công!</CAlert>);
-                history.push("/manage-admin");
+                setRefreshDataFlag(!refreshDataFlag);
             } else {
                 setAddMessage(<CAlert color="danger">Thêm mới thành công! Tuy nhiên phần thông tin cập nhật đã gặp sự cố. Hãy sử dụng chức năng Cập nhật để cập nhật lại thông tin.</CAlert>);
             }
@@ -292,7 +293,7 @@ const AddAdminModal = ({ show, handleClose }) => {
                     {addMessage}
                 </CModalBody>
                 <CModalFooter>
-                    <CButton color="primary" type="submit">
+                    <CButton color="primary" type="submit" disabled={promiseInProgress}>
                         Thêm
                 </CButton>
                     <CButton color="secondary" onClick={handleClose()}>
