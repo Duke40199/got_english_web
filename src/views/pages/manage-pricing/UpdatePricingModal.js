@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import { useHistory } from 'react-router-dom'
 
 import {
     CCol,
@@ -18,6 +17,8 @@ import {
 } from '@coreui/react'
 import { GetPricingInfoByIdAPI, UpdatePricingInfoByIdAPI } from '../../../api/pricing'
 
+import { usePromiseTracker, trackPromise } from "react-promise-tracker";
+
 const definePricingName = pricingName => {
     if (pricingName.includes("coin_value")) {
         return "Coin";
@@ -33,9 +34,7 @@ const definePricingName = pricingName => {
     }
 }
 
-const UpdatePricingModal = ({ selectedPricingId, show, handleClose }) => {
-    const history = useHistory();
-
+const UpdatePricingModal = ({ selectedPricingId, show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [updatePricingId, setUpdatePricingId] = useState("");
     const [updatePricingName, setUpdatePricingName] = useState("");
     const [updatePricingQuantity, setUpdatePricingQuantity] = useState("");
@@ -44,17 +43,20 @@ const UpdatePricingModal = ({ selectedPricingId, show, handleClose }) => {
     const [updatePricingPriceUnit, setUpdatePricingPriceUnit] = useState("");
     const [updateMessage, setUpdateMessage] = useState(null);
 
+    const { promiseInProgress } = usePromiseTracker();
 
     //this useEffect will be executed every time the modal show
     useEffect(async () => {
         if (selectedPricingId != null) {
-            const selectedPricingInfo = await GetPricingInfoByIdAPI(selectedPricingId);
-            setUpdatePricingId(selectedPricingInfo.id);
-            setUpdatePricingName(selectedPricingInfo.pricing_name);
-            setUpdatePricingQuantity(selectedPricingInfo.quantity);
-            setUpdatePricingQuantityUnit(selectedPricingInfo.quantity_unit)
-            setUpdatePricingPrice(selectedPricingInfo.price);
-            setUpdatePricingPriceUnit(selectedPricingInfo.price_unit);
+            const selectedPricingInfo = await trackPromise(GetPricingInfoByIdAPI(selectedPricingId));
+            if (selectedPricingInfo != null) {
+                setUpdatePricingId(selectedPricingInfo.id);
+                setUpdatePricingName(selectedPricingInfo.pricing_name);
+                setUpdatePricingQuantity(selectedPricingInfo.quantity);
+                setUpdatePricingQuantityUnit(selectedPricingInfo.quantity_unit)
+                setUpdatePricingPrice(selectedPricingInfo.price);
+                setUpdatePricingPriceUnit(selectedPricingInfo.price_unit);
+            }
         }
     }, [selectedPricingId]);
 
@@ -65,12 +67,12 @@ const UpdatePricingModal = ({ selectedPricingId, show, handleClose }) => {
             "price": parseInt(updatePricingPrice)
         }
 
-        const updatePricingResult = await UpdatePricingInfoByIdAPI(selectedPricingId, userInput);
+        const updatePricingResult = await trackPromise(UpdatePricingInfoByIdAPI(selectedPricingId, userInput));
         console.log(updatePricingResult, userInput);
 
         if (updatePricingResult === true) {
             setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
-            history.push("/manage-pricing");
+            setRefreshDataFlag(!refreshDataFlag);
         } else {
             setUpdateMessage(<CAlert color="danger">Cập nhật thất bại!</CAlert>);
         }
@@ -117,11 +119,11 @@ const UpdatePricingModal = ({ selectedPricingId, show, handleClose }) => {
                     {updateMessage}
                 </CModalBody>
                 <CModalFooter>
-                    <CButton color="success" type="submit">
+                    <CButton color="success" type="submit" disabled={promiseInProgress}>
                         Cập nhật
                         </CButton>
                     <CButton color="secondary" onClick={handleClose()}>
-                        Hủy
+                        Đóng
                         </CButton>
                 </CModalFooter>
             </CForm>

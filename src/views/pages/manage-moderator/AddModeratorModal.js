@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { useHistory } from 'react-router-dom'
 
 import {
     CCol,
@@ -27,9 +26,9 @@ import "react-datepicker/dist/react-datepicker.css";
 import vi from "date-fns/locale/vi";
 import { format } from 'date-fns';
 
-const AddModeratorModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
-    const history = useHistory();
+import { usePromiseTracker, trackPromise } from "react-promise-tracker";
 
+const AddModeratorModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [addModeratorFullname, setAddModeratorFullname] = useState("");
     const [addModeratorUsername, setAddModeratorUsername] = useState("");
     const [addModeratorPassword, setAddModeratorPassword] = useState("");
@@ -41,7 +40,10 @@ const AddModeratorModal = ({ show, handleClose, refreshDataFlag, setRefreshDataF
     const [addModeratorCanManageCoinBundle, setAddModeratorCanManageCoinBundle] = useState(false);
     const [addModeratorCanManagePricing, setAddModeratorCanManagePricing] = useState(false);
     const [addModeratorCanManageApplicationForm, setAddModeratorCanManageApplicationForm] = useState(false);
+    const [addModeratorCanManageExchangeRate, setAddModeratorCanManageExchangeRate] = useState(false);
     const [addMessage, setAddMessage] = useState(null);
+
+    const { promiseInProgress } = usePromiseTracker();
 
     const uploadToStorage = async (imageURL, updateModeratorUUID) => {
         let blob = await new Promise((resolve, reject) => {
@@ -96,7 +98,7 @@ const AddModeratorModal = ({ show, handleClose, refreshDataFlag, setRefreshDataF
             "role_name": "Moderator"
         };
 
-        const addModeratorResult = await CreateUserAPI(userInput);
+        const addModeratorResult = await trackPromise(CreateUserAPI(userInput));
         console.log(addModeratorResult, userInput);
 
         if (addModeratorResult.success === true) {
@@ -107,7 +109,7 @@ const AddModeratorModal = ({ show, handleClose, refreshDataFlag, setRefreshDataF
             let newAvtSrc = addModeratorAvatarUrl;
             if (isBlob) {
                 //upload local image to Firebase Storage
-                newAvtSrc = await uploadToStorage(addModeratorAvatarUrl, newModeratorID);
+                newAvtSrc = await trackPromise(uploadToStorage(addModeratorAvatarUrl, newModeratorID));
             } else {
                 //do nothing
             }
@@ -121,11 +123,12 @@ const AddModeratorModal = ({ show, handleClose, refreshDataFlag, setRefreshDataF
             const permissionInput = {
                 "can_manage_coin_bundle": addModeratorCanManageCoinBundle,
                 "can_manage_pricing": addModeratorCanManagePricing,
-                "can_manage_application_form": addModeratorCanManageApplicationForm
+                "can_manage_application_form": addModeratorCanManageApplicationForm,
+                "can_manage_exchange_rate": addModeratorCanManageExchangeRate
             }
 
-            const updateModeratorAvt = await UpdateUserInfoByUserIdAPI(newModeratorID, additionalData);
-            const permissionUpdateResult = await UpdateModeratorPermissionByIdAPI(newModeratorID, permissionInput);
+            const updateModeratorAvt = await trackPromise(UpdateUserInfoByUserIdAPI(newModeratorID, additionalData));
+            const permissionUpdateResult = await trackPromise(UpdateModeratorPermissionByIdAPI(newModeratorID, permissionInput));
             console.log(newModeratorID, additionalData)
             if (updateModeratorAvt === true && permissionUpdateResult === true) {
                 setAddMessage(<CAlert color="success">Thêm mới thành công!</CAlert>);
@@ -263,6 +266,16 @@ const AddModeratorModal = ({ show, handleClose, refreshDataFlag, setRefreshDataF
                                 />
                                 Quản lý Hồ sơ Ứng Viên
                                 </CLabel>
+                            <CLabel htmlFor="add-moderator-can-manage-exchange-rate-input"
+                                className="w-100 permission-input-checkbox">
+                                <CInputCheckbox
+                                    id="add-moderator-can-manage-exchange-rate-input"
+                                    name="add-moderator-can-manage-exchange-rate-input"
+                                    checked={addModeratorCanManageExchangeRate}
+                                    onChange={({ target }) => setAddModeratorCanManageExchangeRate(target.checked)}
+                                />
+                                Quản lý Chiết Khấu
+                                </CLabel>
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -280,7 +293,7 @@ const AddModeratorModal = ({ show, handleClose, refreshDataFlag, setRefreshDataF
                     {addMessage}
                 </CModalBody>
                 <CModalFooter>
-                    <CButton color="primary" type="submit">
+                    <CButton color="primary" type="submit" disabled={promiseInProgress}>
                         Thêm
                 </CButton>
                     <CButton color="secondary" onClick={handleClose()}>

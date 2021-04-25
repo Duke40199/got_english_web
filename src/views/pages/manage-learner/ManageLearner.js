@@ -103,7 +103,8 @@ const ManageLearner = () => {
             <CRow>
                 <CCol>
                     <CCard>
-                        <CCardHeader align="right">
+                        <CCardHeader>
+                        <h3 className="m-0">Danh sách Học Viên</h3>
                             <CButton color="primary" className="mt-2 d-flex align-items-center" onClick={() => setAddLearnerModalShow(true)}>
                                 <CIcon name="cilPlus" size="sm" className="mr-1"></CIcon>Thêm mới Học Viên</CButton>
                         </CCardHeader>

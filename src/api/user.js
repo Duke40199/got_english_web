@@ -111,6 +111,28 @@ export const GetExpertInfoListAPI = async () => {
     return learnerInfoList;
 }
 
+export const GetExpertInfoByIdAPI = async (expertId) => {
+    const token = (JSON.parse(localStorage.getItem("user"))).token;
+    let expertInfo = null;
+    const onSuccess = data => {
+        expertInfo = data.data.data;
+    }
+
+    const onFailure = error => {
+        console.log(error);
+    }
+
+    const apiConfig = {
+        headers: { "Authorization": `Bearer ${token}` }
+    }
+
+    await APIKit.get('/experts?id=' + expertId, apiConfig)
+        .then(onSuccess)
+        .catch(onFailure);
+
+    return expertInfo;
+}
+
 export const UpdateUserInfoByUserIdAPI = async (userID, updateInfoJson) => {
     const token = (JSON.parse(localStorage.getItem("user"))).token;
     let updateResult = null;

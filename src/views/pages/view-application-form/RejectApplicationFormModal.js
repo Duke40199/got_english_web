@@ -11,17 +11,22 @@ import {
     CForm
 } from '@coreui/react'
 
+import { trackPromise, usePromiseTracker } from 'react-promise-tracker';
+
 import { RejectApplicationFormByIdAPI } from '../../../api/application-form'
 
-const RejectApplicationFormModal = ({ selectedApplicationFormId, show, handleClose }) => {
+const RejectApplicationFormModal = ({ selectedApplicationFormId, show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [rejectMessage, setRejectMessage] = useState(null);
+
+    const { promiseInProgress } = usePromiseTracker();
 
     const onSubmitRejectForm = async (e) => {
         e.preventDefault();
 
-        const rejectResult = await RejectApplicationFormByIdAPI(selectedApplicationFormId);
+        const rejectResult = await trackPromise(RejectApplicationFormByIdAPI(selectedApplicationFormId));
         if (rejectResult === true) {
             setRejectMessage(<CAlert color="success">Từ chối đơn xin thành công!</CAlert>);
+            setRefreshDataFlag(!refreshDataFlag);
         } else {
             setRejectMessage(<CAlert color="danger">{rejectResult}</CAlert>);
         }
@@ -42,7 +47,7 @@ const RejectApplicationFormModal = ({ selectedApplicationFormId, show, handleClo
                     {rejectMessage ? rejectMessage : "Bạn chắc chắn muốn từ chối đơn xin này chứ?"}
                 </CModalBody>
                 <CModalFooter>
-                    <CButton color="danger" type="submit">
+                    <CButton color="danger" type="submit" disabled={promiseInProgress}>
                         Từ chối
                 </CButton>
                     <CButton color="secondary" onClick={handleClose()}>

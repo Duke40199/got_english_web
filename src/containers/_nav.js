@@ -67,6 +67,12 @@ if (role === "Admin") {
       to: '/manage-pricing',
       icon: 'cil-cash',
     },
+    {
+      _tag: 'CSidebarNavItem',
+      name: 'Quản lý Chiết Khấu',
+      to: '/manage-exchange-rate',
+      icon: 'cil-balance-scale',
+    }
   ]
 }
 

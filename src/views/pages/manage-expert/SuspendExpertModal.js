@@ -11,6 +11,7 @@ import {
     CForm
 } from '@coreui/react'
 
+import { usePromiseTracker, trackPromise } from "react-promise-tracker";
 
 import { GetUserInfoAPI, SuspendUserByIdAPI } from '../../../api/user';
 
@@ -19,22 +20,26 @@ const SuspendExpertModal = ({ selectedExpertUsername, show, handleClose, refresh
     const [suspendExpertUsername, setSuspendExpertUsername] = useState("");
     const [suspendMessage, setSuspendMessage] = useState(null);
 
+    const { promiseInProgress } = usePromiseTracker();
+
     //this useEffect will be executed every time the modal show
     useEffect(async () => {
         if (selectedExpertUsername != null) {
-            const selectedExpertInfo = await GetUserInfoAPI(selectedExpertUsername);
-            setSuspendExpertUUID(selectedExpertInfo.id);
-            setSuspendExpertUsername(selectedExpertInfo.username);
+            const selectedExpertInfo = await trackPromise(GetUserInfoAPI(selectedExpertUsername));
+            if (selectedExpertInfo) {
+                setSuspendExpertUUID(selectedExpertInfo.id);
+                setSuspendExpertUsername(selectedExpertInfo.username);
+            }
         }
-    });
+    }, [selectedExpertUsername]);
 
     const onSubmitSuspendForm = async (e) => {
         e.preventDefault();
 
-        const suspendResult = await SuspendUserByIdAPI(suspendExpertUUID);
+        const suspendResult = await trackPromise(SuspendUserByIdAPI(suspendExpertUUID));
         if (suspendResult === true) {
-            setRefreshDataFlag(!refreshDataFlag);
             setSuspendMessage(<CAlert color="success">Khóa tài khoản thành công!</CAlert>);
+            setRefreshDataFlag(!refreshDataFlag);
         } else {
             setSuspendMessage(<CAlert color="danger">{suspendResult}</CAlert>);
         }
@@ -55,7 +60,7 @@ const SuspendExpertModal = ({ selectedExpertUsername, show, handleClose, refresh
                     {suspendMessage ? suspendMessage : "Bạn chắc chắn muốn khóa Chuyên Gia này chứ?"}
                 </CModalBody>
                 <CModalFooter>
-                    <CButton color="danger" type="submit">
+                    <CButton color="danger" type="submit" disabled={promiseInProgress}>
                         Khóa
                 </CButton>
                     <CButton color="secondary" onClick={handleClose()}>

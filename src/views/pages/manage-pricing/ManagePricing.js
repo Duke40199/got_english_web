@@ -26,6 +26,14 @@ import {
     GetCoinValuePricingInfoListAPI
 } from '../../../api/pricing';
 
+const defineQuantityUnitName = quantityUnitName => {
+    if (quantityUnitName.includes("minutes")) {
+        return 'phút';
+    } else {
+        return 'Không xác định';
+    }
+}
+
 const fields = [
     { key: 'price', label: 'Đơn giá', _style: { width: '20%' } },
     { key: 'created_at', label: 'Thời gian tạo', _style: { width: '22%' } },
@@ -43,6 +51,7 @@ const ManagePricing = () => {
     const [messagingSessionPricingInfoList, setMessagingSessionPricingInfoList] = useState(null);
     const [liveCallSessionPricingInfoList, setLiveCallSessionPricingInfoList] = useState(null);
     const [translationCallSessionPricingInfoList, setTranslationCallSessionPricingInfoList] = useState(null);
+    const [refreshDataFlag, setRefreshDataFlag] = useState(false);
 
     const { promiseInProgress } = usePromiseTracker();
 
@@ -55,7 +64,7 @@ const ManagePricing = () => {
         setMessagingSessionPricingInfoList(messagingSessionPricingInfoList);
         setLiveCallSessionPricingInfoList(liveCallSessionPricingInfoList);
         setTranslationCallSessionPricingInfoList(translationCallSessionPricingInfoList);
-    }, [updatePricingModalShow, addPricingModalShow, deletePricingModalShow])
+    }, [refreshDataFlag])
 
     const updatePricingOnclick = (pricingId) => {
         //open the update pricing modal
@@ -237,7 +246,7 @@ const ManagePricing = () => {
                                         (item, index) => {
                                             return (
                                                 <td className="py-1">
-                                                    {item.quantity + " " + item.quantity_unit + " = " + item.price + " " + item.price_unit}
+                                                    {item.quantity + " " + defineQuantityUnitName(item.quantity_unit) + " = " + item.price + " " + item.price_unit}
                                                 </td>
                                             );
                                         },
@@ -301,7 +310,7 @@ const ManagePricing = () => {
                                         (item, index) => {
                                             return (
                                                 <td className="py-1">
-                                                    {item.quantity + " " + item.quantity_unit + " = " + item.price + " " + item.price_unit}
+                                                    {item.quantity + " " + defineQuantityUnitName(item.quantity_unit) + " = " + item.price + " " + item.price_unit}
                                                 </td>
                                             );
                                         },
@@ -348,6 +357,8 @@ const ManagePricing = () => {
                         selectedPricingId={selectedPricingId}
                         show={updatePricingModalShow}
                         handleClose={() => hideUpdateModal}
+                        refreshDataFlag={refreshDataFlag}
+                        setRefreshDataFlag={setRefreshDataFlag}
                     />
                     : null}
                 {/* POPUP ADD PRICING */}
@@ -356,6 +367,8 @@ const ManagePricing = () => {
                         selectedPricingServiceName={selectedServiceName}
                         show={addPricingModalShow}
                         handleClose={() => hideAddModal}
+                        refreshDataFlag={refreshDataFlag}
+                        setRefreshDataFlag={setRefreshDataFlag}
                     />
                     : null}
                 {/* POPUP DELETE PRICING */}
@@ -364,6 +377,8 @@ const ManagePricing = () => {
                         selectedPricingId={selectedPricingId}
                         show={deletePricingModalShow}
                         handleClose={() => hideDeleteModal}
+                        refreshDataFlag={refreshDataFlag}
+                        setRefreshDataFlag={setRefreshDataFlag}
                     />
                     : null}
             </CRow >

@@ -25,6 +25,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import vi from "date-fns/locale/vi";
 import { format } from 'date-fns';
 
+import { usePromiseTracker, trackPromise } from "react-promise-tracker";
+
 const AddLearnerModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [addLearnerFullname, setAddLearnerFullname] = useState("");
     const [addLearnerUsername, setAddLearnerUsername] = useState("");
@@ -35,6 +37,8 @@ const AddLearnerModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFla
     const [addLearnerBirthday, setAddLearnerBirthday] = useState("");
     const [addLearnerAvatarUrl, setAddLearnerAvatarUrl] = useState("");
     const [addMessage, setAddMessage] = useState(null);
+
+    const { promiseInProgress } = usePromiseTracker();
 
     const uploadToStorage = async (imageURL, updateLearnerUUID) => {
         let blob = await new Promise((resolve, reject) => {
@@ -89,7 +93,7 @@ const AddLearnerModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFla
             "role_name": "Learner"
         };
 
-        const addLearnerResult = await CreateUserAPI(userInput);
+        const addLearnerResult = await trackPromise(CreateUserAPI(userInput));
         console.log(addLearnerResult, userInput);
 
         if (addLearnerResult.success === true) {
@@ -100,7 +104,7 @@ const AddLearnerModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFla
             let newAvtSrc = addLearnerAvatarUrl;
             if (isBlob) {
                 //upload local image to Firebase Storage
-                newAvtSrc = await uploadToStorage(addLearnerAvatarUrl, newLearnerID);
+                newAvtSrc = await trackPromise(uploadToStorage(addLearnerAvatarUrl, newLearnerID));
             } else {
                 //do nothing
             }
@@ -112,7 +116,7 @@ const AddLearnerModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFla
                 "avatar_url": newAvtSrc
             }
 
-            const updateLearnerAvt = await UpdateUserInfoByUserIdAPI(newLearnerID, additionalData);
+            const updateLearnerAvt = await trackPromise(UpdateUserInfoByUserIdAPI(newLearnerID, additionalData));
             console.log(newLearnerID, additionalData)
             if (updateLearnerAvt === true) {
                 setAddMessage(<CAlert color="success">Thêm mới thành công!</CAlert>);
@@ -233,11 +237,11 @@ const AddLearnerModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFla
                     {addMessage}
                 </CModalBody>
                 <CModalFooter>
-                    <CButton color="primary" type="submit">
+                    <CButton color="primary" type="submit" disabled={promiseInProgress}>
                         Thêm
                 </CButton>
                     <CButton color="secondary" onClick={handleClose()}>
-                        Hủy
+                        Đóng
                 </CButton>
                 </CModalFooter>
             </CForm>

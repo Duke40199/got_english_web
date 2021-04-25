@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { useHistory } from 'react-router-dom'
 
 import {
     CCol,
@@ -17,14 +16,16 @@ import {
 } from '@coreui/react'
 import { CreateCoinBundleAPI } from '../../../api/coin-bundle';
 
-const AddCoinBundleModal = ({ show, handleClose }) => {
-    const history = useHistory();
+import { usePromiseTracker, trackPromise } from "react-promise-tracker";
 
+const AddCoinBundleModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [addCoinBundleTitle, setAddCoinBundleTitle] = useState("");
     const [addCoinBundleDescription, setAddCoinBundleDescription] = useState("");
     const [addCoinBundleQuantity, setAddCoinBundleQuantity] = useState("");
     const [addCoinBundlePrice, setAddCoinBundlePrice] = useState("");
     const [addMessage, setAddMessage] = useState(null);
+
+    const { promiseInProgress } = usePromiseTracker();
 
     const onSubmitAddForm = async (e) => {
         e.preventDefault();
@@ -37,12 +38,12 @@ const AddCoinBundleModal = ({ show, handleClose }) => {
             "price_unit": "VND"
         }
 
-        const addCoinBundleResult = await CreateCoinBundleAPI(userInput);
+        const addCoinBundleResult = await trackPromise(CreateCoinBundleAPI(userInput));
         console.log(addCoinBundleResult, userInput);
 
         if (addCoinBundleResult === true) {
             setAddMessage(<CAlert color="success">Thêm mới thành công!</CAlert>);
-            history.push("/manage-coin-bundle");
+            setRefreshDataFlag(!refreshDataFlag);
         } else {
             setAddMessage(<CAlert color="danger">Thêm mới thất bại!</CAlert>);
         }
@@ -110,11 +111,11 @@ const AddCoinBundleModal = ({ show, handleClose }) => {
                     {addMessage}
                 </CModalBody>
                 <CModalFooter>
-                    <CButton color="primary" type="submit">
+                    <CButton color="primary" type="submit" disabled={promiseInProgress}>
                         Thêm
                 </CButton>
                     <CButton color="secondary" onClick={handleClose()}>
-                        Hủy
+                        Đóng
                 </CButton>
                 </CModalFooter>
             </CForm>

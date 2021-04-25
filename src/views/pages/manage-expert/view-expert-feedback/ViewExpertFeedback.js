@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom"
 import ReactStars from 'react-rating-stars-component'
 
 import { GetRatingListByExpertIdAPI } from '../../../../api/rating'
+import { GetExpertInfoByIdAPI } from '../../../../api/user'
 
 import { format, parseISO } from 'date-fns'
 
@@ -16,6 +17,7 @@ import {
     CCol,
     CDataTable,
     CRow,
+    CAlert
 } from '@coreui/react'
 
 const fields = [
@@ -33,13 +35,17 @@ const ViewExpertFeedback = () => {
     const expertId = query.get("expertId");
 
     const [selectedExpertRatingList, setSelectedExpertRatingList] = useState(null);
+    const [selectedExpertInfo, setSelectedExpertInfo] = useState(null);
 
     const { promiseInProgress } = usePromiseTracker();
 
     useEffect(async () => {
-        const expertRatingList = await trackPromise(GetRatingListByExpertIdAPI(expertId));
-        setSelectedExpertRatingList(expertRatingList);
-        console.log(expertRatingList);
+        const expertInfo = await trackPromise(GetExpertInfoByIdAPI(expertId));
+        if (expertInfo != null) {
+            const expertRatingList = await trackPromise(GetRatingListByExpertIdAPI(expertId));
+            setSelectedExpertRatingList(expertRatingList);
+            setSelectedExpertInfo(expertInfo);
+        }
     }, [expertId])
 
     const GetUsedService = expertRatingList => {
@@ -59,7 +65,7 @@ const ViewExpertFeedback = () => {
             <CCol>
                 <CCard>
                     <CCardHeader>
-                        <h3 className="mb-0">Chi tiết Đánh Giá của Chuyên Gia</h3>
+                        <h3 className="mb-0">Chi tiết Đánh Giá của Chuyên Gia ({selectedExpertInfo != null ? selectedExpertInfo.account.username : "..."})</h3>
                     </CCardHeader>
                     <CCardBody>
                         <CDataTable

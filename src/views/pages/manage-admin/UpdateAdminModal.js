@@ -18,6 +18,7 @@ import {
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 
+import { usePromiseTracker, trackPromise } from "react-promise-tracker";
 
 import { GetUserInfoAPI, UpdateUserInfoByUserIdAPI, UpdateAdminPermissionByIdAPI } from '../../../api/user';
 import firebase from '../../../firebase/firebase';
@@ -43,26 +44,30 @@ const UpdateAdminModal = ({ selectedAdminUsername, show, handleClose, refreshDat
     const [updateAdminCanManageAdmin, setUpdateAdminCanManageAdmin] = useState(false);
     const [updateMessage, setUpdateMessage] = useState(null);
 
+    const { promiseInProgress } = usePromiseTracker();
+
     //this useEffect will be executed every time the modal show
     useEffect(async () => {
         if (selectedAdminUsername != null) {
-            const selectedAdminInfo = await GetUserInfoAPI(selectedAdminUsername);
-            setUpdateAdminUUID(selectedAdminInfo.id);
-            setUpdateAdminFullname(selectedAdminInfo.fullname);
-            setUpdateAdminUsername(selectedAdminInfo.username);
-            setUpdateAdminEmail(selectedAdminInfo.email);
-            setUpdateAdminAddress(selectedAdminInfo.address);
-            setUpdateAdminPhoneNumber(selectedAdminInfo.phone_number);
-            if (selectedAdminInfo.birthday == "" || selectedAdminInfo.birthday == null) {
-                setUpdateAdminBirthday("");
-            } else {
-                setUpdateAdminBirthday(parseISO(selectedAdminInfo.birthday));
+            const selectedAdminInfo = await trackPromise(GetUserInfoAPI(selectedAdminUsername));
+            if (selectedAdminInfo != null) {
+                setUpdateAdminUUID(selectedAdminInfo.id);
+                setUpdateAdminFullname(selectedAdminInfo.fullname);
+                setUpdateAdminUsername(selectedAdminInfo.username);
+                setUpdateAdminEmail(selectedAdminInfo.email);
+                setUpdateAdminAddress(selectedAdminInfo.address);
+                setUpdateAdminPhoneNumber(selectedAdminInfo.phone_number);
+                if (selectedAdminInfo.birthday == "" || selectedAdminInfo.birthday == null) {
+                    setUpdateAdminBirthday("");
+                } else {
+                    setUpdateAdminBirthday(parseISO(selectedAdminInfo.birthday));
+                }
+                setUpdateAdminAvatarUrl((selectedAdminInfo.avatar_url == "" || selectedAdminInfo.avatar_url == null) ? "" : selectedAdminInfo.avatar_url);
+                setUpdateAdminCanManageLearner(selectedAdminInfo.admin_details.can_manage_learner);
+                setUpdateAdminCanManageExpert(selectedAdminInfo.admin_details.can_manage_expert);
+                setUpdateAdminCanManageModerator(selectedAdminInfo.admin_details.can_manage_moderator);
+                setUpdateAdminCanManageAdmin(selectedAdminInfo.admin_details.can_manage_admin);
             }
-            setUpdateAdminAvatarUrl((selectedAdminInfo.avatar_url == "" || selectedAdminInfo.avatar_url == null) ? "" : selectedAdminInfo.avatar_url);
-            setUpdateAdminCanManageLearner(selectedAdminInfo.admin_details.can_manage_learner);
-            setUpdateAdminCanManageExpert(selectedAdminInfo.admin_details.can_manage_expert);
-            setUpdateAdminCanManageModerator(selectedAdminInfo.admin_details.can_manage_moderator);
-            setUpdateAdminCanManageAdmin(selectedAdminInfo.admin_details.can_manage_admin)
         }
     }, [selectedAdminUsername]);
 
@@ -120,7 +125,7 @@ const UpdateAdminModal = ({ selectedAdminUsername, show, handleClose, refreshDat
         let newAvtSrc = updateAdminAvatarUrl;
         if (isBlob) {
             //upload local image to Firebase Storage
-            newAvtSrc = await uploadToStorage(updateAdminAvatarUrl);
+            newAvtSrc = await trackPromise(uploadToStorage(updateAdminAvatarUrl));
         } else {
             //do nothing
         }
@@ -161,8 +166,8 @@ const UpdateAdminModal = ({ selectedAdminUsername, show, handleClose, refreshDat
 
         console.log(userInput);
 
-        const updateResult = await UpdateUserInfoByUserIdAPI(updateAdminUUID, userInput);
-        const permissionUpdateResult = await UpdateAdminPermissionByIdAPI(updateAdminUUID, permissionInput);
+        const updateResult = await trackPromise(UpdateUserInfoByUserIdAPI(updateAdminUUID, userInput));
+        const permissionUpdateResult = await trackPromise(UpdateAdminPermissionByIdAPI(updateAdminUUID, permissionInput));
 
         if (updateResult === true && permissionUpdateResult === true) {
             setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
@@ -332,7 +337,7 @@ const UpdateAdminModal = ({ selectedAdminUsername, show, handleClose, refreshDat
                     {updateMessage}
                 </CModalBody>
                 <CModalFooter>
-                    <CButton color="success" type="submit">
+                    <CButton color="success" type="submit" disabled={promiseInProgress}>
                         Cập nhật
                         </CButton>
                     <CButton color="secondary" onClick={handleClose()}>

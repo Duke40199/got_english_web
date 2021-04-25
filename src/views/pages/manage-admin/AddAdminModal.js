@@ -18,6 +18,8 @@ import {
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 
+import { usePromiseTracker, trackPromise } from "react-promise-tracker";
+
 import { CreateUserAPI, UpdateUserInfoByUserIdAPI, UpdateAdminPermissionByIdAPI } from '../../../api/user';
 import firebase from '../../../firebase/firebase';
 import jwt_decode from 'jwt-decode'
@@ -40,6 +42,8 @@ const AddAdminModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag 
     const [addAdminCanManageModerator, setAddAdminCanManageModerator] = useState(false);
     const [addAdminCanManageAdmin, setAddAdminCanManageAdmin] = useState(false);
     const [addMessage, setAddMessage] = useState(null);
+
+    const { promiseInProgress } = usePromiseTracker();
 
     const uploadToStorage = async (imageURL, updateAdminUUID) => {
         let blob = await new Promise((resolve, reject) => {
@@ -94,7 +98,7 @@ const AddAdminModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag 
             "role_name": "Admin"
         };
 
-        const addAdminResult = await CreateUserAPI(userInput);
+        const addAdminResult = await trackPromise(CreateUserAPI(userInput));
         console.log(addAdminResult, userInput);
 
         if (addAdminResult.success === true) {
@@ -105,7 +109,7 @@ const AddAdminModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag 
             let newAvtSrc = addAdminAvatarUrl;
             if (isBlob) {
                 //upload local image to Firebase Storage
-                newAvtSrc = await uploadToStorage(addAdminAvatarUrl, newAdminID);
+                newAvtSrc = await trackPromise(uploadToStorage(addAdminAvatarUrl, newAdminID));
             } else {
                 //do nothing
             }
@@ -123,8 +127,8 @@ const AddAdminModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag 
                 "can_manage_admin": addAdminCanManageAdmin
             }
 
-            const updateAdminAvt = await UpdateUserInfoByUserIdAPI(newAdminID, additionalData);
-            const permissionUpdateResult = await UpdateAdminPermissionByIdAPI(newAdminID, permissionInput);
+            const updateAdminAvt = await trackPromise(UpdateUserInfoByUserIdAPI(newAdminID, additionalData));
+            const permissionUpdateResult = await trackPromise(UpdateAdminPermissionByIdAPI(newAdminID, permissionInput));
             console.log(newAdminID, additionalData)
             if (updateAdminAvt === true && permissionUpdateResult === true) {
                 setAddMessage(<CAlert color="success">Thêm mới thành công!</CAlert>);
@@ -289,7 +293,7 @@ const AddAdminModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag 
                     {addMessage}
                 </CModalBody>
                 <CModalFooter>
-                    <CButton color="primary" type="submit">
+                    <CButton color="primary" type="submit" disabled={promiseInProgress}>
                         Thêm
                 </CButton>
                     <CButton color="secondary" onClick={handleClose()}>

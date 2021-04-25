@@ -11,17 +11,22 @@ import {
     CForm
 } from '@coreui/react'
 
+import { trackPromise, usePromiseTracker } from 'react-promise-tracker';
+
 import { ApproveApplicationFormByIdAPI } from '../../../api/application-form'
 
-const ApproveApplicationFormModal = ({ selectedApplicationFormId, show, handleClose }) => {
+const ApproveApplicationFormModal = ({ selectedApplicationFormId, show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [approveMessage, setApproveMessage] = useState(null);
+
+    const { promiseInProgress } = usePromiseTracker();
 
     const onSubmitApproveForm = async (e) => {
         e.preventDefault();
 
-        const approveResult = await ApproveApplicationFormByIdAPI(selectedApplicationFormId);
+        const approveResult = await trackPromise(ApproveApplicationFormByIdAPI(selectedApplicationFormId));
         if (approveResult === true) {
             setApproveMessage(<CAlert color="success">Duyệt đơn xin thành công!</CAlert>);
+            setRefreshDataFlag(!refreshDataFlag);
         } else {
             setApproveMessage(<CAlert color="danger">{approveResult}</CAlert>);
         }
@@ -42,7 +47,7 @@ const ApproveApplicationFormModal = ({ selectedApplicationFormId, show, handleCl
                     {approveMessage ? approveMessage : "Bạn chắc chắn muốn duyệt đơn xin này chứ?"}
                 </CModalBody>
                 <CModalFooter>
-                    <CButton color="success" type="submit">
+                    <CButton color="success" type="submit" disabled={promiseInProgress}>
                         Duyệt
                 </CButton>
                     <CButton color="secondary" onClick={handleClose()}>

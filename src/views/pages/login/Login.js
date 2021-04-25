@@ -18,7 +18,7 @@ import {
   CAlert
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { signInWithEmailAndPasswordHandler } from 'src/firebase/firebase'
+import { signInWithEmailAndPasswordHandler } from 'src/firebase/firebase';
 import { usePromiseTracker, trackPromise } from "react-promise-tracker";
 
 const Login = () => {
@@ -101,7 +101,7 @@ const Login = () => {
                   }
                   <CRow>
                     <CCol xs="6">
-                      <CButton color="primary" className="px-4" type="Submit">Đăng Nhập</CButton>
+                      <CButton color="primary" className="px-4" type="Submit" disabled={promiseInProgress}>Đăng Nhập</CButton>
                     </CCol>
                     <CCol xs="6" className="text-right">
                       <CButton color="link" className="px-0">Quên mật khẩu?</CButton>

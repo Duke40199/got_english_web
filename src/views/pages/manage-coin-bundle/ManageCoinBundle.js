@@ -34,13 +34,14 @@ const ManageCoinBundle = () => {
     const [deleteCoinBundleModalShow, setDeleteCoinBundleModalShow] = useState(false);
     const [coinBundleInfoList, setCoinBundleInfoList] = useState(null);
     const [selectedCoinBundleId, setSelectedCoinBundleId] = useState(null);
+    const [refreshDataFlag, setRefreshDataFlag] = useState(false);
 
     const { promiseInProgress } = usePromiseTracker();
 
     useEffect(async () => {
         const coinBundleInfoList = await trackPromise(GetCoinBundleInfoListAPI());
         setCoinBundleInfoList(coinBundleInfoList);
-    }, [updateCoinBundleModalShow, addCoinBundleModalShow, deleteCoinBundleModalShow]);
+    }, [refreshDataFlag]);
 
     const updateCoinBundleOnclick = (coinBundleId) => {
         //open the update coin bundle modal
@@ -126,21 +127,27 @@ const ManageCoinBundle = () => {
                 {addCoinBundleModalShow ?
                     <AddCoinBundleModal
                         show={addCoinBundleModalShow}
-                        handleClose={() => hideAddModal} />
+                        handleClose={() => hideAddModal}
+                        refreshDataFlag={refreshDataFlag}
+                        setRefreshDataFlag={setRefreshDataFlag} />
                     : null}
                 {/*POPUP UPDATE COIN BUNDLE*/}
                 {updateCoinBundleModalShow && selectedCoinBundleId != null ?
                     <UpdateCoinBundleModal
                         selectedCoinBundleId={selectedCoinBundleId}
                         show={updateCoinBundleModalShow}
-                        handleClose={() => hideUpdateModal} />
+                        handleClose={() => hideUpdateModal}
+                        refreshDataFlag={refreshDataFlag}
+                        setRefreshDataFlag={setRefreshDataFlag} />
                     : null}
                 {/*POPUP DELETE COIN BUNDLE*/}
                 {deleteCoinBundleModalShow && selectedCoinBundleId != null ?
                     <DeleteCoinBundleModal
                         selectedCoinBundleId={selectedCoinBundleId}
                         show={deleteCoinBundleModalShow}
-                        handleClose={() => hideDeleteModal} />
+                        handleClose={() => hideDeleteModal}
+                        refreshDataFlag={refreshDataFlag}
+                        setRefreshDataFlag={setRefreshDataFlag} />
                     : null}
             </CRow>
         )

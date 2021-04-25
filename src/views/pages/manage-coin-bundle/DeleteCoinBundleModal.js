@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { useHistory } from 'react-router-dom'
 
 import {
     CButton,
@@ -12,22 +11,24 @@ import {
     CAlert
 } from '@coreui/react'
 
+import { usePromiseTracker, trackPromise } from "react-promise-tracker";
+
 import { DeleteCoinBundleByIdAPI } from '../../../api/coin-bundle';
 
-const DeleteCoinBundleModal = ({ selectedCoinBundleId, show, handleClose }) => {
-    const history = useHistory();
-
+const DeleteCoinBundleModal = ({ selectedCoinBundleId, show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [deleteMessage, setDeleteMessage] = useState(null);
+
+    const { promiseInProgress } = usePromiseTracker();
 
     const onSubmitDeleteForm = async (e) => {
         e.preventDefault();
 
-        const deleteCoinBundleResult = await DeleteCoinBundleByIdAPI
-            (selectedCoinBundleId)
+        const deleteCoinBundleResult = await trackPromise(DeleteCoinBundleByIdAPI
+            (selectedCoinBundleId));
 
         if (deleteCoinBundleResult === true) {
             setDeleteMessage(<CAlert color="success">Xóa thành công!</CAlert>);
-            history.push("/manage-coin-bundle");
+            setRefreshDataFlag(!refreshDataFlag);
         } else {
             setDeleteMessage(<CAlert color="danger">{deleteCoinBundleResult}</CAlert>);
         }
@@ -48,7 +49,7 @@ const DeleteCoinBundleModal = ({ selectedCoinBundleId, show, handleClose }) => {
                     {deleteMessage ? deleteMessage : "Bạn chắc chắn muốn xóa Gói Coin này chứ?"}
                 </CModalBody>
                 <CModalFooter>
-                    <CButton color="danger" type="submit">
+                    <CButton color="danger" type="submit" disabled={promiseInProgress}>
                         Xóa
                 </CButton>
                     <CButton color="secondary" onClick={handleClose()}>

@@ -103,9 +103,10 @@ const ManageAdmin = () => {
             <CRow>
                 <CCol>
                     <CCard>
-                        <CCardHeader align="right">
+                        <CCardHeader>
+                            <h3 className="m-0">Danh sách Quản Trị Viên</h3>
                             <CButton color="primary" className="mt-2 d-flex align-items-center" onClick={() => setAddAdminModalShow(true)}>
-                                <CIcon name="cilPlus" size="sm" className="mr-1"></CIcon>Thêm mới Điều Hành Viên</CButton>
+                                <CIcon name="cilPlus" size="sm" className="mr-1"></CIcon>Thêm mới Quản Trị Viên</CButton>
                         </CCardHeader>
                         <CCardBody className="pt-0 pb-0">
                             <CDataTable

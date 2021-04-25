@@ -11,6 +11,8 @@ import {
     CForm
 } from '@coreui/react'
 
+import { usePromiseTracker, trackPromise } from "react-promise-tracker";
+
 import { GetUserInfoAPI, UnsuspendUserByIdAPI } from '../../../api/user';
 
 const UnsuspendAdminModal = ({ selectedAdminUsername, show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
@@ -18,19 +20,23 @@ const UnsuspendAdminModal = ({ selectedAdminUsername, show, handleClose, refresh
     const [unsuspendAdminUsername, setUnsuspendAdminUsername] = useState("");
     const [unsuspendMessage, setUnsuspendMessage] = useState(null);
 
+    const { promiseInProgress } = usePromiseTracker();
+
     //this useEffect will be executed every time the modal show
     useEffect(async () => {
         if (selectedAdminUsername != null) {
-            const selectedAdminInfo = await GetUserInfoAPI(selectedAdminUsername);
-            setUnsuspendAdminUUID(selectedAdminInfo.id);
-            setUnsuspendAdminUsername(selectedAdminInfo.username);
+            const selectedAdminInfo = await trackPromise(GetUserInfoAPI(selectedAdminUsername));
+            if (selectedAdminInfo != null) {
+                setUnsuspendAdminUUID(selectedAdminInfo.id);
+                setUnsuspendAdminUsername(selectedAdminInfo.username);
+            }
         }
-    });
+    }, [selectedAdminUsername]);
 
     const onSubmitUnsuspendForm = async (e) => {
         e.preventDefault();
 
-        const unsuspendResult = await UnsuspendUserByIdAPI(unsuspendAdminUUID);
+        const unsuspendResult = await trackPromise(UnsuspendUserByIdAPI(unsuspendAdminUUID));
         if (unsuspendResult === true) {
             setUnsuspendMessage(<CAlert color="success">Mở khóa tài khoản thành công!</CAlert>);
             setRefreshDataFlag(!refreshDataFlag);
@@ -54,7 +60,7 @@ const UnsuspendAdminModal = ({ selectedAdminUsername, show, handleClose, refresh
                     {unsuspendMessage ? unsuspendMessage : "Bạn chắc chắn muốn mở khóa cho Quản Trị Viên này chứ?"}
                 </CModalBody>
                 <CModalFooter>
-                    <CButton color="warning" type="submit">
+                    <CButton color="warning" type="submit" disabled={promiseInProgress}>
                         Mở khóa
                 </CButton>
                     <CButton color="secondary" onClick={handleClose()}>

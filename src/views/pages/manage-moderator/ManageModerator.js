@@ -39,7 +39,6 @@ const fields = [
     { key: 'address', label: 'Địa chỉ', _style: { width: '20%' } },
     { key: 'phone_number', label: 'Số điện thoại', _style: { width: '10%' } },
     { key: 'is_suspended', label: '', _style: { width: '8%' } },
-    //{ key: 'status', label: 'Trạng thái' },
     { key: 'action', label: '', _style: { width: '6%' } }]
 
 const ManageModerator = () => {
@@ -103,7 +102,8 @@ const ManageModerator = () => {
             <CRow>
                 <CCol>
                     <CCard>
-                        <CCardHeader align="right">
+                        <CCardHeader>
+                            <h3 className="m-0">Danh sách Điều Hành Viên</h3>
                             <CButton color="primary" className="mt-2 d-flex align-items-center" onClick={() => setAddModeratorModalShow(true)}>
                                 <CIcon name="cilPlus" size="sm" className="mr-1"></CIcon>Thêm mới Điều Hành Viên</CButton>
                         </CCardHeader>

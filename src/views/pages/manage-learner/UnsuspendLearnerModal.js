@@ -13,24 +13,30 @@ import {
 
 import { GetUserInfoAPI, UnsuspendUserByIdAPI } from '../../../api/user';
 
+import { usePromiseTracker, trackPromise } from "react-promise-tracker";
+
 const UnsuspendLearnerModal = ({ selectedLearnerUsername, show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [unsuspendLearnerUUID, setUnsuspendLearnerUUID] = useState("");
     const [unsuspendLearnerUsername, setUnsuspendLearnerUsername] = useState("");
     const [unsuspendMessage, setUnsuspendMessage] = useState(null);
 
+    const { promiseInProgress } = usePromiseTracker();
+
     //this useEffect will be executed every time the modal show
     useEffect(async () => {
         if (selectedLearnerUsername != null) {
-            const selectedLearnerInfo = await GetUserInfoAPI(selectedLearnerUsername);
-            setUnsuspendLearnerUUID(selectedLearnerInfo.id);
-            setUnsuspendLearnerUsername(selectedLearnerInfo.username);
+            const selectedLearnerInfo = await trackPromise(GetUserInfoAPI(selectedLearnerUsername));
+            if (selectedLearnerInfo != null) {
+                setUnsuspendLearnerUUID(selectedLearnerInfo.id);
+                setUnsuspendLearnerUsername(selectedLearnerInfo.username);
+            }
         }
-    });
+    }, [selectedLearnerUsername]);
 
     const onSubmitUnsuspendForm = async (e) => {
         e.preventDefault();
 
-        const unsuspendResult = await UnsuspendUserByIdAPI(unsuspendLearnerUUID);
+        const unsuspendResult = await trackPromise(UnsuspendUserByIdAPI(unsuspendLearnerUUID));
         if (unsuspendResult === true) {
             setUnsuspendMessage(<CAlert color="success">Mở khóa tài khoản thành công!</CAlert>);
             setRefreshDataFlag(!refreshDataFlag);
@@ -54,11 +60,11 @@ const UnsuspendLearnerModal = ({ selectedLearnerUsername, show, handleClose, ref
                     {unsuspendMessage ? unsuspendMessage : "Bạn chắc chắn muốn mở khóa cho Học Viên này chứ?"}
                 </CModalBody>
                 <CModalFooter>
-                    <CButton color="warning" type="submit">
+                    <CButton color="warning" type="submit" disabled={promiseInProgress}>
                         Mở khóa
                 </CButton>
                     <CButton color="secondary" onClick={handleClose()}>
-                        Hủy
+                        Đóng
                 </CButton>
                 </CModalFooter>
             </CForm>

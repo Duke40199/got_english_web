@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import { useHistory } from 'react-router-dom'
 
 import {
     CCol,
@@ -17,9 +16,9 @@ import {
 } from '@coreui/react'
 import { GetCoinBundleByIdAPI, UpdateCoinBundleByIdAPI } from '../../../api/coin-bundle'
 
-const UpdateCoinBundleModal = ({ selectedCoinBundleId, show, handleClose }) => {
-    const history = useHistory();
+import { usePromiseTracker, trackPromise } from "react-promise-tracker";
 
+const UpdateCoinBundleModal = ({ selectedCoinBundleId, show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [updateCoinBundleId, setUpdateCoinBundleId] = useState("");
     const [updateCoinBundleTitle, setUpdateCoinBundleTitle] = useState("");
     const [updateCoinBundleDescription, setUpdateCoinBundleDescription] = useState("");
@@ -27,15 +26,19 @@ const UpdateCoinBundleModal = ({ selectedCoinBundleId, show, handleClose }) => {
     const [updateCoinBundlePrice, setUpdateCoinBundlePrice] = useState("");
     const [updateMessage, setUpdateMessage] = useState(null);
 
+    const { promiseInProgress } = usePromiseTracker();
+
     //this useEffect will be executed every time the modal show
     useEffect(async () => {
         if (selectedCoinBundleId != null) {
-            const selectedCoinBundleInfo = await GetCoinBundleByIdAPI(selectedCoinBundleId);
-            setUpdateCoinBundleId(selectedCoinBundleInfo.id);
-            setUpdateCoinBundleTitle(selectedCoinBundleInfo.title);
-            setUpdateCoinBundleDescription(selectedCoinBundleInfo.description);
-            setUpdateCoinBundleQuantity(selectedCoinBundleInfo.quantity);
-            setUpdateCoinBundlePrice(selectedCoinBundleInfo.price);
+            const selectedCoinBundleInfo = await trackPromise(GetCoinBundleByIdAPI(selectedCoinBundleId));
+            if (selectedCoinBundleInfo != null) {
+                setUpdateCoinBundleId(selectedCoinBundleInfo.id);
+                setUpdateCoinBundleTitle(selectedCoinBundleInfo.title);
+                setUpdateCoinBundleDescription(selectedCoinBundleInfo.description);
+                setUpdateCoinBundleQuantity(selectedCoinBundleInfo.quantity);
+                setUpdateCoinBundlePrice(selectedCoinBundleInfo.price);
+            }
         }
     }, [selectedCoinBundleId]);
 
@@ -49,12 +52,12 @@ const UpdateCoinBundleModal = ({ selectedCoinBundleId, show, handleClose }) => {
             "price": parseInt(updateCoinBundlePrice)
         }
 
-        const updateCoinBundleResult = await UpdateCoinBundleByIdAPI(selectedCoinBundleId, userInput);
+        const updateCoinBundleResult = await trackPromise(UpdateCoinBundleByIdAPI(selectedCoinBundleId, userInput));
         console.log(updateCoinBundleResult, userInput);
 
         if (updateCoinBundleResult === true) {
             setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
-            history.push("/manage-coin-bundle");
+            setRefreshDataFlag(!refreshDataFlag);
         } else {
             setUpdateMessage(<CAlert color="danger">Cập nhật thất bại!</CAlert>);
         }
@@ -85,7 +88,7 @@ const UpdateCoinBundleModal = ({ selectedCoinBundleId, show, handleClose }) => {
                             <CLabel htmlFor="update-coin-bundle-title-input">Tên Gói:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="text" id="update-coin-bundle-title-input" name="title" value={updateCoinBundleTitle} onChange={({ target }) => setUpdateCoinBundleTitle(target.value)} />
+                            <CInput type="text" id="update-coin-bundle-title-input" name="title" value={updateCoinBundleTitle} onChange={({ target }) => setUpdateCoinBundleTitle(target.value)} required />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -101,7 +104,7 @@ const UpdateCoinBundleModal = ({ selectedCoinBundleId, show, handleClose }) => {
                             <CLabel htmlFor="update-coin-bundle-quantity-input">Số lượng Coin:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="number" id="update-coin-bundle-quantity-input" min="0" name="quantity" value={updateCoinBundleQuantity} onChange={({ target }) => setUpdateCoinBundleQuantity(target.value)} />
+                            <CInput type="number" id="update-coin-bundle-quantity-input" min="0" name="quantity" value={updateCoinBundleQuantity} onChange={({ target }) => setUpdateCoinBundleQuantity(target.value)} required />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -109,7 +112,7 @@ const UpdateCoinBundleModal = ({ selectedCoinBundleId, show, handleClose }) => {
                             <CLabel htmlFor="update-coin-bundle-price-input">Giá:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="number" id="update-coin-bundle-price-input" min="0" name="price" value={updateCoinBundlePrice} onChange={({ target }) => setUpdateCoinBundlePrice(target.value)} />
+                            <CInput type="number" id="update-coin-bundle-price-input" min="0" name="price" value={updateCoinBundlePrice} onChange={({ target }) => setUpdateCoinBundlePrice(target.value)} required />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -123,11 +126,11 @@ const UpdateCoinBundleModal = ({ selectedCoinBundleId, show, handleClose }) => {
                     {updateMessage}
                 </CModalBody>
                 <CModalFooter>
-                    <CButton color="success" type="submit">
+                    <CButton color="success" type="submit" disabled={promiseInProgress}>
                         Cập nhật
                         </CButton>
                     <CButton color="secondary" onClick={handleClose()}>
-                        Hủy
+                        Đóng
                         </CButton>
                 </CModalFooter>
             </CForm>

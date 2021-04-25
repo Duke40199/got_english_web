@@ -108,7 +108,8 @@ const ManageExpert = () => {
             <CRow>
                 <CCol>
                     <CCard>
-                        <CCardHeader align="right">
+                        <CCardHeader>
+                            <h3 className="m-0">Danh sách Chuyên Gia</h3>
                             <CButton color="primary" className="mt-2 d-flex align-items-center" onClick={() => setAddExpertModalShow(true)}>
                                 <CIcon name="cilPlus" size="sm" className="mr-1"></CIcon>Thêm mới Chuyên Gia</CButton>
                         </CCardHeader>
