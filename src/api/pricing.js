@@ -88,6 +88,29 @@ export const GetTranslationCallSessionPricingInfoListAPI = async () => {
     return pricingInfoList;
 }
 
+export const GetCoinPricingInfoAPI = async () => {
+    const token = (JSON.parse(localStorage.getItem("user"))).token;
+    let pricingInfoList = null;
+    const onSuccess = data => {
+        //only first data
+        pricingInfoList = data.data.data[0];
+    }
+
+    const onFailure = error => {
+        console.log(error);
+    }
+
+    const apiConfig = {
+        headers: { "Authorization": `Bearer ${token}` }
+    }
+
+    await APIKit.get('/pricings?pricing_name=coin_value', apiConfig)
+        .then(onSuccess)
+        .catch(onFailure);
+
+    return pricingInfoList;
+}
+
 export const GetPricingInfoByIdAPI = async (pricingId) => {
     const token = (JSON.parse(localStorage.getItem("user"))).token;
     let pricingInfo = null;

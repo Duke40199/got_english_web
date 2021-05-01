@@ -1,6 +1,7 @@
 import APIKit from './APIKit';
+import DefineErrorLog from '../reusable/DefineErrorLog'
 
-export const GetUserInfoAPI = async (username) => {
+export const GetUserInfoAPI = async (username, role) => {
     const token = (JSON.parse(localStorage.getItem("user"))).token;
     let userInfo = null;
     const onSuccess = data => {
@@ -16,7 +17,7 @@ export const GetUserInfoAPI = async (username) => {
         headers: { "Authorization": `Bearer ${token}` }
     }
 
-    await APIKit.get('/accounts?username=' + username, apiConfig)
+    await APIKit.get('/accounts?username=' + username + '&role=' + role, apiConfig)
         .then(onSuccess)
         .catch(onFailure);
 
@@ -137,13 +138,11 @@ export const UpdateUserInfoByUserIdAPI = async (userID, updateInfoJson) => {
     const token = (JSON.parse(localStorage.getItem("user"))).token;
     let updateResult = null;
     const onSuccess = response => {
-        console.log(response.data);
         updateResult = response.data.success;
     }
 
     const onFailure = error => {
-        console.log(error);
-        updateResult = false;
+        updateResult = DefineErrorLog(error);
     }
 
     const apiConfig = {
@@ -161,12 +160,11 @@ export const CreateUserAPI = async (userInfoJson) => {
     const token = (JSON.parse(localStorage.getItem("user"))).token;
     let createData = null;
     const onSuccess = response => {
-        console.log(response.data);
         createData = response.data;
     }
 
     const onFailure = error => {
-        console.log(error);
+        createData = DefineErrorLog(error);
     }
 
     const apiConfig = {
@@ -257,18 +255,11 @@ export const SuspendUserByIdAPI = async (userId) => {
     let suspendResult = null;
 
     const onSuccess = response => {
-        console.log(response.data);
         suspendResult = response.data.success;
     }
 
     const onFailure = error => {
-        console.log(error);
-        suspendResult = error.response.data;
-        if ((error.response.data).includes("Account is already suspended.")) {
-            suspendResult = "Tài khoản này đã bị khóa!"
-        } else {
-            suspendResult = "Khóa tài khoản thất bại!"
-        }
+        suspendResult = DefineErrorLog(error);
     }
 
     const apiConfig = {
@@ -287,18 +278,11 @@ export const UnsuspendUserByIdAPI = async (userId) => {
     let unsuspendResult = null;
 
     const onSuccess = response => {
-        console.log(response.data);
         unsuspendResult = response.data.success;
     }
 
     const onFailure = error => {
-        console.log(error);
-        unsuspendResult = error.response.data;
-        if ((error.response.data).includes("Account is not yet suspended.")) {
-            unsuspendResult = "Tài khoản này hiện không bị khóa!"
-        } else {
-            unsuspendResult = "Mở khóa tài khoản thất bại!"
-        }
+        unsuspendResult = DefineErrorLog(error);
     }
 
     const apiConfig = {

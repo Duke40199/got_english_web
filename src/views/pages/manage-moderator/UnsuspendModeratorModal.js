@@ -25,7 +25,7 @@ const UnsuspendModeratorModal = ({ selectedModeratorUsername, show, handleClose,
     //this useEffect will be executed every time the modal show
     useEffect(async () => {
         if (selectedModeratorUsername != null) {
-            const selectedModeratorInfo = await trackPromise(GetUserInfoAPI(selectedModeratorUsername));
+            const selectedModeratorInfo = await trackPromise(GetUserInfoAPI(selectedModeratorUsername, 'Moderator'));
             if (selectedModeratorInfo != null) {
                 setUnsuspendModeratorUUID(selectedModeratorInfo.id);
                 setUnsuspendModeratorUsername(selectedModeratorInfo.username);

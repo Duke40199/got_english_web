@@ -13,7 +13,8 @@ import {
     CFormGroup,
     CInputFile,
     CForm,
-    CAlert
+    CAlert,
+    CInvalidFeedback
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 
@@ -24,6 +25,8 @@ import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import vi from "date-fns/locale/vi";
 import { format } from 'date-fns';
+
+import AccountValidator from '../../../reusable/AccountValidator';
 
 import { usePromiseTracker, trackPromise } from "react-promise-tracker";
 
@@ -36,6 +39,7 @@ const AddLearnerModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFla
     const [addLearnerPhoneNumber, setAddLearnerPhoneNumber] = useState("");
     const [addLearnerBirthday, setAddLearnerBirthday] = useState("");
     const [addLearnerAvatarUrl, setAddLearnerAvatarUrl] = useState("");
+    const [fieldErrorMessages, setFieldErrorMessages] = useState({});
     const [addMessage, setAddMessage] = useState(null);
 
     const { promiseInProgress } = usePromiseTracker();
@@ -87,45 +91,71 @@ const AddLearnerModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFla
         e.preventDefault();
 
         const userInput = {
+            "fullname": addLearnerFullname,
             "username": addLearnerUsername,
             "password": addLearnerPassword,
             "email": addLearnerEmail,
-            "role_name": "Learner"
-        };
+            "address": addLearnerAddress,
+            "phone_number": addLearnerPhoneNumber
+        }
 
-        const addLearnerResult = await trackPromise(CreateUserAPI(userInput));
-        console.log(addLearnerResult, userInput);
+        const formValidate = AccountValidator(userInput);
+        const noErrors = Object.keys(formValidate).length === 0;
 
-        if (addLearnerResult.success === true) {
-            const newLearnerToken = addLearnerResult.data.token;
-            const newLearnerID = (jwt_decode(newLearnerToken)).claims.id;
-            //check if uploaded file is blob file from local
-            const isBlob = addLearnerAvatarUrl.includes("blob:");
-            let newAvtSrc = addLearnerAvatarUrl;
-            if (isBlob) {
-                //upload local image to Firebase Storage
-                newAvtSrc = await trackPromise(uploadToStorage(addLearnerAvatarUrl, newLearnerID));
-            } else {
-                //do nothing
-            }
-            const additionalData = {
-                "fullname": addLearnerFullname,
-                "address": addLearnerAddress,
-                "phone_number": addLearnerPhoneNumber,
-                "birthday": ((addLearnerBirthday == "" || addLearnerBirthday == null) ? null : format(addLearnerBirthday, 'yyyy-MM-dd')),
-                "avatar_url": newAvtSrc
-            }
+        if (noErrors) {
+            const addLearnerData = {
+                "username": addLearnerUsername,
+                "password": addLearnerPassword,
+                "email": addLearnerEmail,
+                "role_name": "Learner"
+            };
 
-            const updateLearnerAvt = await trackPromise(UpdateUserInfoByUserIdAPI(newLearnerID, additionalData));
-            console.log(newLearnerID, additionalData)
-            if (updateLearnerAvt === true) {
-                setAddMessage(<CAlert color="success">Thêm mới thành công!</CAlert>);
+            const addLearnerResult = await trackPromise(CreateUserAPI(addLearnerData));
+
+            if (addLearnerResult != null) {
+                if (addLearnerResult.success === true) {
+                    const newLearnerToken = addLearnerResult.data.token;
+                    const newLearnerID = (jwt_decode(newLearnerToken)).claims.id;
+                    let newAvtSrc = "";
+                    //check if uploaded file is blob file from local
+                    if (addLearnerAvatarUrl != null) {
+                        const isBlob = addLearnerAvatarUrl.includes("blob:");
+                        newAvtSrc = addLearnerAvatarUrl;
+                        if (isBlob) {
+                            //upload local image to Firebase Storage
+                            newAvtSrc = await trackPromise(uploadToStorage(addLearnerAvatarUrl, newLearnerID));
+                        } else {
+                            //do nothing
+                        }
+                    }
+
+                    const additionalData = {
+                        "fullname": addLearnerFullname,
+                        "address": addLearnerAddress,
+                        "phone_number": addLearnerPhoneNumber,
+                        "birthday": ((addLearnerBirthday == "" || addLearnerBirthday == null) ? "" : format(addLearnerBirthday, 'yyyy-MM-dd')),
+                        "avatar_url": newAvtSrc
+                    }
+
+                    const updateLearnerAvt = await trackPromise(UpdateUserInfoByUserIdAPI(newLearnerID, additionalData));
+
+                    if (updateLearnerAvt === true) {
+                        setAddMessage(<CAlert color="success">Thêm mới thành công!</CAlert>);
+                    } else {
+                        setAddMessage(<CAlert color="danger">Thêm mới thành công! Tuy nhiên phần thông tin cập nhật đã gặp sự cố. Hãy sử dụng chức năng Cập nhật để cập nhật lại thông tin.</CAlert>);
+                    }
+                } else {
+                    setAddMessage(<CAlert color="danger">{addLearnerResult}</CAlert>);
+                }
                 setRefreshDataFlag(!refreshDataFlag);
             } else {
-                setAddMessage(<CAlert color="danger">Thêm mới thành công! Tuy nhiên phần thông tin cập nhật đã gặp sự cố. Hãy sử dụng chức năng Cập nhật để cập nhật lại thông tin.</CAlert>);
+                setAddMessage(<CAlert color="danger">{addLearnerResult}</CAlert>);
             }
+            //clear errors if any
+            setFieldErrorMessages({});
         } else {
-            setAddMessage(<CAlert color="danger">Thêm mới thất bại!</CAlert>);
+            setFieldErrorMessages(formValidate);
+            setAddMessage(null);
         }
     }
 
@@ -148,31 +178,73 @@ const AddLearnerModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFla
                             <CLabel htmlFor="learner-fullname-input">Họ và tên:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput id="learner-fullname-input" name="learner-fullname-input" onChange={({ target }) => setAddLearnerFullname(target.value)} />
+                            <CInput
+                                id="learner-fullname-input" name="learner-fullname-input"
+                                onChange={({ target }) => setAddLearnerFullname(target.value)} />
+                            {fieldErrorMessages.fullname != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.fullname}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="learner-username-input">Tên tài khoản:</CLabel>
+                            <CLabel
+                                className="required"
+                                htmlFor="learner-username-input">
+                                Tên tài khoản:
+                                    </CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput id="learner-username-input" name="learner-username-input" onChange={({ target }) => setAddLearnerUsername(target.value)} required={true} />
+                            <CInput
+                                id="learner-username-input"
+                                name="learner-username-input"
+                                onChange={({ target }) => setAddLearnerUsername(target.value)}
+                                required
+                            />
+                            {fieldErrorMessages.username != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.username}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="learner-password-input">Mật khẩu:</CLabel>
+                            <CLabel
+                                className="required" htmlFor="learner-password-input">
+                                Mật khẩu:
+                                </CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="password" id="learner-password-input" name="learner-password-input" onChange={({ target }) => setAddLearnerPassword(target.value)} required={true} />
+                            <CInput
+                                type="password"
+                                id="learner-password-input" name="learner-password-input"
+                                onChange={({ target }) => setAddLearnerPassword(target.value)}
+                                required />
+                            {fieldErrorMessages.password != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.password}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="learner-email-input">Email:</CLabel>
+                            <CLabel className="required" htmlFor="learner-email-input">Email:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="email" id="learner-email-input" name="learner-email-input" autoComplete="email" onChange={({ target }) => setAddLearnerEmail(target.value)} required={true} />
+                            <CInput type="email" id="learner-email-input" name="learner-email-input" autoComplete="email" onChange={({ target }) => setAddLearnerEmail(target.value)} required />
+                            {fieldErrorMessages.email != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.email}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -188,7 +260,8 @@ const AddLearnerModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFla
                                     name="learner-birthday-input"
                                     placeholderText="Ngày-Tháng-Năm"
                                     onChange={date => setAddLearnerBirthday(date)}
-                                    dateFormat="dd-MM-yyyy" />
+                                    dateFormat="dd-MM-yyyy"
+                                    maxDate={new Date()} />
                                 :
 
                                 <DatePicker
@@ -201,6 +274,7 @@ const AddLearnerModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFla
                                     onChange={date => setAddLearnerBirthday(date)}
                                     dateFormat="dd-MM-yyyy"
                                     value={addLearnerBirthday}
+                                    maxDate={new Date()}
                                 />
                             }
 
@@ -211,7 +285,13 @@ const AddLearnerModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFla
                             <CLabel htmlFor="learner-address-input">Địa chỉ:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="tel" id="learner-address-input" name="learner-address-input" onChange={({ target }) => setAddLearnerAddress(target.value)} />
+                            <CInput type="text" id="learner-address-input" name="learner-address-input" onChange={({ target }) => setAddLearnerAddress(target.value)} />
+                            {fieldErrorMessages.address != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.address}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -219,7 +299,13 @@ const AddLearnerModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFla
                             <CLabel htmlFor="learner-phone-input">Số điện thoại:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="tel" id="learner-phone-input" name="learner-phone-input" onChange={({ target }) => setAddLearnerPhoneNumber(target.value)} />
+                            <CInput type="text" id="learner-phone-input" name="learner-phone-input" onChange={({ target }) => setAddLearnerPhoneNumber(target.value)} />
+                            {fieldErrorMessages.phone_number != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.phone_number}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -230,8 +316,9 @@ const AddLearnerModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFla
                                 color="info"
                                 className="rounded-circle"
                                 onClick={avtUrlUploadOnclick}
-                            ><CIcon name="cil-pencil"></CIcon></CButton>
-                            <CInputFile class="d-none" id="addLearnerAvtUrlInput" name="learner-avatar-url" />
+                            ><CIcon name="cil-pencil"></CIcon>
+                            </CButton>
+                            <CInputFile className="d-none" id="addLearnerAvtUrlInput" name="learner-avatar-url" />
                         </CCol>
                     </CFormGroup>
                     {addMessage}

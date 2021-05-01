@@ -13,7 +13,8 @@ import {
     CFormGroup,
     CInputFile,
     CForm,
-    CAlert
+    CAlert,
+    CInvalidFeedback
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { GetUserInfoAPI, UpdateUserInfoByUserIdAPI } from '../../../api/user';
@@ -23,6 +24,8 @@ import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import vi from "date-fns/locale/vi";
 import { format, parseISO } from 'date-fns';
+
+import AccountValidator from '../../../reusable/AccountValidator';
 
 import { usePromiseTracker, trackPromise } from "react-promise-tracker";
 
@@ -36,6 +39,7 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose, refres
     const [updateLearnerPhoneNumber, setUpdateLearnerPhoneNumber] = useState("");
     const [updateLearnerBirthday, setUpdateLearnerBirthday] = useState("");
     const [updateLearnerAvatarUrl, setUpdateLearnerAvatarUrl] = useState("");
+    const [fieldErrorMessages, setFieldErrorMessages] = useState({});
     const [updateMessage, setUpdateMessage] = useState(null);
 
     const { promiseInProgress } = usePromiseTracker();
@@ -43,7 +47,7 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose, refres
     //this useEffect will be executed every time the modal show
     useEffect(async () => {
         if (selectedLearnerUsername != null) {
-            const selectedLearnerInfo = await trackPromise(GetUserInfoAPI(selectedLearnerUsername));
+            const selectedLearnerInfo = await trackPromise(GetUserInfoAPI(selectedLearnerUsername, 'Learner'));
             if (selectedLearnerInfo) {
                 setUpdateLearnerUUID(selectedLearnerInfo.id);
                 setUpdateLearnerFullname(selectedLearnerInfo.fullname);
@@ -107,47 +111,67 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose, refres
     const onSubmitUpdateForm = async (e) => {
         e.preventDefault();
 
-        let userInput = {};
+        const userInput = {
+            "fullname": (updateLearnerFullname != null) ? updateLearnerFullname : null,
+            "username": updateLearnerUsername,
+            "password": (updateLearnerPassword !== "") ? updateLearnerPassword : null,
+            "email": updateLearnerEmail,
+            "address": (updateLearnerAddress != null) ? updateLearnerAddress : null,
+            "phone_number": (updateLearnerPhoneNumber != null) ? updateLearnerPhoneNumber : null
+        };
 
-        //check if uploaded file is blob file from local
-        const isBlob = updateLearnerAvatarUrl.includes("blob:");
-        let newAvtSrc = updateLearnerAvatarUrl;
-        if (isBlob) {
-            //upload local image to Firebase Storage
-            newAvtSrc = await trackPromise(uploadToStorage(updateLearnerAvatarUrl));
-        } else {
-            //do nothing
-        }
+        const formValidate = AccountValidator(userInput);
+        const noErrors = Object.keys(formValidate).length === 0;
 
-        if (updateLearnerPassword === "") {
-            userInput = {
-                "fullname": updateLearnerFullname,
-                "username": updateLearnerUsername,
-                "address": updateLearnerAddress,
-                "phone_number": updateLearnerPhoneNumber,
-                "birthday": ((updateLearnerBirthday == "" || updateLearnerBirthday == null) ? null : format(updateLearnerBirthday, 'yyyy-MM-dd')),
-                "avatar_url": newAvtSrc,
+        if (noErrors) {
+            let updateLearnerData = {};
+            let newAvtSrc = "";
+            //check if uploaded file is blob file from local
+            if (updateLearnerAvatarUrl != null) {
+                const isBlob = updateLearnerAvatarUrl.includes("blob:");
+                newAvtSrc = updateLearnerAvatarUrl;
+                if (isBlob) {
+                    //upload local image to Firebase Storage
+                    newAvtSrc = await trackPromise(uploadToStorage(updateLearnerAvatarUrl));
+                } else {
+                    //do nothing
+                }
             }
-        } else {
-            userInput = {
-                "fullname": updateLearnerFullname,
-                "username": updateLearnerUsername,
-                "password": updateLearnerPassword,
-                "address": updateLearnerAddress,
-                "phone_number": updateLearnerPhoneNumber,
-                "birthday": ((updateLearnerBirthday == "" || updateLearnerBirthday == null) ? null : format(updateLearnerBirthday, 'yyyy-MM-dd')),
-                "avatar_url": newAvtSrc,
+
+            if (updateLearnerPassword === "") {
+                updateLearnerData = {
+                    "fullname": updateLearnerFullname,
+                    "username": updateLearnerUsername,
+                    "address": updateLearnerAddress,
+                    "phone_number": updateLearnerPhoneNumber,
+                    "birthday": ((updateLearnerBirthday == "" || updateLearnerBirthday == null) ? "" : format(updateLearnerBirthday, 'yyyy-MM-dd')),
+                    "avatar_url": newAvtSrc,
+                }
+            } else {
+                updateLearnerData = {
+                    "fullname": updateLearnerFullname,
+                    "username": updateLearnerUsername,
+                    "password": updateLearnerPassword,
+                    "address": updateLearnerAddress,
+                    "phone_number": updateLearnerPhoneNumber,
+                    "birthday": ((updateLearnerBirthday == "" || updateLearnerBirthday == null) ? "" : format(updateLearnerBirthday, 'yyyy-MM-dd')),
+                    "avatar_url": newAvtSrc,
+                }
             }
-        }
 
-        const updateResult = await trackPromise(UpdateUserInfoByUserIdAPI(updateLearnerUUID, userInput));
-        console.log(updateResult, userInput);
+            const updateResult = await trackPromise(UpdateUserInfoByUserIdAPI(updateLearnerUUID, updateLearnerData));
 
-        if (updateResult === true) {
-            setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
-            setRefreshDataFlag(!refreshDataFlag);
+            if (updateResult === true) {
+                setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
+                setRefreshDataFlag(!refreshDataFlag);
+            } else {
+                setUpdateMessage(<CAlert color="danger">{updateResult}</CAlert>);
+            }
+            //clear errors if any
+            setFieldErrorMessages({});
         } else {
-            setUpdateMessage(<CAlert color="danger">Cập nhật thất bại!</CAlert>);
+            setFieldErrorMessages(formValidate);
+            setUpdateMessage(null);
         }
     }
 
@@ -179,14 +203,26 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose, refres
                         </CCol>
                         <CCol xs="12" md="8">
                             <CInput type="text" id="update-learner-fullname-input" name="fullname" value={updateLearnerFullname} onChange={({ target }) => setUpdateLearnerFullname(target.value)} />
+                            {fieldErrorMessages.fullname != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.fullname}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="update-learner-username-input">Tên tài khoản:</CLabel>
+                            <CLabel className="required" htmlFor="update-learner-username-input">Tên tài khoản:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
                             <CInput type="text" id="update-learner-username-input" name="username" value={updateLearnerUsername} required={true} onChange={({ target }) => setUpdateLearnerUsername(target.value)} />
+                            {fieldErrorMessages.username != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.username}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -195,6 +231,12 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose, refres
                         </CCol>
                         <CCol xs="12" md="8">
                             <CInput type="password" id="update-learner-password-input" name="update-learner-password-input" placeholder="[Không thay đổi]" value={updateLearnerPassword} onChange={({ target }) => setUpdateLearnerPassword(target.value)} />
+                            {fieldErrorMessages.password != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.password}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -202,7 +244,13 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose, refres
                             <CLabel htmlFor="update-learner-email-input">Email:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="email" id="update-learner-email-input" name="update-learner-email-input" autoComplete="email" value={updateLearnerEmail} required={true} readOnly />
+                            <CInput type="email" id="update-learner-email-input" name="update-learner-email-input" autoComplete="email" value={updateLearnerEmail} required readOnly />
+                            {fieldErrorMessages.email != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.email}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -219,6 +267,7 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose, refres
                                     placeholderText="Ngày-Tháng-Năm"
                                     onChange={date => setUpdateLearnerBirthday(date)}
                                     dateFormat="dd-MM-yyyy"
+                                    maxDate={new Date()}
                                 />
                                 :
                                 <DatePicker
@@ -231,6 +280,7 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose, refres
                                     onChange={date => setUpdateLearnerBirthday(date)}
                                     dateFormat="dd-MM-yyyy"
                                     value={updateLearnerBirthday}
+                                    maxDate={new Date()}
                                 />
                             }
                         </CCol>
@@ -241,6 +291,12 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose, refres
                         </CCol>
                         <CCol xs="12" md="8">
                             <CInput type="text" id="update-learner-address-input" name="update-learner-address-input" value={updateLearnerAddress} onChange={({ target }) => setUpdateLearnerAddress(target.value)} />
+                            {fieldErrorMessages.address != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.address}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -248,7 +304,13 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose, refres
                             <CLabel htmlFor="update-learner-phone-input">Số điện thoại:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="tel" id="update-learner-phone-input" name="update-learner-phone-input" value={updateLearnerPhoneNumber} onChange={({ target }) => setUpdateLearnerPhoneNumber(target.value)} />
+                            <CInput type="text" id="update-learner-phone-input" name="update-learner-phone-input" value={updateLearnerPhoneNumber} onChange={({ target }) => setUpdateLearnerPhoneNumber(target.value)} />
+                            {fieldErrorMessages.phone_number != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.phone_number}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -260,7 +322,7 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose, refres
                                 className="rounded-circle"
                                 onClick={avtUrlUploadOnclick}
                             ><CIcon name="cil-pencil"></CIcon></CButton>
-                            <CInputFile class="d-none" id="updateLearnerAvtUrlInput" name="update-learner-avatar-url" />
+                            <CInputFile className="d-none" id="updateLearnerAvtUrlInput" name="update-learner-avatar-url" />
                         </CCol>
                     </CFormGroup>
                     {updateMessage}

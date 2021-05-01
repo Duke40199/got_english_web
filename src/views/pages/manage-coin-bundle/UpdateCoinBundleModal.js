@@ -15,6 +15,7 @@ import {
     CAlert
 } from '@coreui/react'
 import { GetCoinBundleByIdAPI, UpdateCoinBundleByIdAPI } from '../../../api/coin-bundle'
+import { GetCoinPricingInfoAPI } from '../../../api/pricing';
 
 import { usePromiseTracker, trackPromise } from "react-promise-tracker";
 
@@ -24,6 +25,7 @@ const UpdateCoinBundleModal = ({ selectedCoinBundleId, show, handleClose, refres
     const [updateCoinBundleDescription, setUpdateCoinBundleDescription] = useState("");
     const [updateCoinBundleQuantity, setUpdateCoinBundleQuantity] = useState("");
     const [updateCoinBundlePrice, setUpdateCoinBundlePrice] = useState("");
+    const [coinPricing, setCoinPricing] = useState("");
     const [updateMessage, setUpdateMessage] = useState(null);
 
     const { promiseInProgress } = usePromiseTracker();
@@ -40,6 +42,10 @@ const UpdateCoinBundleModal = ({ selectedCoinBundleId, show, handleClose, refres
                 setUpdateCoinBundlePrice(selectedCoinBundleInfo.price);
             }
         }
+        const coinPricing = await trackPromise(GetCoinPricingInfoAPI());
+        if (coinPricing != null) {
+            setCoinPricing(coinPricing.price);
+        }
     }, [selectedCoinBundleId]);
 
     const onSubmitUpdateForm = async (e) => {
@@ -49,7 +55,7 @@ const UpdateCoinBundleModal = ({ selectedCoinBundleId, show, handleClose, refres
             "title": updateCoinBundleTitle,
             "description": updateCoinBundleDescription,
             "quantity": parseInt(updateCoinBundleQuantity),
-            "price": parseInt(updateCoinBundlePrice)
+            "price": parseInt(updateCoinBundleQuantity) * coinPricing
         }
 
         const updateCoinBundleResult = await trackPromise(UpdateCoinBundleByIdAPI(selectedCoinBundleId, userInput));
@@ -85,10 +91,10 @@ const UpdateCoinBundleModal = ({ selectedCoinBundleId, show, handleClose, refres
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="update-coin-bundle-title-input">Tên Gói:</CLabel>
+                            <CLabel className="required" htmlFor="update-coin-bundle-title-input">Tên Gói:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="text" id="update-coin-bundle-title-input" name="title" value={updateCoinBundleTitle} onChange={({ target }) => setUpdateCoinBundleTitle(target.value)} required />
+                            <CInput type="text" id="update-coin-bundle-title-input" name="title" value={updateCoinBundleTitle} onChange={({ target }) => setUpdateCoinBundleTitle(target.value)} maxLength="30" required />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -96,23 +102,23 @@ const UpdateCoinBundleModal = ({ selectedCoinBundleId, show, handleClose, refres
                             <CLabel htmlFor="update-coin-bundle-description-input">Nội dung Gói:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="text" id="update-coin-bundle-description-input" name="description" value={updateCoinBundleDescription} onChange={({ target }) => setUpdateCoinBundleDescription(target.value)} />
+                            <CInput type="text" id="update-coin-bundle-description-input" name="description" value={updateCoinBundleDescription} onChange={({ target }) => setUpdateCoinBundleDescription(target.value)} maxLength="100" />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="update-coin-bundle-quantity-input">Số lượng Coin:</CLabel>
+                            <CLabel className="required" htmlFor="update-coin-bundle-quantity-input">Số lượng Coin:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="number" id="update-coin-bundle-quantity-input" min="0" name="quantity" value={updateCoinBundleQuantity} onChange={({ target }) => setUpdateCoinBundleQuantity(target.value)} required />
+                            <CInput type="number" id="update-coin-bundle-quantity-input" min="1" max="1000" name="quantity" value={updateCoinBundleQuantity} onChange={({ target }) => setUpdateCoinBundleQuantity(target.value)} required />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="update-coin-bundle-price-input">Giá:</CLabel>
+                            <CLabel htmlFor="update-coin-bundle-price-input">Giá Gói:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="number" id="update-coin-bundle-price-input" min="0" name="price" value={updateCoinBundlePrice} onChange={({ target }) => setUpdateCoinBundlePrice(target.value)} required />
+                            <CInput type="number" id="update-coin-bundle-price-input" min="0" name="price" value={updateCoinBundleQuantity * coinPricing} readOnly />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>

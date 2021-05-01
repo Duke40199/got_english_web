@@ -5,7 +5,7 @@ export const LoginAPI = async idToken => {
     userData: null,
     errorMessage: null,
   };
-  if (idToken == undefined) {
+  if (idToken === undefined) {
     result.errorMessage = "Xin kiểm tra lại thông tin đăng nhập."
     return result;
   }
@@ -16,9 +16,9 @@ export const LoginAPI = async idToken => {
     console.log(error);
     let errorMessage = "";
     if (error.response != null) {
-      if (error.response.status == 403) {
+      if (error.response.status === 403) {
         errorMessage = "Xin kiểm tra lại thông tin đăng nhập.";
-      } else if (error.response.status == 401) {
+      } else if (error.response.status === 401) {
         errorMessage = "Tài khoản của bạn đã bị khóa.";
       }
     } else {
