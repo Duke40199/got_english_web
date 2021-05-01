@@ -32,7 +32,7 @@ const defineServiceName = (serviceName) => {
 
 const fields = [
     { key: 'service_name', label: 'Tên dịch vụ Chiết Khấu', _style: { width: '35%' } },
-    { key: 'rate', label: 'Phần trăm Chiết Khấu', _style: { width: '20%' } },
+    { key: 'rate', label: 'Tỉ lệ Chiết Khấu', _style: { width: '20%' } },
     { key: 'updated_at', label: 'Thời gian lần cuối cập nhật', _style: { width: '40%' } },
     { key: 'action', label: '', _style: { width: '5%' } }
 ]
@@ -90,12 +90,6 @@ const ManageExchangeRate = () => {
                                         (item, index) => (
                                             <td>
                                                 {defineServiceName(item.service_name)}
-                                            </td>
-                                        ),
-                                    'rate':
-                                        (item, index) => (
-                                            <td>
-                                                {item.rate * 100}%
                                             </td>
                                         ),
                                     'updated_at':

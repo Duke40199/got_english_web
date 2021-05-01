@@ -99,11 +99,11 @@ const UpdateExchangeRateModal = ({ selectedExchangeRateId, show, handleClose, re
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="update-exchange-rate-rate-input">Tỉ lệ Chiết Khấu:</CLabel>
+                            <CLabel className="required" htmlFor="update-exchange-rate-rate-input">Tỉ lệ Chiết Khấu:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
                             <CRow className="m-0 align-items-center">
-                                <CInput type="number" className="w-25 mr-2" id="update-exchange-rate-rate-input" min="1" max="100" step="1" name="quantity" value={updateExchangeRateRate * 100} onChange={({ target }) => setUpdateExchangeRateRate((target.value) / 100)} required /> %
+                                <CInput type="number" className="w-25 mr-2" id="update-exchange-rate-rate-input" min="0.01" max="1" step="0.01" name="quantity" value={updateExchangeRateRate} onChange={({ target }) => setUpdateExchangeRateRate(target.value)} required />
                             </CRow>
                         </CCol>
                     </CFormGroup>

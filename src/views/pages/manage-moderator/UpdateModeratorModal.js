@@ -14,10 +14,10 @@ import {
     CInputFile,
     CForm,
     CAlert,
-    CInputCheckbox
+    CInputCheckbox,
+    CInvalidFeedback
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-
 
 import { GetUserInfoAPI, UpdateUserInfoByUserIdAPI, UpdateModeratorPermissionByIdAPI } from '../../../api/user';
 import firebase from '../../../firebase/firebase';
@@ -28,6 +28,8 @@ import vi from "date-fns/locale/vi";
 import { format, parseISO } from 'date-fns';
 
 import { usePromiseTracker, trackPromise } from "react-promise-tracker";
+
+import AccountValidator from '../../../reusable/AccountValidator';
 
 const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [updateModeratorUUID, setUpdateModeratorUUID] = useState("");
@@ -43,6 +45,7 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose, re
     const [updateModeratorCanManagePricing, setUpdateModeratorCanManagePricing] = useState(false);
     const [updateModeratorCanManageApplicationForm, setUpdateModeratorCanManageApplicationForm] = useState(false);
     const [updateModeratorCanManageExchangeRate, setUpdateModeratorCanManageExchangeRate] = useState(false);
+    const [fieldErrorMessages, setFieldErrorMessages] = useState({});
     const [updateMessage, setUpdateMessage] = useState(null);
 
     const { promiseInProgress } = usePromiseTracker();
@@ -50,7 +53,7 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose, re
     //this useEffect will be executed every time the modal show
     useEffect(async () => {
         if (selectedModeratorUsername != null) {
-            const selectedModeratorInfo = await trackPromise(GetUserInfoAPI(selectedModeratorUsername));
+            const selectedModeratorInfo = await trackPromise(GetUserInfoAPI(selectedModeratorUsername, 'Moderator'));
             if (selectedModeratorInfo != null) {
                 setUpdateModeratorUUID(selectedModeratorInfo.id);
                 setUpdateModeratorFullname(selectedModeratorInfo.fullname);
@@ -118,63 +121,83 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose, re
     const onSubmitUpdateForm = async (e) => {
         e.preventDefault();
 
-        let userInput = {};
-        let permissionInput = {};
-
-        //check if uploaded file is blob file from local
-        const isBlob = updateModeratorAvatarUrl.includes("blob:");
-        let newAvtSrc = updateModeratorAvatarUrl;
-        if (isBlob) {
-            //upload local image to Firebase Storage
-            newAvtSrc = await trackPromise(uploadToStorage(updateModeratorAvatarUrl));
-        } else {
-            //do nothing
+        const userInput = {
+            "fullname": (updateModeratorFullname != null) ? updateModeratorFullname : null,
+            "username": updateModeratorUsername,
+            "password": (updateModeratorPassword !== "") ? updateModeratorPassword : null,
+            "email": updateModeratorEmail,
+            "address": (updateModeratorAddress != null) ? updateModeratorAddress : null,
+            "phone_number": (updateModeratorPhoneNumber != null) ? updateModeratorPhoneNumber : null
         }
 
-        if (updateModeratorPassword === "") {
-            userInput = {
-                "fullname": updateModeratorFullname,
-                "username": updateModeratorUsername,
-                "address": updateModeratorAddress,
-                "phone_number": updateModeratorPhoneNumber,
-                "birthday": ((updateModeratorBirthday != "" && updateModeratorBirthday != null) ? format(updateModeratorBirthday, 'yyyy-MM-dd') : null),
-                "avatar_url": newAvtSrc,
+        const formValidate = AccountValidator(userInput);
+        const noErrors = Object.keys(formValidate).length === 0;
 
+        if (noErrors) {
+            let updateModeratorData = {};
+            let permissionInput = {};
+            let newAvtSrc = "";
+
+            //check if uploaded file is blob file from local
+            if (updateModeratorAvatarUrl != null) {
+                const isBlob = updateModeratorAvatarUrl.includes("blob:");
+                newAvtSrc = updateModeratorAvatarUrl;
+                if (isBlob) {
+                    //upload local image to Firebase Storage
+                    newAvtSrc = await trackPromise(uploadToStorage(updateModeratorAvatarUrl));
+                } else {
+                    //do nothing
+                }
             }
-            permissionInput = {
-                "can_manage_coin_bundle": updateModeratorCanManageCoinBundle,
-                "can_manage_pricing": updateModeratorCanManagePricing,
-                "can_manage_application_form": updateModeratorCanManageApplicationForm,
-                "can_manage_exchange_rate": updateModeratorCanManageExchangeRate
+
+            if (updateModeratorPassword === "") {
+                updateModeratorData = {
+                    "fullname": updateModeratorFullname,
+                    "username": updateModeratorUsername,
+                    "address": updateModeratorAddress,
+                    "phone_number": updateModeratorPhoneNumber,
+                    "birthday": ((updateModeratorBirthday != "" && updateModeratorBirthday != null) ? format(updateModeratorBirthday, 'yyyy-MM-dd') : ""),
+                    "avatar_url": newAvtSrc,
+
+                }
+                permissionInput = {
+                    "can_manage_coin_bundle": updateModeratorCanManageCoinBundle,
+                    "can_manage_pricing": updateModeratorCanManagePricing,
+                    "can_manage_application_form": updateModeratorCanManageApplicationForm,
+                    "can_manage_exchange_rate": updateModeratorCanManageExchangeRate
+                }
+            } else {
+                updateModeratorData = {
+                    "fullname": updateModeratorFullname,
+                    "username": updateModeratorUsername,
+                    "password": updateModeratorPassword,
+                    "address": updateModeratorAddress,
+                    "phone_number": updateModeratorPhoneNumber,
+                    "birthday": ((updateModeratorBirthday != "" && updateModeratorBirthday != null) ? format(updateModeratorBirthday, 'yyyy-MM-dd') : ""),
+                    "avatar_url": newAvtSrc,
+                }
+                permissionInput = {
+                    "can_manage_coin_bundle": updateModeratorCanManageCoinBundle,
+                    "can_manage_pricing": updateModeratorCanManagePricing,
+                    "can_manage_application_form": updateModeratorCanManageApplicationForm,
+                    "can_manage_exchange_rate": updateModeratorCanManageExchangeRate
+                }
             }
+
+            const updateResult = await trackPromise(UpdateUserInfoByUserIdAPI(updateModeratorUUID, updateModeratorData));
+            const permissionUpdateResult = await trackPromise(UpdateModeratorPermissionByIdAPI(updateModeratorUUID, permissionInput));
+
+            if (updateResult === true && permissionUpdateResult === true) {
+                setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
+                setRefreshDataFlag(!refreshDataFlag);
+            } else {
+                setUpdateMessage(<CAlert color="danger">{updateResult}</CAlert>);
+            }
+            //clear errors if any
+            setFieldErrorMessages({});
         } else {
-            userInput = {
-                "fullname": updateModeratorFullname,
-                "username": updateModeratorUsername,
-                "password": updateModeratorPassword,
-                "address": updateModeratorAddress,
-                "phone_number": updateModeratorPhoneNumber,
-                "birthday": ((updateModeratorBirthday != "" && updateModeratorBirthday != null) ? format(updateModeratorBirthday, 'yyyy-MM-dd') : null),
-                "avatar_url": newAvtSrc,
-            }
-            permissionInput = {
-                "can_manage_coin_bundle": updateModeratorCanManageCoinBundle,
-                "can_manage_pricing": updateModeratorCanManagePricing,
-                "can_manage_application_form": updateModeratorCanManageApplicationForm,
-                "can_manage_exchange_rate": updateModeratorCanManageExchangeRate
-            }
-        }
-
-        console.log(userInput);
-
-        const updateResult = await trackPromise(UpdateUserInfoByUserIdAPI(updateModeratorUUID, userInput));
-        const permissionUpdateResult = await trackPromise(UpdateModeratorPermissionByIdAPI(updateModeratorUUID, permissionInput));
-
-        if (updateResult === true && permissionUpdateResult === true) {
-            setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
-            setRefreshDataFlag(!refreshDataFlag);
-        } else {
-            setUpdateMessage(<CAlert color="danger">Cập nhật thất bại!</CAlert>);
+            setFieldErrorMessages(formValidate);
+            setUpdateMessage(null);
         }
     }
 
@@ -206,14 +229,26 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose, re
                         </CCol>
                         <CCol xs="12" md="8">
                             <CInput type="text" id="update-moderator-fullname-input" name="fullname" value={updateModeratorFullname} onChange={({ target }) => setUpdateModeratorFullname(target.value)} />
+                            {fieldErrorMessages.fullname != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.fullname}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="update-moderator-username-input">Tên tài khoản:</CLabel>
+                            <CLabel className="required" htmlFor="update-moderator-username-input">Tên tài khoản:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="text" id="update-moderator-username-input" name="username" value={updateModeratorUsername} required={true} onChange={({ target }) => setUpdateModeratorUsername(target.value)} />
+                            <CInput type="text" id="update-moderator-username-input" name="username" value={updateModeratorUsername} required onChange={({ target }) => setUpdateModeratorUsername(target.value)} />
+                            {fieldErrorMessages.username != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.username}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -222,6 +257,12 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose, re
                         </CCol>
                         <CCol xs="12" md="8">
                             <CInput type="password" id="update-moderator-password-input" name="update-moderator-password-input" value={updateModeratorPassword} placeholder="[Không thay đổi]" onChange={({ target }) => setUpdateModeratorPassword(target.value)} />
+                            {fieldErrorMessages.password != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.password}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -230,6 +271,12 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose, re
                         </CCol>
                         <CCol xs="12" md="8">
                             <CInput type="email" id="update-moderator-email-input" name="update-moderator-email-input" autoComplete="email" value={updateModeratorEmail} required={true} readOnly />
+                            {fieldErrorMessages.email != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.email}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -246,6 +293,7 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose, re
                                     placeholderText="Ngày-Tháng-Năm"
                                     onChange={date => setUpdateModeratorBirthday(date)}
                                     dateFormat="dd-MM-yyyy"
+                                    maxDate={new Date()}
                                 />
                                 :
                                 <DatePicker
@@ -258,6 +306,7 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose, re
                                     onChange={date => setUpdateModeratorBirthday(date)}
                                     dateFormat="dd-MM-yyyy"
                                     value={updateModeratorBirthday}
+                                    maxDate={new Date()}
                                 />
                             }
                         </CCol>
@@ -268,6 +317,12 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose, re
                         </CCol>
                         <CCol xs="12" md="8">
                             <CInput type="text" id="update-moderator-address-input" name="update-moderator-address-input" value={updateModeratorAddress} onChange={({ target }) => setUpdateModeratorAddress(target.value)} />
+                            {fieldErrorMessages.address != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.address}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -276,6 +331,12 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose, re
                         </CCol>
                         <CCol xs="12" md="8">
                             <CInput type="tel" id="update-moderator-phone-input" name="update-moderator-phone-input" value={updateModeratorPhoneNumber} onChange={({ target }) => setUpdateModeratorPhoneNumber(target.value)} />
+                            {fieldErrorMessages.phone_number != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.phone_number}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -332,7 +393,7 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose, re
                                 className="rounded-circle"
                                 onClick={avtUrlUploadOnclick}
                             ><CIcon name="cil-pencil"></CIcon></CButton>
-                            <CInputFile class="d-none" id="updateModeratorAvtUrlInput" name="update-moderator-avatar-url" />
+                            <CInputFile className="d-none" id="updateModeratorAvtUrlInput" name="update-moderator-avatar-url" />
                         </CCol>
                     </CFormGroup>
                     {updateMessage}

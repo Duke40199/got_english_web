@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import { useHistory } from 'react-router-dom'
 
 import {
     CCol,
@@ -15,7 +14,8 @@ import {
     CInputFile,
     CForm,
     CAlert,
-    CInputCheckbox
+    CInputCheckbox,
+    CInvalidFeedback
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import { GetUserInfoAPI, UpdateExpertPermissionByIdAPI, UpdateUserInfoByUserIdAPI } from '../../../api/user';
@@ -27,6 +27,8 @@ import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import vi from "date-fns/locale/vi";
 import { format, parseISO } from 'date-fns';
+
+import AccountValidator from '../../../reusable/AccountValidator';
 
 const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [updateExpertUUID, setUpdateExpertUUID] = useState("");
@@ -41,6 +43,7 @@ const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose, refreshD
     const [updateExpertCanChat, setUpdateExpertCanChat] = useState(false);
     const [updateExpertCanJoinTranslationSession, setUpdateExpertCanJoinTranslationSession] = useState(false);
     const [updateExpertCanJoinLiveCallSession, setUpdateExpertCanJoinLiveCallSession] = useState(false);
+    const [fieldErrorMessages, setFieldErrorMessages] = useState({});
     const [updateMessage, setUpdateMessage] = useState(null);
 
     const { promiseInProgress } = usePromiseTracker();
@@ -48,7 +51,7 @@ const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose, refreshD
     //this useEffect will be executed every time the modal show
     useEffect(async () => {
         if (selectedExpertUsername != null) {
-            const selectedExpertInfo = await trackPromise(GetUserInfoAPI(selectedExpertUsername));
+            const selectedExpertInfo = await trackPromise(GetUserInfoAPI(selectedExpertUsername, 'Expert'));
             if (selectedExpertInfo != null) {
                 setUpdateExpertUUID(selectedExpertInfo.id);
                 setUpdateExpertFullname(selectedExpertInfo.fullname);
@@ -115,60 +118,77 @@ const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose, refreshD
     const onSubmitUpdateForm = async (e) => {
         e.preventDefault();
 
-        let userInput = {};
-        let permissionInput = {};
+        const userInput = {
+            "fullname": (updateExpertFullname != null) ? updateExpertFullname : null,
+            "username": updateExpertUsername,
+            "password": (updateExpertPassword !== "") ? updateExpertPassword : null,
+            "email": updateExpertEmail,
+            "address": (updateExpertAddress != null) ? updateExpertAddress : null,
+            "phone_number": (updateExpertPhoneNumber != null) ? updateExpertPhoneNumber : null
+        };
 
-        //check if uploaded file is blob file from local
-        const isBlob = updateExpertAvatarUrl.includes("blob:");
-        let newAvtSrc = updateExpertAvatarUrl;
-        if (isBlob) {
-            //upload local image to Firebase Storage
-            newAvtSrc = await trackPromise(uploadToStorage(updateExpertAvatarUrl));
+        const formValidate = AccountValidator(userInput);
+        const noErrors = Object.keys(formValidate).length === 0;
+
+        if (noErrors) {
+            let updateExpertData = {};
+            let permissionInput = {};
+
+            //check if uploaded file is blob file from local
+            const isBlob = updateExpertAvatarUrl.includes("blob:");
+            let newAvtSrc = updateExpertAvatarUrl;
+            if (isBlob) {
+                //upload local image to Firebase Storage
+                newAvtSrc = await trackPromise(uploadToStorage(updateExpertAvatarUrl));
+            } else {
+                //do nothing
+            }
+
+            if (updateExpertPassword === "") {
+                updateExpertData = {
+                    "fullname": updateExpertFullname,
+                    "username": updateExpertUsername,
+                    "address": updateExpertAddress,
+                    "phone_number": updateExpertPhoneNumber,
+                    "birthday": ((updateExpertBirthday == "" || updateExpertBirthday == null) ? "" : format(updateExpertBirthday, 'yyyy-MM-dd')),
+                    "avatar_url": newAvtSrc,
+                }
+                permissionInput = {
+                    "can_chat": updateExpertCanChat,
+                    "can_join_live_call_session": updateExpertCanJoinLiveCallSession,
+                    "can_join_translation_session": updateExpertCanJoinTranslationSession
+                }
+            } else {
+                updateExpertData = {
+                    "fullname": updateExpertFullname,
+                    "username": updateExpertUsername,
+                    "password": updateExpertPassword,
+                    "address": updateExpertAddress,
+                    "phone_number": updateExpertPhoneNumber,
+                    "birthday": ((updateExpertBirthday == "" || updateExpertBirthday == null) ? "" : format(updateExpertBirthday, 'yyyy-MM-dd')),
+                    "avatar_url": newAvtSrc,
+                }
+                permissionInput = {
+                    "can_chat": updateExpertCanChat,
+                    "can_join_live_call_session": updateExpertCanJoinLiveCallSession,
+                    "can_join_translation_session": updateExpertCanJoinTranslationSession
+                }
+            }
+
+            const updateResult = await trackPromise(UpdateUserInfoByUserIdAPI(updateExpertUUID, updateExpertData));
+            const permissionUpdateResult = await trackPromise(UpdateExpertPermissionByIdAPI(updateExpertUUID, permissionInput));
+
+            if (updateResult === true && permissionUpdateResult === true) {
+                setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
+                setRefreshDataFlag(!refreshDataFlag);
+            } else {
+                setUpdateMessage(<CAlert color="danger">{updateResult}</CAlert>);
+            }
+            //clear errors if any
+            setFieldErrorMessages({});
         } else {
-            //do nothing
-        }
-
-        if (updateExpertPassword === "") {
-            userInput = {
-                "fullname": updateExpertFullname,
-                "username": updateExpertUsername,
-                "address": updateExpertAddress,
-                "phone_number": updateExpertPhoneNumber,
-                "birthday": ((updateExpertBirthday == "" || updateExpertBirthday == null) ? null : format(updateExpertBirthday, 'yyyy-MM-dd')),
-                "avatar_url": newAvtSrc,
-            }
-            permissionInput = {
-                "can_chat": updateExpertCanChat,
-                "can_join_live_call_session": updateExpertCanJoinLiveCallSession,
-                "can_join_translation_session": updateExpertCanJoinTranslationSession
-            }
-        } else {
-            userInput = {
-                "fullname": updateExpertFullname,
-                "username": updateExpertUsername,
-                "password": updateExpertPassword,
-                "address": updateExpertAddress,
-                "phone_number": updateExpertPhoneNumber,
-                "birthday": ((updateExpertBirthday == "" || updateExpertBirthday == null) ? null : format(updateExpertBirthday, 'yyyy-MM-dd')),
-                "avatar_url": newAvtSrc,
-            }
-            permissionInput = {
-                "can_chat": updateExpertCanChat,
-                "can_join_live_call_session": updateExpertCanJoinLiveCallSession,
-                "can_join_translation_session": updateExpertCanJoinTranslationSession
-            }
-        }
-
-        console.log(userInput);
-
-        const updateResult = await trackPromise(UpdateUserInfoByUserIdAPI(updateExpertUUID, userInput));
-        const permissionUpdateResult = await trackPromise(UpdateExpertPermissionByIdAPI(updateExpertUUID, permissionInput));
-
-        if (updateResult === true && permissionUpdateResult === true) {
-            setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
-            setRefreshDataFlag(!refreshDataFlag);
-        } else {
-            setUpdateMessage(<CAlert color="danger">Cập nhật thất bại!</CAlert>);
+            setFieldErrorMessages(formValidate);
+            setUpdateMessage(null);
         }
     }
 
@@ -200,14 +220,26 @@ const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose, refreshD
                         </CCol>
                         <CCol xs="12" md="8">
                             <CInput type="text" id="update-expert-fullname-input" name="fullname" value={updateExpertFullname} onChange={({ target }) => setUpdateExpertFullname(target.value)} />
+                            {fieldErrorMessages.fullname != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.fullname}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="update-expert-username-input">Tên tài khoản:</CLabel>
+                            <CLabel className="required" htmlFor="update-expert-username-input">Tên tài khoản:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
                             <CInput type="text" id="update-expert-username-input" name="username" value={updateExpertUsername} required={true} onChange={({ target }) => setUpdateExpertUsername(target.value)} />
+                            {fieldErrorMessages.username != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.username}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -216,6 +248,12 @@ const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose, refreshD
                         </CCol>
                         <CCol xs="12" md="8">
                             <CInput type="password" id="update-expert-password-input" name="update-expert-password-input" placeholder="[Không thay đổi]" value={updateExpertPassword} onChange={({ target }) => setUpdateExpertPassword(target.value)} />
+                            {fieldErrorMessages.password != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.password}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -223,7 +261,13 @@ const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose, refreshD
                             <CLabel htmlFor="update-expert-email-input">Email:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="email" id="update-expert-email-input" name="update-expert-email-input" autoComplete="email" value={updateExpertEmail} required={true} readOnly />
+                            <CInput type="email" id="update-expert-email-input" name="update-expert-email-input" autoComplete="email" value={updateExpertEmail} required readOnly />
+                            {fieldErrorMessages.email != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.email}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -240,6 +284,7 @@ const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose, refreshD
                                     placeholderText="Ngày-Tháng-Năm"
                                     onChange={date => setUpdateExpertBirthday(date)}
                                     dateFormat="dd-MM-yyyy"
+                                    maxDate={new Date()}
                                 />
                                 :
                                 <DatePicker
@@ -252,6 +297,7 @@ const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose, refreshD
                                     onChange={date => setUpdateExpertBirthday(date)}
                                     dateFormat="dd-MM-yyyy"
                                     value={updateExpertBirthday}
+                                    maxDate={new Date()}
                                 />
                             }
                         </CCol>
@@ -262,6 +308,12 @@ const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose, refreshD
                         </CCol>
                         <CCol xs="12" md="8">
                             <CInput type="text" id="update-expert-address-input" name="update-expert-address-input" value={updateExpertAddress} onChange={({ target }) => setUpdateExpertAddress(target.value)} />
+                            {fieldErrorMessages.address != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.address}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -269,7 +321,13 @@ const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose, refreshD
                             <CLabel htmlFor="update-expert-phone-input">Số điện thoại:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="tel" id="update-expert-phone-input" name="update-expert-phone-input" value={updateExpertPhoneNumber} onChange={({ target }) => setUpdateExpertPhoneNumber(target.value)} />
+                            <CInput type="text" id="update-expert-phone-input" name="update-expert-phone-input" value={updateExpertPhoneNumber} onChange={({ target }) => setUpdateExpertPhoneNumber(target.value)} />
+                            {fieldErrorMessages.phone_number != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.phone_number}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -316,7 +374,7 @@ const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose, refreshD
                                 className="rounded-circle"
                                 onClick={avtUrlUploadOnclick}
                             ><CIcon name="cil-pencil"></CIcon></CButton>
-                            <CInputFile class="d-none" id="updateExpertAvtUrlInput" name="update-expert-avatar-url" />
+                            <CInputFile className="d-none" id="updateExpertAvtUrlInput" name="update-expert-avatar-url" />
                         </CCol>
                     </CFormGroup>
                     {updateMessage}

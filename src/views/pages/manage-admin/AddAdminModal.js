@@ -14,7 +14,8 @@ import {
     CInputFile,
     CForm,
     CAlert,
-    CInputCheckbox
+    CInputCheckbox,
+    CInvalidFeedback
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 
@@ -27,6 +28,8 @@ import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import vi from "date-fns/locale/vi";
 import { format } from 'date-fns';
+
+import AccountValidator from '../../../reusable/AccountValidator';
 
 const AddAdminModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [addAdminFullname, setAddAdminFullname] = useState("");
@@ -41,6 +44,7 @@ const AddAdminModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag 
     const [addAdminCanManageExpert, setAddAdminCanManageExpert] = useState(false);
     const [addAdminCanManageModerator, setAddAdminCanManageModerator] = useState(false);
     const [addAdminCanManageAdmin, setAddAdminCanManageAdmin] = useState(false);
+    const [fieldErrorMessages, setFieldErrorMessages] = useState({});
     const [addMessage, setAddMessage] = useState(null);
 
     const { promiseInProgress } = usePromiseTracker();
@@ -92,52 +96,78 @@ const AddAdminModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag 
         e.preventDefault();
 
         const userInput = {
+            "fullname": addAdminFullname,
             "username": addAdminUsername,
             "password": addAdminPassword,
             "email": addAdminEmail,
-            "role_name": "Admin"
-        };
+            "address": addAdminAddress,
+            "phone_number": addAdminPhoneNumber
+        }
 
-        const addAdminResult = await trackPromise(CreateUserAPI(userInput));
-        console.log(addAdminResult, userInput);
+        const formValidate = AccountValidator(userInput);
+        const noErrors = Object.keys(formValidate).length === 0;
 
-        if (addAdminResult.success === true) {
-            const newAdminToken = addAdminResult.data.token;
-            const newAdminID = (jwt_decode(newAdminToken)).claims.id;
-            //check if uploaded file is blob file from local
-            const isBlob = addAdminAvatarUrl.includes("blob:");
-            let newAvtSrc = addAdminAvatarUrl;
-            if (isBlob) {
-                //upload local image to Firebase Storage
-                newAvtSrc = await trackPromise(uploadToStorage(addAdminAvatarUrl, newAdminID));
+        if (noErrors) {
+            const addAdminData = {
+                "username": addAdminUsername,
+                "password": addAdminPassword,
+                "email": addAdminEmail,
+                "role_name": "Admin"
+            };
+
+            const addAdminResult = await trackPromise(CreateUserAPI(addAdminData));
+
+            if (addAdminResult != null) {
+                if (addAdminResult.success === true) {
+                    const newAdminToken = addAdminResult.data.token;
+                    const newAdminID = (jwt_decode(newAdminToken)).claims.id;
+                    let newAvtSrc = "";
+                    //check if uploaded file is blob file from local
+                    if (addAdminAvatarUrl != null) {
+                        const isBlob = addAdminAvatarUrl.includes("blob:");
+                        newAvtSrc = addAdminAvatarUrl;
+                        if (isBlob) {
+                            //upload local image to Firebase Storage
+                            newAvtSrc = await trackPromise(uploadToStorage(addAdminAvatarUrl, newAdminID));
+                        } else {
+                            //do nothing
+                        }
+                    }
+
+                    const additionalData = {
+                        "fullname": addAdminFullname,
+                        "address": addAdminAddress,
+                        "phone_number": addAdminPhoneNumber,
+                        "birthday": ((addAdminBirthday == "" || addAdminBirthday == null) ? "" : format(addAdminBirthday, 'yyyy-MM-dd')),
+                        "avatar_url": newAvtSrc
+                    }
+                    const permissionInput = {
+                        "can_manage_learner": addAdminCanManageLearner,
+                        "can_manage_expert": addAdminCanManageExpert,
+                        "can_manage_moderator": addAdminCanManageModerator,
+                        "can_manage_admin": addAdminCanManageAdmin
+                    }
+
+                    const updateAdminAvt = await trackPromise(UpdateUserInfoByUserIdAPI(newAdminID, additionalData));
+                    const permissionUpdateResult = await trackPromise(UpdateAdminPermissionByIdAPI(newAdminID, permissionInput));
+
+                    if (updateAdminAvt === true && permissionUpdateResult === true) {
+                        setAddMessage(<CAlert color="success">Thêm mới thành công!</CAlert>);
+                    } else {
+                        setAddMessage(<CAlert color="danger">Thêm mới thành công! Tuy nhiên phần thông tin cập nhật đã gặp sự cố. Hãy sử dụng chức năng Cập nhật để cập nhật lại thông tin.</CAlert>);
+                    }
+                    setRefreshDataFlag(!refreshDataFlag);
+                } else {
+                    setAddMessage(<CAlert color="danger">{addAdminResult}</CAlert>);
+                }
             } else {
-                //do nothing
+                setAddMessage(<CAlert color="danger">{addAdminResult}</CAlert>);
             }
-            const additionalData = {
-                "fullname": addAdminFullname,
-                "address": addAdminAddress,
-                "phone_number": addAdminPhoneNumber,
-                "birthday": ((addAdminBirthday == "" || addAdminBirthday == null) ? null : format(addAdminBirthday, 'yyyy-MM-dd')),
-                "avatar_url": newAvtSrc
-            }
-            const permissionInput = {
-                "can_manage_learner": addAdminCanManageLearner,
-                "can_manage_expert": addAdminCanManageExpert,
-                "can_manage_moderator": addAdminCanManageModerator,
-                "can_manage_admin": addAdminCanManageAdmin
-            }
-
-            const updateAdminAvt = await trackPromise(UpdateUserInfoByUserIdAPI(newAdminID, additionalData));
-            const permissionUpdateResult = await trackPromise(UpdateAdminPermissionByIdAPI(newAdminID, permissionInput));
-            console.log(newAdminID, additionalData)
-            if (updateAdminAvt === true && permissionUpdateResult === true) {
-                setAddMessage(<CAlert color="success">Thêm mới thành công!</CAlert>);
-                setRefreshDataFlag(!refreshDataFlag);
-            } else {
-                setAddMessage(<CAlert color="danger">Thêm mới thành công! Tuy nhiên phần thông tin cập nhật đã gặp sự cố. Hãy sử dụng chức năng Cập nhật để cập nhật lại thông tin.</CAlert>);
-            }
+            //clear errors if any
+            setFieldErrorMessages({});
         } else {
-            setAddMessage(<CAlert color="danger">Thêm mới thất bại!</CAlert>);
+            setFieldErrorMessages(formValidate);
+            setAddMessage(null);
         }
     }
 
@@ -161,30 +191,54 @@ const AddAdminModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag 
                         </CCol>
                         <CCol xs="12" md="8">
                             <CInput id="admin-fullname-input" name="admin-fullname-input" onChange={({ target }) => setAddAdminFullname(target.value)} />
+                            {fieldErrorMessages.fullname != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.fullname}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="admin-username-input">Tên tài khoản:</CLabel>
+                            <CLabel className="required" htmlFor="admin-username-input">Tên tài khoản:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput id="admin-username-input" name="admin-username-input" onChange={({ target }) => setAddAdminUsername(target.value)} required={true} />
+                            <CInput id="admin-username-input" name="admin-username-input" onChange={({ target }) => setAddAdminUsername(target.value)} required />
+                            {fieldErrorMessages.username != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.username}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="admin-password-input">Mật khẩu:</CLabel>
+                            <CLabel className="required" htmlFor="admin-password-input">Mật khẩu:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="password" id="admin-password-input" name="admin-password-input" onChange={({ target }) => setAddAdminPassword(target.value)} required={true} />
+                            <CInput type="password" id="admin-password-input" name="admin-password-input" onChange={({ target }) => setAddAdminPassword(target.value)} required />
+                            {fieldErrorMessages.password != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.password}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="admin-email-input">Email:</CLabel>
+                            <CLabel className="required" htmlFor="admin-email-input">Email:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="email" id="admin-email-input" name="admin-email-input" autoComplete="email" onChange={({ target }) => setAddAdminEmail(target.value)} required={true} />
+                            <CInput type="email" id="admin-email-input" name="admin-email-input" autoComplete="email" onChange={({ target }) => setAddAdminEmail(target.value)} required />
+                            {fieldErrorMessages.email != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.email}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -203,6 +257,7 @@ const AddAdminModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag 
                                     onChange={date => setAddAdminBirthday(date)}
                                     dateFormat="dd-MM-yyyy"
                                     value={addAdminBirthday}
+                                    maxDate={new Date()}
                                 />
                                 :
                                 <DatePicker
@@ -212,7 +267,9 @@ const AddAdminModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag 
                                     name="admin-birthday-input"
                                     placeholderText="Ngày-Tháng-Năm"
                                     onChange={date => setAddAdminBirthday(date)}
-                                    dateFormat="dd-MM-yyyy" />
+                                    dateFormat="dd-MM-yyyy"
+                                    maxDate={new Date()}
+                                />
                             }
 
                         </CCol>
@@ -222,7 +279,13 @@ const AddAdminModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag 
                             <CLabel htmlFor="admin-address-input">Địa chỉ:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="tel" id="admin-address-input" name="admin-address-input" onChange={({ target }) => setAddAdminAddress(target.value)} />
+                            <CInput type="text" id="admin-address-input" name="admin-address-input" onChange={({ target }) => setAddAdminAddress(target.value)} />
+                            {fieldErrorMessages.address != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.address}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -230,7 +293,13 @@ const AddAdminModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag 
                             <CLabel htmlFor="admin-phone-input">Số điện thoại:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="tel" id="admin-phone-input" name="admin-phone-input" onChange={({ target }) => setAddAdminPhoneNumber(target.value)} />
+                            <CInput type="text" id="admin-phone-input" name="admin-phone-input" onChange={({ target }) => setAddAdminPhoneNumber(target.value)} />
+                            {fieldErrorMessages.phone_number != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.phone_number}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -287,7 +356,7 @@ const AddAdminModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag 
                                 className="rounded-circle"
                                 onClick={avtUrlUploadOnclick}
                             ><CIcon name="cil-pencil"></CIcon></CButton>
-                            <CInputFile class="d-none" id="addAdminAvtUrlInput" name="admin-avatar-url" />
+                            <CInputFile className="d-none" id="addAdminAvtUrlInput" name="admin-avatar-url" />
                         </CCol>
                     </CFormGroup>
                     {addMessage}

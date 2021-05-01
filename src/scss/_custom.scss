@@ -19,7 +19,7 @@
 .comment-card-delete:focus {
     outline: 0 !important;
 }
-.statistic-month-year-input {
+.dashboard-month-year-input {
     cursor: pointer;
     padding: 2px 14px;
     border: 0;
@@ -45,4 +45,11 @@
 }
 .text-pre-line {
     white-space: pre-line !important;
+}
+.react-datepicker__triangle {
+    display: none;
+}
+.required:after {
+	content: '(*)';
+	color: red;
 }

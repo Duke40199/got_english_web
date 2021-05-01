@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 
 import {
     CCol,
@@ -15,17 +15,26 @@ import {
     CAlert
 } from '@coreui/react'
 import { CreateCoinBundleAPI } from '../../../api/coin-bundle';
+import { GetCoinPricingInfoAPI } from '../../../api/pricing';
 
 import { usePromiseTracker, trackPromise } from "react-promise-tracker";
 
 const AddCoinBundleModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag }) => {
     const [addCoinBundleTitle, setAddCoinBundleTitle] = useState("");
     const [addCoinBundleDescription, setAddCoinBundleDescription] = useState("");
-    const [addCoinBundleQuantity, setAddCoinBundleQuantity] = useState("");
-    const [addCoinBundlePrice, setAddCoinBundlePrice] = useState("");
+    const [addCoinBundleQuantity, setAddCoinBundleQuantity] = useState(1);
+    const [coinPricing, setCoinPricing] = useState("");
     const [addMessage, setAddMessage] = useState(null);
 
     const { promiseInProgress } = usePromiseTracker();
+
+    //this useEffect will be executed every time the modal show
+    useEffect(async () => {
+        const coinPricing = await trackPromise(GetCoinPricingInfoAPI());
+        if (coinPricing != null) {
+            setCoinPricing(coinPricing.price);
+        }
+    }, []);
 
     const onSubmitAddForm = async (e) => {
         e.preventDefault();
@@ -34,7 +43,7 @@ const AddCoinBundleModal = ({ show, handleClose, refreshDataFlag, setRefreshData
             "title": addCoinBundleTitle,
             "description": addCoinBundleDescription,
             "quantity": parseInt(addCoinBundleQuantity),
-            "price": parseInt(addCoinBundlePrice),
+            "price": parseInt(addCoinBundleQuantity) * coinPricing,
             "price_unit": "VND"
         }
 
@@ -62,7 +71,7 @@ const AddCoinBundleModal = ({ show, handleClose, refreshDataFlag, setRefreshData
                 <CModalBody>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="coin-bundle-title-input">Tên Gói:</CLabel>
+                            <CLabel className="required" htmlFor="coin-bundle-title-input">Tên Gói:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
                             <CInput id="coin-bundle-title-input" name="coin-bundle-title-input" onChange={({ target }) => setAddCoinBundleTitle(target.value)} required />
@@ -78,10 +87,10 @@ const AddCoinBundleModal = ({ show, handleClose, refreshDataFlag, setRefreshData
                     </CFormGroup>
                     <CFormGroup row>
                         <CCol md="4">
-                            <CLabel htmlFor="coin-bundle-quantity-input">Số lượng Coin:</CLabel>
+                            <CLabel className="required" htmlFor="coin-bundle-quantity-input">Số lượng Coin:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            <CInput type="number" min="0" id="coin-bundle-quantity-input" name="coin-bundle-quantity-input" onChange={({ target }) => setAddCoinBundleQuantity(target.value)} required />
+                            <CInput type="number" min="1" max="1000" id="coin-bundle-quantity-input" name="coin-bundle-quantity-input" value={addCoinBundleQuantity} onChange={({ target }) => setAddCoinBundleQuantity(target.value)} required />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -94,8 +103,8 @@ const AddCoinBundleModal = ({ show, handleClose, refreshDataFlag, setRefreshData
                                 id="coin-bundle-price-input"
                                 name="coin-bundle-price-input"
                                 min="0"
-                                onChange={({ target }) => setAddCoinBundlePrice(target.value)}
-                                required />
+                                value={addCoinBundleQuantity * coinPricing}
+                                readOnly />
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>

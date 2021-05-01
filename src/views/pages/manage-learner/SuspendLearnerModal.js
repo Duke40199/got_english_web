@@ -25,7 +25,7 @@ const SuspendLearnerModal = ({ selectedLearnerUsername, show, handleClose, refre
     //this useEffect will be executed every time the modal show
     useEffect(async () => {
         if (selectedLearnerUsername != null) {
-            const selectedLearnerInfo = await trackPromise(GetUserInfoAPI(selectedLearnerUsername));
+            const selectedLearnerInfo = await trackPromise(GetUserInfoAPI(selectedLearnerUsername, 'Learner'));
             if (selectedLearnerInfo != null) {
                 setSuspendLearnerUUID(selectedLearnerInfo.id);
                 setSuspendLearnerUsername(selectedLearnerInfo.username);

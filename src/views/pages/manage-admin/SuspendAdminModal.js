@@ -25,7 +25,7 @@ const SuspendAdminModal = ({ selectedAdminUsername, show, handleClose, refreshDa
     //this useEffect will be executed every time the modal show
     useEffect(async () => {
         if (selectedAdminUsername != null) {
-            const selectedAdminInfo = await trackPromise(GetUserInfoAPI(selectedAdminUsername));
+            const selectedAdminInfo = await trackPromise(GetUserInfoAPI(selectedAdminUsername, 'Admin'));
             if (selectedAdminInfo != null) {
                 setSuspendAdminUUID(selectedAdminInfo.id);
                 setSuspendAdminUsername(selectedAdminInfo.username);

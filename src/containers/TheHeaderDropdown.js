@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import { useHistory } from 'react-router-dom'
 import {
   CDropdown,
@@ -29,7 +29,7 @@ const TheHeaderDropdown = () => {
       <CDropdownToggle className="c-header-nav-link" caret={false}>
         <div className="c-avatar">
           <CImg
-            src={(userInfo.avatar_url == "" || userInfo.avatar_url == null) ? "/avatars/default_avt.png" : userInfo.avatar_url}
+            src={(userInfo.avatar_url === "" || userInfo.avatar_url == null) ? "/avatars/default_avt.png" : userInfo.avatar_url}
             className="c-avatar-img"
           />
         </div>

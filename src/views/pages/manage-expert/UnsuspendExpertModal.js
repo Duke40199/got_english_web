@@ -25,7 +25,7 @@ const UnsuspendExpertModal = ({ selectedExpertUsername, show, handleClose, refre
     //this useEffect will be executed every time the modal show
     useEffect(async () => {
         if (selectedExpertUsername != null) {
-            const selectedExpertInfo = await trackPromise(GetUserInfoAPI(selectedExpertUsername));
+            const selectedExpertInfo = await trackPromise(GetUserInfoAPI(selectedExpertUsername, 'Expert'));
             if (selectedExpertInfo != null) {
                 setUnsuspendExpertUUID(selectedExpertInfo.id);
                 setUnsuspendExpertUsername(selectedExpertInfo.username);

@@ -117,7 +117,7 @@ const ManageAdmin = () => {
                                 striped
                                 bordered
                                 size="sm"
-                                itemsPerPage={20}
+                                itemsPerPage={10}
                                 pagination
                                 loading={promiseInProgress}
                                 noItemsView={{ noResults: 'Không có kết quả tìm kiếm trùng khớp', noItems: 'Không có dữ liệu' }}
