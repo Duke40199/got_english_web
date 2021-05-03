@@ -1,4 +1,5 @@
 import APIKit from './APIKit';
+import DefineErrorLog from '../reusable/DefineErrorLog'
 
 export const GetCoinValuePricingInfoListAPI = async () => {
     const token = (JSON.parse(localStorage.getItem("user"))).token;
@@ -143,8 +144,7 @@ export const UpdatePricingInfoByIdAPI = async (pricingId, updateInfoJson) => {
     }
 
     const onFailure = error => {
-        console.log(error);
-        updateResult = false;
+        updateResult = DefineErrorLog(error);
     }
 
     const apiConfig = {
@@ -167,8 +167,7 @@ export const AddPricingInfoAPI = async (addInfoJson) => {
     }
 
     const onFailure = error => {
-        console.log(error);
-        addResult = false;
+        addResult = DefineErrorLog(error);
     }
 
     const apiConfig = {
@@ -191,8 +190,7 @@ export const DeletePricingByIdAPI = async (pricingId) => {
     }
 
     const onFailure = error => {
-        console.log(error);
-        deleteResult = false;
+        deleteResult = DefineErrorLog(error);
     }
 
     const apiConfig = {

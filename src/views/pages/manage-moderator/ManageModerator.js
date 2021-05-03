@@ -52,9 +52,12 @@ const ManageModerator = () => {
 
     const { promiseInProgress } = usePromiseTracker();
 
-    useEffect(async () => {
-        const moderatorInfoList = await trackPromise(GetModeratorInfoListAPI());
-        setModeratorInfoList(moderatorInfoList);
+    useEffect(() => {
+        async function fetchData() {
+            const moderatorInfoList = await trackPromise(GetModeratorInfoListAPI());
+            setModeratorInfoList(moderatorInfoList);
+        }
+        fetchData();
     }, [refreshDataFlag])
 
     const updateModeratorOnclick = (moderatorUsername) => {
@@ -155,7 +158,7 @@ const ManageModerator = () => {
                                         ),
                                     'birthday':
                                         (item) => (<td>
-                                            {(item.birthday == "" || item.birthday == null) ? "" : format(parseISO(item.birthday), "dd-MM-yyyy")}
+                                            {(item.birthday === "" || item.birthday == null) ? "" : format(parseISO(item.birthday), "dd-MM-yyyy")}
                                         </td>),
                                     'action':
                                         (item, index) => {

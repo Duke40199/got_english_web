@@ -13,12 +13,15 @@ import {
     CFormGroup,
     CForm,
     CAlert,
-    CRow
+    CRow,
+    CInvalidFeedback
 } from '@coreui/react'
 
 import { AddPricingInfoAPI } from '../../../api/pricing';
 
 import { usePromiseTracker, trackPromise } from "react-promise-tracker";
+
+import PricingValidator from '../../../reusable/PricingValidator';
 
 const definePricingName = pricingName => {
     if (pricingName.includes("coin_value")) {
@@ -49,6 +52,7 @@ const AddPricingModal = ({ selectedPricingServiceName, show, handleClose, refres
     const [addPricingQuantityUnit] = useState("minutes");
     const [addPricingPrice, setAddPricingPrice] = useState("");
     const [addPricingPriceUnit] = useState("coin(s)");
+    const [fieldErrorMessages, setFieldErrorMessages] = useState({});
     const [addMessage, setAddMessage] = useState(null);
 
     const { promiseInProgress } = usePromiseTracker();
@@ -57,21 +61,35 @@ const AddPricingModal = ({ selectedPricingServiceName, show, handleClose, refres
         e.preventDefault();
 
         const userInput = {
-            "pricing_name": addPricingName,
-            "quantity": parseInt(addPricingQuantity),
-            "quantity_unit": addPricingQuantityUnit,
-            "price": parseInt(addPricingPrice),
-            "price_unit": addPricingPriceUnit
+            "quantity": addPricingQuantity,
+            "price": addPricingPrice,
         }
 
-        const addPricingResult = await trackPromise(AddPricingInfoAPI(userInput));
-        console.log(addPricingResult, userInput);
+        const formValidate = PricingValidator(userInput);
+        const noErrors = Object.keys(formValidate).length === 0;
 
-        if (addPricingResult === true) {
-            setAddMessage(<CAlert color="success">Thêm mới thành công!</CAlert>);
-            setRefreshDataFlag(!refreshDataFlag);
+        if (noErrors) {
+            const addPricingData = {
+                "pricing_name": addPricingName,
+                "quantity": parseInt(addPricingQuantity),
+                "quantity_unit": addPricingQuantityUnit,
+                "price": parseInt(addPricingPrice),
+                "price_unit": addPricingPriceUnit
+            }
+
+            const addPricingResult = await trackPromise(AddPricingInfoAPI(addPricingData));
+
+            if (addPricingResult === true) {
+                setAddMessage(<CAlert color="success">Thêm mới thành công!</CAlert>);
+                setRefreshDataFlag(!refreshDataFlag);
+            } else {
+                setAddMessage(<CAlert color="danger">{addPricingResult}</CAlert>)
+            }
+            //clear errors if any
+            setFieldErrorMessages({});
         } else {
-            setAddMessage(<CAlert color="danger">Thêm mới thất bại!</CAlert>)
+            setFieldErrorMessages(formValidate);
+            setAddMessage(null);
         }
     }
 
@@ -103,6 +121,12 @@ const AddPricingModal = ({ selectedPricingServiceName, show, handleClose, refres
                             <CRow className="m-0">
                                 <CInput type="number" id="add-pricing-quantity-input" className="w-25 mr-2" name="quantity" onChange={({ target }) => setAddPricingQuantity(target.value)} required />
                                 {defineQuantityUnitName(addPricingQuantityUnit)}
+                                {fieldErrorMessages.quantity != null ? <CInvalidFeedback
+                                    className="d-block"
+                                >
+                                    {fieldErrorMessages.quantity}
+                                </CInvalidFeedback>
+                                    : null}
                             </CRow>
                         </CCol>
                     </CFormGroup>
@@ -114,6 +138,12 @@ const AddPricingModal = ({ selectedPricingServiceName, show, handleClose, refres
                             <CRow className="m-0">
                                 <CInput type="number" className="w-25 mr-2" id="add-pricing-price-input" name="price" onChange={({ target }) => setAddPricingPrice(target.value)} required />
                                 {addPricingPriceUnit}
+                                {fieldErrorMessages.price != null ? <CInvalidFeedback
+                                    className="d-block"
+                                >
+                                    {fieldErrorMessages.price}
+                                </CInvalidFeedback>
+                                    : null}
                             </CRow>
                         </CCol>
                     </CFormGroup>

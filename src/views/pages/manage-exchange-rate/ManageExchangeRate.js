@@ -45,9 +45,12 @@ const ManageExchangeRate = () => {
 
     const { promiseInProgress } = usePromiseTracker();
 
-    useEffect(async () => {
-        const exchangeRateInfoList = await trackPromise(GetExchangeRateInfoListAPI());
-        setExchangeRateInfoList(exchangeRateInfoList);
+    useEffect(() => {
+        async function fetchData() {
+            const exchangeRateInfoList = await trackPromise(GetExchangeRateInfoListAPI());
+            setExchangeRateInfoList(exchangeRateInfoList);
+        }
+        fetchData();
     }, [refreshDataFlag]);
 
     const updateExchangeRateOnclick = (exchangeRateId) => {
@@ -96,7 +99,7 @@ const ManageExchangeRate = () => {
                                         (item, index) => (
                                             <td>
                                                 {
-                                                    (item.updated_at == null || item.updated_at == "") ? "" : format(parseISO(item.updated_at), 'dd-MM-yyyy hh:mm:ss')
+                                                    (item.updated_at == null || item.updated_at === "") ? "" : format(parseISO(item.updated_at), 'dd-MM-yyyy hh:mm:ss')
                                                 }
                                             </td>
                                         ),

@@ -13,11 +13,14 @@ import {
     CFormGroup,
     CForm,
     CAlert,
-    CRow
+    CRow,
+    CInvalidFeedback
 } from '@coreui/react'
 import { GetExchangeRateInfoByIdAPI, UpdateExchangeRateInfoByIdAPI } from '../../../api/exchange-rate';
 
 import { usePromiseTracker, trackPromise } from "react-promise-tracker";
+
+import ExchangeRateValidator from '../../../reusable/ExchangeRateValidator';
 
 const defineServiceName = (serviceName) => {
     if (serviceName.includes("messaging_session")) {
@@ -35,37 +38,54 @@ const UpdateExchangeRateModal = ({ selectedExchangeRateId, show, handleClose, re
     const [updateExchangeRateId, setUpdateExchangeRateId] = useState("");
     const [updateExchangeRateServiceName, setUpdateExchangeRateServiceName] = useState("");
     const [updateExchangeRateRate, setUpdateExchangeRateRate] = useState("");
+    const [fieldErrorMessages, setFieldErrorMessages] = useState({});
     const [updateMessage, setUpdateMessage] = useState(null);
 
     const { promiseInProgress } = usePromiseTracker();
 
     //this useEffect will be executed every time the modal show
-    useEffect(async () => {
-        if (selectedExchangeRateId != null) {
-            const selectedExchangeRateInfo = await trackPromise(GetExchangeRateInfoByIdAPI(selectedExchangeRateId));
-            if (selectedExchangeRateInfo != null) {
-                setUpdateExchangeRateId(selectedExchangeRateInfo.id);
-                setUpdateExchangeRateServiceName(selectedExchangeRateInfo.service_name);
-                setUpdateExchangeRateRate(selectedExchangeRateInfo.rate);
+    useEffect(() => {
+        async function fetchData() {
+            if (selectedExchangeRateId != null) {
+                const selectedExchangeRateInfo = await trackPromise(GetExchangeRateInfoByIdAPI(selectedExchangeRateId));
+                if (selectedExchangeRateInfo != null) {
+                    setUpdateExchangeRateId(selectedExchangeRateInfo.id);
+                    setUpdateExchangeRateServiceName(selectedExchangeRateInfo.service_name);
+                    setUpdateExchangeRateRate(selectedExchangeRateInfo.rate);
+                }
             }
         }
+        fetchData();
     }, [selectedExchangeRateId]);
 
     const onSubmitUpdateForm = async (e) => {
         e.preventDefault();
 
         const userInput = {
-            "rate": parseFloat(updateExchangeRateRate)
+            "rate": updateExchangeRateRate
         }
 
-        const updateExchangeRateResult = await trackPromise(UpdateExchangeRateInfoByIdAPI(selectedExchangeRateId, userInput));
-        console.log(updateExchangeRateResult, userInput);
+        const formValidate = ExchangeRateValidator(userInput);
+        const noErrors = Object.keys(formValidate).length === 0;
 
-        if (updateExchangeRateResult === true) {
-            setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
-            setRefreshDataFlag(!refreshDataFlag);
+        if (noErrors) {
+            const exchangeRateData = {
+                "rate": parseFloat(updateExchangeRateRate)
+            }
+
+            const updateExchangeRateResult = await trackPromise(UpdateExchangeRateInfoByIdAPI(selectedExchangeRateId, exchangeRateData));
+
+            if (updateExchangeRateResult === true) {
+                setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
+                setRefreshDataFlag(!refreshDataFlag);
+            } else {
+                setUpdateMessage(<CAlert color="danger">{updateExchangeRateResult}</CAlert>);
+            }
+            //clear errors if any
+            setFieldErrorMessages({});
         } else {
-            setUpdateMessage(<CAlert color="danger">Cập nhật thất bại!</CAlert>);
+            setFieldErrorMessages(formValidate);
+            setUpdateMessage(null);
         }
     }
 
@@ -103,7 +123,13 @@ const UpdateExchangeRateModal = ({ selectedExchangeRateId, show, handleClose, re
                         </CCol>
                         <CCol xs="12" md="8">
                             <CRow className="m-0 align-items-center">
-                                <CInput type="number" className="w-25 mr-2" id="update-exchange-rate-rate-input" min="0.01" max="1" step="0.01" name="quantity" value={updateExchangeRateRate} onChange={({ target }) => setUpdateExchangeRateRate(target.value)} required />
+                                <CInput type="number" className="w-25 mr-2" id="update-exchange-rate-rate-input" name="quantity" value={updateExchangeRateRate} onChange={({ target }) => setUpdateExchangeRateRate(target.value)} required />
+                                {fieldErrorMessages.rate != null ? <CInvalidFeedback
+                                    className="d-block"
+                                >
+                                    {fieldErrorMessages.rate}
+                                </CInvalidFeedback>
+                                    : null}
                             </CRow>
                         </CCol>
                     </CFormGroup>

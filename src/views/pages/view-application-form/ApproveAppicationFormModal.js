@@ -41,7 +41,7 @@ const ApproveApplicationFormModal = ({ selectedApplicationFormId, show, handleCl
         >
             <CForm onSubmit={onSubmitApproveForm} method="post" encType="multipart/form-data" className="form-horizontal">
                 <CModalHeader closeButton>
-                    <CModalTitle>Duyệt đơn xin ( id: {selectedApplicationFormId} )</CModalTitle>
+                    <CModalTitle>Duyệt đơn xin</CModalTitle>
                 </CModalHeader>
                 <CModalBody>
                     {approveMessage ? approveMessage : "Bạn chắc chắn muốn duyệt đơn xin này chứ?"}

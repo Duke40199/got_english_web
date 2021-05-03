@@ -36,7 +36,6 @@ const Login = () => {
 
     const idToken = await trackPromise(signInWithEmailAndPasswordHandler(email, password));
     const loginResult = await trackPromise(LoginAPI(idToken));
-    console.log(loginResult);
 
     if (loginResult.userData != null) {
       //role check
@@ -45,6 +44,7 @@ const Login = () => {
         setLoginMessage(<CAlert color="success">Đăng nhập thành công! Xin chờ trong giây lát...</CAlert>);
         // set the state of the user
         setUser(loginResult.userData);
+        console.log(user);
         // store the user in localStorage
         localStorage.setItem("user", JSON.stringify(loginResult.userData));
         // get logged in user detail info then store it into localStorage
@@ -73,7 +73,7 @@ const Login = () => {
                   <CInputGroup className="mb-3">
                     <CInputGroupPrepend>
                       <CInputGroupText>
-                        <CIcon name="cil-user" />
+                        <CIcon name="cil-envelope-closed" />
                       </CInputGroupText>
                     </CInputGroupPrepend>
                     <CInput type="email"
@@ -97,14 +97,14 @@ const Login = () => {
                   {promiseInProgress ?
                     <div className="spinner-border text-primary mb-3">
                     </div> :
-                    (loginMessage != null && loginMessage != "") ? loginMessage : null
+                    (loginMessage != null && loginMessage !== "") ? loginMessage : null
                   }
                   <CRow>
                     <CCol xs="6">
                       <CButton color="primary" className="px-4" type="Submit" disabled={promiseInProgress}>Đăng Nhập</CButton>
                     </CCol>
                     <CCol xs="6" className="text-right">
-                      <CButton color="link" className="px-0">Quên mật khẩu?</CButton>
+                      <CButton color="link" className="px-0" onClick={() => history.push("/recover-account")}>Quên mật khẩu?</CButton>
                     </CCol>
                   </CRow>
                 </CForm>

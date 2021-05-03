@@ -12,10 +12,13 @@ import {
     CLabel,
     CFormGroup,
     CForm,
-    CAlert
+    CAlert,
+    CInvalidFeedback
 } from '@coreui/react'
 import { CreateCoinBundleAPI } from '../../../api/coin-bundle';
 import { GetCoinPricingInfoAPI } from '../../../api/pricing';
+
+import CoinBundleValidator from '../../../reusable/CoinBundleValidator';
 
 import { usePromiseTracker, trackPromise } from "react-promise-tracker";
 
@@ -24,16 +27,20 @@ const AddCoinBundleModal = ({ show, handleClose, refreshDataFlag, setRefreshData
     const [addCoinBundleDescription, setAddCoinBundleDescription] = useState("");
     const [addCoinBundleQuantity, setAddCoinBundleQuantity] = useState(1);
     const [coinPricing, setCoinPricing] = useState("");
+    const [fieldErrorMessages, setFieldErrorMessages] = useState({});
     const [addMessage, setAddMessage] = useState(null);
 
     const { promiseInProgress } = usePromiseTracker();
 
     //this useEffect will be executed every time the modal show
-    useEffect(async () => {
-        const coinPricing = await trackPromise(GetCoinPricingInfoAPI());
-        if (coinPricing != null) {
-            setCoinPricing(coinPricing.price);
+    useEffect(() => {
+        async function fetchData() {
+            const coinPricing = await trackPromise(GetCoinPricingInfoAPI());
+            if (coinPricing != null) {
+                setCoinPricing(coinPricing.price);
+            }
         }
+        fetchData();
     }, []);
 
     const onSubmitAddForm = async (e) => {
@@ -42,19 +49,33 @@ const AddCoinBundleModal = ({ show, handleClose, refreshDataFlag, setRefreshData
         const userInput = {
             "title": addCoinBundleTitle,
             "description": addCoinBundleDescription,
-            "quantity": parseInt(addCoinBundleQuantity),
-            "price": parseInt(addCoinBundleQuantity) * coinPricing,
-            "price_unit": "VND"
+            "quantity": addCoinBundleQuantity
         }
 
-        const addCoinBundleResult = await trackPromise(CreateCoinBundleAPI(userInput));
-        console.log(addCoinBundleResult, userInput);
+        const formValidate = CoinBundleValidator(userInput);
+        const noErrors = Object.keys(formValidate).length === 0;
 
-        if (addCoinBundleResult === true) {
-            setAddMessage(<CAlert color="success">Thêm mới thành công!</CAlert>);
-            setRefreshDataFlag(!refreshDataFlag);
+        if (noErrors) {
+            const addCoinBundleData = {
+                "title": addCoinBundleTitle,
+                "description": addCoinBundleDescription,
+                "quantity": parseInt(addCoinBundleQuantity),
+                "price_unit": "VND"
+            }
+
+            const addCoinBundleResult = await trackPromise(CreateCoinBundleAPI(addCoinBundleData));
+
+            if (addCoinBundleResult === true) {
+                setAddMessage(<CAlert color="success">Thêm mới thành công!</CAlert>);
+                setRefreshDataFlag(!refreshDataFlag);
+            } else {
+                setAddMessage(<CAlert color="danger">{addCoinBundleResult}</CAlert>);
+            }
+            //clear errors if any
+            setFieldErrorMessages({});
         } else {
-            setAddMessage(<CAlert color="danger">Thêm mới thất bại!</CAlert>);
+            setFieldErrorMessages(formValidate);
+            setAddMessage(null);
         }
     }
 
@@ -75,6 +96,12 @@ const AddCoinBundleModal = ({ show, handleClose, refreshDataFlag, setRefreshData
                         </CCol>
                         <CCol xs="12" md="8">
                             <CInput id="coin-bundle-title-input" name="coin-bundle-title-input" onChange={({ target }) => setAddCoinBundleTitle(target.value)} required />
+                            {fieldErrorMessages.title != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.title}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -83,6 +110,12 @@ const AddCoinBundleModal = ({ show, handleClose, refreshDataFlag, setRefreshData
                         </CCol>
                         <CCol xs="12" md="8">
                             <CInput id="coin-bundle-description-input" name="coin-bundle-description-input" onChange={({ target }) => setAddCoinBundleDescription(target.value)} />
+                            {fieldErrorMessages.description != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.description}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
@@ -91,6 +124,12 @@ const AddCoinBundleModal = ({ show, handleClose, refreshDataFlag, setRefreshData
                         </CCol>
                         <CCol xs="12" md="8">
                             <CInput type="number" min="1" max="1000" id="coin-bundle-quantity-input" name="coin-bundle-quantity-input" value={addCoinBundleQuantity} onChange={({ target }) => setAddCoinBundleQuantity(target.value)} required />
+                            {fieldErrorMessages.quantity != null ? <CInvalidFeedback
+                                className="d-block"
+                            >
+                                {fieldErrorMessages.quantity}
+                            </CInvalidFeedback>
+                                : null}
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>

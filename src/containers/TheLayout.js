@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react'
-import { useHistory } from 'react-router-dom'
+import React from 'react'
+
 import {
   TheContent,
   TheSidebar,
@@ -8,18 +8,6 @@ import {
 } from './index'
 
 const TheLayout = () => {
-  const history = useHistory();
-  
-  useEffect(() => {
-    const userInfo = JSON.parse(localStorage.getItem("userInfo"));
-    if (userInfo === null) {
-      console.log("get user profile failed!")
-      localStorage.clear();
-      history.push("/");
-    }
-  }, [])
-
-
   return (
     <div className="c-app c-default-layout">
       <TheSidebar />

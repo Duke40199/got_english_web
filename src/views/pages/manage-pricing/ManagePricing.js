@@ -55,15 +55,18 @@ const ManagePricing = () => {
 
     const { promiseInProgress } = usePromiseTracker();
 
-    useEffect(async () => {
-        const coinValuePricingInfoList = await trackPromise(GetCoinValuePricingInfoListAPI());
-        const messagingSessionPricingInfoList = await trackPromise(GetMessagingSessionPricingInfoListAPI());
-        const liveCallSessionPricingInfoList = await trackPromise(GetLiveCallSessionPricingInfoListAPI());
-        const translationCallSessionPricingInfoList = await trackPromise(GetTranslationCallSessionPricingInfoListAPI());
-        setCoinValuePricingInfoList(coinValuePricingInfoList);
-        setMessagingSessionPricingInfoList(messagingSessionPricingInfoList);
-        setLiveCallSessionPricingInfoList(liveCallSessionPricingInfoList);
-        setTranslationCallSessionPricingInfoList(translationCallSessionPricingInfoList);
+    useEffect(() => {
+        async function fetchData() {
+            const coinValuePricingInfoList = await trackPromise(GetCoinValuePricingInfoListAPI());
+            const messagingSessionPricingInfoList = await trackPromise(GetMessagingSessionPricingInfoListAPI());
+            const liveCallSessionPricingInfoList = await trackPromise(GetLiveCallSessionPricingInfoListAPI());
+            const translationCallSessionPricingInfoList = await trackPromise(GetTranslationCallSessionPricingInfoListAPI());
+            setCoinValuePricingInfoList(coinValuePricingInfoList);
+            setMessagingSessionPricingInfoList(messagingSessionPricingInfoList);
+            setLiveCallSessionPricingInfoList(liveCallSessionPricingInfoList);
+            setTranslationCallSessionPricingInfoList(translationCallSessionPricingInfoList);
+        }
+        fetchData();
     }, [refreshDataFlag])
 
     const updatePricingOnclick = (pricingId) => {
@@ -136,7 +139,7 @@ const ManagePricing = () => {
                                         (item, index) => {
                                             return (
                                                 <td className="py-1">
-                                                    {(item.created_at == null || item.created_at == "") ? "" : format(parseISO(item.created_at), 'dd-MM-yyyy hh:mm:ss')}
+                                                    {(item.created_at == null || item.created_at === "") ? "" : format(parseISO(item.created_at), 'dd-MM-yyyy hh:mm:ss')}
                                                 </td>
                                             );
                                         },
@@ -144,7 +147,7 @@ const ManagePricing = () => {
                                         (item, index) => {
                                             return (
                                                 <td className="py-1">
-                                                    {(item.updated_at == null || item.updated_at == "") ? "" : format(parseISO(item.updated_at), 'dd-MM-yyyy hh:mm:ss')}
+                                                    {(item.updated_at == null || item.updated_at === "") ? "" : format(parseISO(item.updated_at), 'dd-MM-yyyy hh:mm:ss')}
                                                 </td>
                                             );
                                         },
@@ -194,7 +197,7 @@ const ManagePricing = () => {
                                         (item, index) => {
                                             return (
                                                 <td className="py-1">
-                                                    {(item.created_at == null || item.created_at == "") ? "" : format(parseISO(item.created_at), 'dd-MM-yyyy hh:mm:ss')}
+                                                    {(item.created_at == null || item.created_at === "") ? "" : format(parseISO(item.created_at), 'dd-MM-yyyy hh:mm:ss')}
                                                 </td>
                                             );
                                         },
@@ -202,7 +205,7 @@ const ManagePricing = () => {
                                         (item, index) => {
                                             return (
                                                 <td className="py-1">
-                                                    {(item.updated_at == null || item.updated_at == "") ? "" : format(parseISO(item.updated_at), 'dd-MM-yyyy hh:mm:ss')}
+                                                    {(item.updated_at == null || item.updated_at === "") ? "" : format(parseISO(item.updated_at), 'dd-MM-yyyy hh:mm:ss')}
                                                 </td>
                                             );
                                         },
@@ -254,7 +257,7 @@ const ManagePricing = () => {
                                         (item, index) => {
                                             return (
                                                 <td className="py-1">
-                                                    {(item.created_at == null || item.created_at == "") ? "" : format(parseISO(item.created_at), 'dd-MM-yyyy hh:mm:ss')}
+                                                    {(item.created_at == null || item.created_at === "") ? "" : format(parseISO(item.created_at), 'dd-MM-yyyy hh:mm:ss')}
                                                 </td>
                                             );
                                         },
@@ -262,7 +265,7 @@ const ManagePricing = () => {
                                         (item, index) => {
                                             return (
                                                 <td className="py-1">
-                                                    {(item.updated_at == null || item.updated_at == "") ? "" : format(parseISO(item.updated_at), 'dd-MM-yyyy hh:mm:ss')}
+                                                    {(item.updated_at == null || item.updated_at === "") ? "" : format(parseISO(item.updated_at), 'dd-MM-yyyy hh:mm:ss')}
                                                 </td>
                                             );
                                         },
@@ -318,7 +321,7 @@ const ManagePricing = () => {
                                         (item, index) => {
                                             return (
                                                 <td className="py-1">
-                                                    {(item.created_at == null || item.created_at == "") ? "" : format(parseISO(item.created_at), 'dd-MM-yyyy hh:mm:ss')}
+                                                    {(item.created_at == null || item.created_at === "") ? "" : format(parseISO(item.created_at), 'dd-MM-yyyy hh:mm:ss')}
                                                 </td>
                                             );
                                         },
@@ -326,7 +329,7 @@ const ManagePricing = () => {
                                         (item, index) => {
                                             return (
                                                 <td className="py-1">
-                                                    {(item.updated_at == null || item.updated_at == "") ? "" : format(parseISO(item.updated_at), 'dd-MM-yyyy hh:mm:ss')}
+                                                    {(item.updated_at == null || item.updated_at === "") ? "" : format(parseISO(item.updated_at), 'dd-MM-yyyy hh:mm:ss')}
                                                 </td>
                                             );
                                         },

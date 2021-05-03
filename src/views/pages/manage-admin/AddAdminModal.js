@@ -80,7 +80,7 @@ const AddAdminModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag 
             var img = document.getElementById("addAdminAvt");
             const fileSize = e.target.files[0].size;
             const fileType = e.target.files[0].type;
-            if (fileSize <= 300000 && (fileType == "image/jpeg" || fileType == "image/png" || fileType == "image/jpg")) {
+            if (fileSize <= 300000 && (fileType === "image/jpeg" || fileType === "image/png" || fileType === "image/jpg")) {
                 // create blob url
                 var blobUrl = URL.createObjectURL(e.target.files[0]);
                 // use blob url to preview avatar
@@ -138,7 +138,7 @@ const AddAdminModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag 
                         "fullname": addAdminFullname,
                         "address": addAdminAddress,
                         "phone_number": addAdminPhoneNumber,
-                        "birthday": ((addAdminBirthday == "" || addAdminBirthday == null) ? "" : format(addAdminBirthday, 'yyyy-MM-dd')),
+                        "birthday": ((addAdminBirthday === "" || addAdminBirthday == null) ? "" : format(addAdminBirthday, 'yyyy-MM-dd')),
                         "avatar_url": newAvtSrc
                     }
                     const permissionInput = {
@@ -246,7 +246,7 @@ const AddAdminModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag 
                             <CLabel htmlFor="admin-birthday-input">Ngày sinh:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            {addAdminBirthday != "" ?
+                            {addAdminBirthday !== "" ?
                                 <DatePicker
                                     className="form-control"
                                     locale="vi"
@@ -350,7 +350,7 @@ const AddAdminModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag 
                     <CFormGroup row>
                         <CLabel col md="4" htmlFor="admin-avatar-url">Ảnh đại diện:</CLabel>
                         <CCol xs="12" md="8">
-                            <img id="addAdminAvt" className="mr-2" src={addAdminAvatarUrl} width="80" height="80" />
+                            <img id="addAdminAvt" className="mr-2" alt="Admin Avatar" src={(addAdminAvatarUrl === "" || addAdminAvatarUrl == null) ? "/avatars/default_avt.png" : addAdminAvatarUrl} width="80" height="80" />
                             <CButton
                                 color="info"
                                 className="rounded-circle"

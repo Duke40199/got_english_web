@@ -1,4 +1,5 @@
 import APIKit from './APIKit'
+import DefineErrorLog from '../reusable/DefineErrorLog'
 
 export const GetApplicationFormListAPI = async () => {
     const token = (JSON.parse(localStorage.getItem("user"))).token;
@@ -109,12 +110,7 @@ export const ApproveApplicationFormByIdAPI = async (applicationFormId) => {
     }
 
     const onFailure = error => {
-        console.log(error);
-        if ((error.response.data).includes("Application form is already being either approved or rejected.")) {
-            approveApplicationFormResult = "Đơn xin này đã được duyệt hoặc đã bị từ chối!"
-        } else {
-            approveApplicationFormResult = "Duyệt đơn xin thất bại!"
-        }
+        approveApplicationFormResult = DefineErrorLog(error);
     }
 
     const apiConfig = {
@@ -137,12 +133,7 @@ export const RejectApplicationFormByIdAPI = async (applicationFormId) => {
     }
 
     const onFailure = error => {
-        console.log(error);
-        if ((error.response.data).includes("Application form is already being either approved or rejected.")) {
-            rejectApplicationFormResult = "Đơn xin này đã được duyệt hoặc đã bị từ chối!"
-        } else {
-            rejectApplicationFormResult = "Duyệt đơn xin thất bại!"
-        }
+        rejectApplicationFormResult = DefineErrorLog(error);
     }
 
     const apiConfig = {

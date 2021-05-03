@@ -38,9 +38,12 @@ const ManageCoinBundle = () => {
 
     const { promiseInProgress } = usePromiseTracker();
 
-    useEffect(async () => {
-        const coinBundleInfoList = await trackPromise(GetCoinBundleInfoListAPI());
-        setCoinBundleInfoList(coinBundleInfoList);
+    useEffect(() => {
+        async function fetchData() {
+            const coinBundleInfoList = await trackPromise(GetCoinBundleInfoListAPI());
+            setCoinBundleInfoList(coinBundleInfoList);
+        }
+        fetchData();
     }, [refreshDataFlag]);
 
     const updateCoinBundleOnclick = (coinBundleId) => {

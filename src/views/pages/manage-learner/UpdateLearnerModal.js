@@ -45,24 +45,27 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose, refres
     const { promiseInProgress } = usePromiseTracker();
 
     //this useEffect will be executed every time the modal show
-    useEffect(async () => {
-        if (selectedLearnerUsername != null) {
-            const selectedLearnerInfo = await trackPromise(GetUserInfoAPI(selectedLearnerUsername, 'Learner'));
-            if (selectedLearnerInfo) {
-                setUpdateLearnerUUID(selectedLearnerInfo.id);
-                setUpdateLearnerFullname(selectedLearnerInfo.fullname);
-                setUpdateLearnerUsername(selectedLearnerInfo.username);
-                setUpdateLearnerEmail(selectedLearnerInfo.email);
-                setUpdateLearnerAddress(selectedLearnerInfo.address);
-                setUpdateLearnerPhoneNumber(selectedLearnerInfo.phone_number);
-                if (selectedLearnerInfo.birthday == "" || selectedLearnerInfo.birthday == null) {
-                    setUpdateLearnerBirthday("");
-                } else {
-                    setUpdateLearnerBirthday(parseISO(selectedLearnerInfo.birthday));
+    useEffect(() => {
+        async function fetchData() {
+            if (selectedLearnerUsername != null) {
+                const selectedLearnerInfo = await trackPromise(GetUserInfoAPI(selectedLearnerUsername, 'Learner'));
+                if (selectedLearnerInfo) {
+                    setUpdateLearnerUUID(selectedLearnerInfo.id);
+                    setUpdateLearnerFullname(selectedLearnerInfo.fullname);
+                    setUpdateLearnerUsername(selectedLearnerInfo.username);
+                    setUpdateLearnerEmail(selectedLearnerInfo.email);
+                    setUpdateLearnerAddress(selectedLearnerInfo.address);
+                    setUpdateLearnerPhoneNumber(selectedLearnerInfo.phone_number);
+                    if (selectedLearnerInfo.birthday === "" || selectedLearnerInfo.birthday == null) {
+                        setUpdateLearnerBirthday("");
+                    } else {
+                        setUpdateLearnerBirthday(parseISO(selectedLearnerInfo.birthday));
+                    }
+                    setUpdateLearnerAvatarUrl(selectedLearnerInfo.avatar_url === "" || selectedLearnerInfo == null ? "" : selectedLearnerInfo.avatar_url);
                 }
-                setUpdateLearnerAvatarUrl(selectedLearnerInfo.avatar_url == "" || selectedLearnerInfo == null ? "" : selectedLearnerInfo.avatar_url);
             }
         }
+        fetchData();
     }, [selectedLearnerUsername]);
 
     const uploadToStorage = async (imageURL) => {
@@ -96,7 +99,7 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose, refres
             var img = document.getElementById("updateLearnerAvt");
             const fileSize = e.target.files[0].size;
             const fileType = e.target.files[0].type;
-            if (fileSize <= 300000 && (fileType == "image/jpeg" || fileType == "image/png" || fileType == "image/jpg")) {
+            if (fileSize <= 300000 && (fileType === "image/jpeg" || fileType === "image/png" || fileType === "image/jpg")) {
                 // create blob url
                 var blobUrl = URL.createObjectURL(e.target.files[0]);
                 // use blob url to preview avatar
@@ -144,7 +147,7 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose, refres
                     "username": updateLearnerUsername,
                     "address": updateLearnerAddress,
                     "phone_number": updateLearnerPhoneNumber,
-                    "birthday": ((updateLearnerBirthday == "" || updateLearnerBirthday == null) ? "" : format(updateLearnerBirthday, 'yyyy-MM-dd')),
+                    "birthday": ((updateLearnerBirthday === "" || updateLearnerBirthday == null) ? "" : format(updateLearnerBirthday, 'yyyy-MM-dd')),
                     "avatar_url": newAvtSrc,
                 }
             } else {
@@ -154,7 +157,7 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose, refres
                     "password": updateLearnerPassword,
                     "address": updateLearnerAddress,
                     "phone_number": updateLearnerPhoneNumber,
-                    "birthday": ((updateLearnerBirthday == "" || updateLearnerBirthday == null) ? "" : format(updateLearnerBirthday, 'yyyy-MM-dd')),
+                    "birthday": ((updateLearnerBirthday === "" || updateLearnerBirthday == null) ? "" : format(updateLearnerBirthday, 'yyyy-MM-dd')),
                     "avatar_url": newAvtSrc,
                 }
             }
@@ -258,7 +261,7 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose, refres
                             <CLabel htmlFor="update-learner-birthday-input">Ngày sinh:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            {(updateLearnerBirthday == "" || updateLearnerBirthday == null) ?
+                            {(updateLearnerBirthday === "" || updateLearnerBirthday == null) ?
                                 <DatePicker
                                     className="form-control"
                                     locale="vi"
@@ -316,7 +319,7 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose, refres
                     <CFormGroup row>
                         <CLabel col md="4" htmlFor="update-learner-avatar-url">Ảnh đại diện:</CLabel>
                         <CCol xs="12" md="8">
-                            <img id="updateLearnerAvt" className="mr-2" src={updateLearnerAvatarUrl} width="80" height="80" />
+                            <img id="updateLearnerAvt" className="mr-2" alt="Learner Avatar" src={(updateLearnerAvatarUrl === "" || updateLearnerAvatarUrl == null) ? "/avatars/default_avt.png" : updateLearnerAvatarUrl} width="80" height="80" />
                             <CButton
                                 color="info"
                                 className="rounded-circle"

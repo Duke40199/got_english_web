@@ -44,6 +44,7 @@ const AddModeratorModal = ({ show, handleClose, refreshDataFlag, setRefreshDataF
     const [addModeratorCanManagePricing, setAddModeratorCanManagePricing] = useState(false);
     const [addModeratorCanManageApplicationForm, setAddModeratorCanManageApplicationForm] = useState(false);
     const [addModeratorCanManageExchangeRate, setAddModeratorCanManageExchangeRate] = useState(false);
+    const [addModeratorCanManageRatingAlgorithm, setAddModeratorCanManageRatingAlgorithm] = useState(false);
     const [fieldErrorMessages, setFieldErrorMessages] = useState({});
     const [addMessage, setAddMessage] = useState(null);
 
@@ -80,7 +81,7 @@ const AddModeratorModal = ({ show, handleClose, refreshDataFlag, setRefreshDataF
             var img = document.getElementById("addModeratorAvt");
             const fileSize = e.target.files[0].size;
             const fileType = e.target.files[0].type;
-            if (fileSize <= 300000 && (fileType == "image/jpeg" || fileType == "image/png" || fileType == "image/jpg")) {
+            if (fileSize <= 300000 && (fileType === "image/jpeg" || fileType === "image/png" || fileType === "image/jpg")) {
                 // create blob url
                 var blobUrl = URL.createObjectURL(e.target.files[0]);
                 // use blob url to preview avatar
@@ -138,19 +139,20 @@ const AddModeratorModal = ({ show, handleClose, refreshDataFlag, setRefreshDataF
                         "fullname": addModeratorFullname,
                         "address": addModeratorAddress,
                         "phone_number": addModeratorPhoneNumber,
-                        "birthday": ((addModeratorBirthday == "" || addModeratorBirthday == null) ? "" : format(addModeratorBirthday, 'yyyy-MM-dd')),
+                        "birthday": ((addModeratorBirthday === "" || addModeratorBirthday == null) ? "" : format(addModeratorBirthday, 'yyyy-MM-dd')),
                         "avatar_url": newAvtSrc
                     }
                     const permissionInput = {
                         "can_manage_coin_bundle": addModeratorCanManageCoinBundle,
                         "can_manage_pricing": addModeratorCanManagePricing,
                         "can_manage_application_form": addModeratorCanManageApplicationForm,
-                        "can_manage_exchange_rate": addModeratorCanManageExchangeRate
+                        "can_manage_exchange_rate": addModeratorCanManageExchangeRate,
+                        "can_manage_rating_algorithm": addModeratorCanManageRatingAlgorithm
                     }
 
                     const updateModeratorAvt = await trackPromise(UpdateUserInfoByUserIdAPI(newModeratorID, additionalData));
                     const permissionUpdateResult = await trackPromise(UpdateModeratorPermissionByIdAPI(newModeratorID, permissionInput));
-                    console.log(newModeratorID, additionalData)
+
                     if (updateModeratorAvt === true && permissionUpdateResult === true) {
                         setAddMessage(<CAlert color="success">Thêm mới thành công!</CAlert>);
                     } else {
@@ -246,7 +248,7 @@ const AddModeratorModal = ({ show, handleClose, refreshDataFlag, setRefreshDataF
                             <CLabel htmlFor="moderator-birthday-input">Ngày sinh:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            {addModeratorBirthday != "" ?
+                            {addModeratorBirthday !== "" ?
                                 <DatePicker
                                     className="form-control"
                                     locale="vi"
@@ -345,12 +347,22 @@ const AddModeratorModal = ({ show, handleClose, refreshDataFlag, setRefreshDataF
                                 />
                                 Quản lý Chiết Khấu
                                 </CLabel>
+                            <CLabel htmlFor="add-moderator-can-manage-rating-algorithm-input"
+                                className="w-100 permission-input-checkbox">
+                                <CInputCheckbox
+                                    id="add-moderator-can-manage-rating-algorithm-input"
+                                    name="add-moderator-can-manage-rating-algorithm-input"
+                                    checked={addModeratorCanManageRatingAlgorithm}
+                                    onChange={({ target }) => setAddModeratorCanManageRatingAlgorithm(target.checked)}
+                                />
+                                Quản lý Thuật toán Đánh Giá
+                                </CLabel>
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
                         <CLabel col md="4" htmlFor="moderator-avatar-url">Ảnh đại diện:</CLabel>
                         <CCol xs="12" md="8">
-                            <img id="addModeratorAvt" className="mr-2" src={addModeratorAvatarUrl} width="80" height="80" />
+                            <img id="addModeratorAvt" className="mr-2" alt="Moderator Avatar" src={(addModeratorAvatarUrl === "" || addModeratorAvatarUrl == null) ? "/avatars/default_avt.png" : addModeratorAvatarUrl} width="80" height="80" />
                             <CButton
                                 color="info"
                                 className="rounded-circle"

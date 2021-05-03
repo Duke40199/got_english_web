@@ -29,7 +29,7 @@ const DeletePricingModal = ({ selectedPricingId, show, handleClose, refreshDataF
             setDeleteMessage(<CAlert color="success">Xóa thành công!</CAlert>);
             setRefreshDataFlag(!refreshDataFlag);
         } else {
-            setDeleteMessage(<CAlert color="danger">Xóa thất bại!</CAlert>);
+            setDeleteMessage(<CAlert color="danger">{deletePricingResult}</CAlert>);
         }
     }
 
@@ -42,7 +42,7 @@ const DeletePricingModal = ({ selectedPricingId, show, handleClose, refreshDataF
         >
             <CForm onSubmit={onSubmitDeleteForm} method="post" encType="multipart/form-data" className="form-horizontal">
                 <CModalHeader closeButton>
-                    <CModalTitle>Xóa Đơn Giá ( id: {selectedPricingId} )</CModalTitle>
+                    <CModalTitle>Xóa Đơn Giá</CModalTitle>
                 </CModalHeader>
                 <CModalBody>
                     {deleteMessage ? deleteMessage : "Bạn chắc chắn muốn xóa Đơn Giá này chứ?"}

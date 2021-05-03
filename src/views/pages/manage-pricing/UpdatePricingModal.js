@@ -13,11 +13,14 @@ import {
     CFormGroup,
     CForm,
     CAlert,
-    CRow
+    CRow,
+    CInvalidFeedback
 } from '@coreui/react'
 import { GetPricingInfoByIdAPI, UpdatePricingInfoByIdAPI } from '../../../api/pricing'
 
 import { usePromiseTracker, trackPromise } from "react-promise-tracker";
+
+import PricingValidator from '../../../reusable/PricingValidator';
 
 const definePricingName = pricingName => {
     if (pricingName.includes("coin_value")) {
@@ -41,40 +44,57 @@ const UpdatePricingModal = ({ selectedPricingId, show, handleClose, refreshDataF
     const [updatePricingQuantityUnit, setUpdatePricingQuantityUnit] = useState("");
     const [updatePricingPrice, setUpdatePricingPrice] = useState("");
     const [updatePricingPriceUnit, setUpdatePricingPriceUnit] = useState("");
+    const [fieldErrorMessages, setFieldErrorMessages] = useState({});
     const [updateMessage, setUpdateMessage] = useState(null);
 
     const { promiseInProgress } = usePromiseTracker();
 
     //this useEffect will be executed every time the modal show
-    useEffect(async () => {
-        if (selectedPricingId != null) {
-            const selectedPricingInfo = await trackPromise(GetPricingInfoByIdAPI(selectedPricingId));
-            if (selectedPricingInfo != null) {
-                setUpdatePricingId(selectedPricingInfo.id);
-                setUpdatePricingName(selectedPricingInfo.pricing_name);
-                setUpdatePricingQuantity(selectedPricingInfo.quantity);
-                setUpdatePricingQuantityUnit(selectedPricingInfo.quantity_unit)
-                setUpdatePricingPrice(selectedPricingInfo.price);
-                setUpdatePricingPriceUnit(selectedPricingInfo.price_unit);
+    useEffect(() => {
+        async function fetchData() {
+            if (selectedPricingId != null) {
+                const selectedPricingInfo = await trackPromise(GetPricingInfoByIdAPI(selectedPricingId));
+                if (selectedPricingInfo != null) {
+                    setUpdatePricingId(selectedPricingInfo.id);
+                    setUpdatePricingName(selectedPricingInfo.pricing_name);
+                    setUpdatePricingQuantity(selectedPricingInfo.quantity);
+                    setUpdatePricingQuantityUnit(selectedPricingInfo.quantity_unit)
+                    setUpdatePricingPrice(selectedPricingInfo.price);
+                    setUpdatePricingPriceUnit(selectedPricingInfo.price_unit);
+                }
             }
         }
+        fetchData();
     }, [selectedPricingId]);
 
     const onSubmitUpdateForm = async (e) => {
         e.preventDefault();
 
         const userInput = {
-            "price": parseInt(updatePricingPrice)
+            "price": updatePricingPrice,
         }
 
-        const updatePricingResult = await trackPromise(UpdatePricingInfoByIdAPI(selectedPricingId, userInput));
-        console.log(updatePricingResult, userInput);
+        const formValidate = PricingValidator(userInput);
+        const noErrors = Object.keys(formValidate).length === 0;
 
-        if (updatePricingResult === true) {
-            setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
-            setRefreshDataFlag(!refreshDataFlag);
+        if (noErrors) {
+            const updatePricingData = {
+                "price": parseInt(updatePricingPrice)
+            }
+
+            const updatePricingResult = await trackPromise(UpdatePricingInfoByIdAPI(selectedPricingId, updatePricingData));
+
+            if (updatePricingResult === true) {
+                setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
+                setRefreshDataFlag(!refreshDataFlag);
+            } else {
+                setUpdateMessage(<CAlert color="danger">{updatePricingResult}</CAlert>);
+            }
+            //clear errors if any
+            setFieldErrorMessages({});
         } else {
-            setUpdateMessage(<CAlert color="danger">Cập nhật thất bại!</CAlert>);
+            setFieldErrorMessages(formValidate);
+            setUpdateMessage(null);
         }
     }
 
@@ -113,6 +133,12 @@ const UpdatePricingModal = ({ selectedPricingId, show, handleClose, refreshDataF
                         <CCol xs="12" md="8">
                             <CRow className="m-0 align-items-center">
                                 <CInput className="w-25 mr-2" type="number" id="update-pricing-price-input" name="price" value={updatePricingPrice} onChange={({ target }) => setUpdatePricingPrice(target.value)} required /> {updatePricingPriceUnit} = {updatePricingQuantity} {updatePricingQuantityUnit}
+                                {fieldErrorMessages.price != null ? <CInvalidFeedback
+                                    className="d-block"
+                                >
+                                    {fieldErrorMessages.price}
+                                </CInvalidFeedback>
+                                    : null}
                             </CRow>
                         </CCol>
                     </CFormGroup>

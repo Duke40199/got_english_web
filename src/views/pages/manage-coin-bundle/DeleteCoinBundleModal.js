@@ -43,7 +43,7 @@ const DeleteCoinBundleModal = ({ selectedCoinBundleId, show, handleClose, refres
         >
             <CForm onSubmit={onSubmitDeleteForm} method="post" encType="multipart/form-data" className="form-horizontal">
                 <CModalHeader closeButton>
-                    <CModalTitle>Xóa Gói Coin ( id: {selectedCoinBundleId} )</CModalTitle>
+                    <CModalTitle>Xóa Gói Coin</CModalTitle>
                 </CModalHeader>
                 <CModalBody>
                     {deleteMessage ? deleteMessage : "Bạn chắc chắn muốn xóa Gói Coin này chứ?"}

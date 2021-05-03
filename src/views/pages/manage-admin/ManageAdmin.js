@@ -53,9 +53,12 @@ const ManageAdmin = () => {
 
     const { promiseInProgress } = usePromiseTracker();
 
-    useEffect(async () => {
-        const adminInfoList = await trackPromise(GetAdminInfoListAPI());
-        setAdminInfoList(adminInfoList);
+    useEffect(() => {
+        async function fetchData() {
+            const adminInfoList = await trackPromise(GetAdminInfoListAPI());
+            setAdminInfoList(adminInfoList);
+        }
+        fetchData();
     }, [refreshDataFlag])
 
     const updateAdminOnclick = (adminUsername) => {
@@ -156,7 +159,7 @@ const ManageAdmin = () => {
                                         ),
                                     'birthday':
                                         (item) => (<td>
-                                            {(item.birthday == "" || item.birthday == null) ? "" : format(parseISO(item.birthday), "dd-MM-yyyy")}
+                                            {(item.birthday === "" || item.birthday == null) ? "" : format(parseISO(item.birthday), "dd-MM-yyyy")}
                                         </td>),
                                     'action':
                                         (item, index) => {

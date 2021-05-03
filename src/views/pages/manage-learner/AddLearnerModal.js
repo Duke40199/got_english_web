@@ -75,7 +75,7 @@ const AddLearnerModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFla
             var img = document.getElementById("addLearnerAvt");
             const fileSize = e.target.files[0].size;
             const fileType = e.target.files[0].type;
-            if (fileSize <= 300000 && (fileType == "image/jpeg" || fileType == "image/png" || fileType == "image/jpg")) {
+            if (fileSize <= 300000 && (fileType === "image/jpeg" || fileType === "image/png" || fileType === "image/jpg")) {
                 // create blob url
                 var blobUrl = URL.createObjectURL(e.target.files[0]);
                 // use blob url to preview avatar
@@ -133,7 +133,7 @@ const AddLearnerModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFla
                         "fullname": addLearnerFullname,
                         "address": addLearnerAddress,
                         "phone_number": addLearnerPhoneNumber,
-                        "birthday": ((addLearnerBirthday == "" || addLearnerBirthday == null) ? "" : format(addLearnerBirthday, 'yyyy-MM-dd')),
+                        "birthday": ((addLearnerBirthday === "" || addLearnerBirthday == null) ? "" : format(addLearnerBirthday, 'yyyy-MM-dd')),
                         "avatar_url": newAvtSrc
                     }
 
@@ -252,7 +252,7 @@ const AddLearnerModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFla
                             <CLabel htmlFor="learner-birthday-input">Ngày sinh:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            {(addLearnerBirthday == "" || addLearnerBirthday == null) ?
+                            {(addLearnerBirthday === "" || addLearnerBirthday == null) ?
                                 <DatePicker
                                     className="form-control"
                                     locale="vi"
@@ -311,7 +311,7 @@ const AddLearnerModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFla
                     <CFormGroup row>
                         <CLabel col md="4" htmlFor="learner-avatar-url">Ảnh đại diện:</CLabel>
                         <CCol xs="12" md="8">
-                            <img id="addLearnerAvt" className="mr-2" src={addLearnerAvatarUrl} width="80" height="80" />
+                            <img id="addLearnerAvt" className="mr-2" alt="Learner Avatar" src={(addLearnerAvatarUrl === "" || addLearnerAvatarUrl == null) ? "/avatars/default_avt.png" : addLearnerAvatarUrl} width="80" height="80" />
                             <CButton
                                 color="info"
                                 className="rounded-circle"

@@ -39,8 +39,8 @@ const MyProfile = () => {
     const [email] = useState(userInfo.email);
     const [address, setAddress] = useState(userInfo.address);
     const [phoneNumber, setPhoneNumber] = useState(userInfo.phone_number);
-    const [birthday, setBirthday] = useState((userInfo.birthday == "" || userInfo.birthday == null) ? "" : parseISO(userInfo.birthday));
-    const [avtSrc, setAvtSrc] = useState((userInfo.avatar_url == "" || userInfo.avatar_url == null) ? "" : userInfo.avatar_url);
+    const [birthday, setBirthday] = useState((userInfo.birthday === "" || userInfo.birthday == null) ? "" : parseISO(userInfo.birthday));
+    const [avtSrc, setAvtSrc] = useState((userInfo.avatar_url === "" || userInfo.avatar_url == null) ? "" : userInfo.avatar_url);
     const [fieldErrorMessages, setFieldErrorMessages] = useState({});
     const [updateMessage, setUpdateMessage] = useState(null);
 
@@ -77,7 +77,7 @@ const MyProfile = () => {
             const img = document.getElementById("myProfileAvt");
             const fileSize = e.target.files[0].size;
             const fileType = e.target.files[0].type;
-            if (fileSize <= 300000 && (fileType == "image/jpeg" || fileType == "image/png" || fileType == "image/jpg")) {
+            if (fileSize <= 300000 && (fileType === "image/jpeg" || fileType === "image/png" || fileType === "image/jpg")) {
                 // create blob url
                 const blobUrl = URL.createObjectURL(e.target.files[0]);
                 // use blob url to preview avatar
@@ -126,7 +126,7 @@ const MyProfile = () => {
                     "username": username,
                     "address": address,
                     "phone_number": phoneNumber,
-                    "birthday": ((birthday != "" && birthday != null) ? format(birthday, 'yyyy-MM-dd') : ""),
+                    "birthday": ((birthday !== "" && birthday != null) ? format(birthday, 'yyyy-MM-dd') : ""),
                     "avatar_url": newAvtSrc,
                 }
             } else {
@@ -136,7 +136,7 @@ const MyProfile = () => {
                     "password": password,
                     "address": address,
                     "phone_number": phoneNumber,
-                    "birthday": ((birthday != "" && birthday != null) ? format(birthday, 'yyyy-MM-dd') : ""),
+                    "birthday": ((birthday !== "" && birthday != null) ? format(birthday, 'yyyy-MM-dd') : ""),
                     "avatar_url": newAvtSrc,
                 }
             }
@@ -145,16 +145,10 @@ const MyProfile = () => {
 
             if (updateResult === true) {
                 setUpdateMessage(<CAlert color="success">Cập nhật thành công!</CAlert>);
-                if (userInfo.username != username) {
-                    alert("Cập nhật thông tin thành công! Tuy nhiên, bạn đã thay đổi Tên tài khoản nên cần phải đăng nhập lại.");
-                    localStorage.clear();
-                    history.push("/");
-                } else {
-                    //refresh data
-                    const newUserInfo = await trackPromise(GetMyProfileAPI());
-                    localStorage.setItem("userInfo", JSON.stringify(newUserInfo));
-                    history.push("/my-profile");
-                }
+                //refresh data
+                const newUserInfo = await trackPromise(GetMyProfileAPI());
+                localStorage.setItem("userInfo", JSON.stringify(newUserInfo));
+                history.push("/my-profile");
             } else {
                 setUpdateMessage(<CAlert color="danger">Cập nhật thất bại!</CAlert>);
             }
@@ -177,7 +171,7 @@ const MyProfile = () => {
                         <CRow>
                             <CCol sm="4" className="text-center">
                                 <div className="rounded-circle d-inline-block overflow-hidden border-2 border-dark position-relative" width="auto">
-                                    <img id="myProfileAvt" src={(userInfo.avatar_url == "" || userInfo.avatar_url == null) ? "/avatars/default_avt.png" : userInfo.avatar_url} width="250" height="250" />
+                                    <img id="myProfileAvt" alt="My Avatar" src={(userInfo.avatar_url === "" || userInfo.avatar_url == null) ? "/avatars/default_avt.png" : userInfo.avatar_url} width="250" height="250" />
                                     <CButton
                                         onClick={avtUrlUploadOnclick}
                                         color="info"
@@ -259,7 +253,7 @@ const MyProfile = () => {
                                     <CCol>
                                         <CLabel htmlFor="birthday">Ngày sinh:</CLabel>
                                         {
-                                            birthday != "" ?
+                                            birthday !== "" ?
                                                 <DatePicker
                                                     className="form-control"
                                                     locale="vi"

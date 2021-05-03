@@ -58,9 +58,12 @@ const ManageExpert = () => {
 
     const { promiseInProgress } = usePromiseTracker();
 
-    useEffect(async () => {
-        const expertInfoList = await trackPromise(GetExpertInfoListAPI());
-        setExpertInfoList(expertInfoList);
+    useEffect(() => {
+        async function fetchData() {
+            const expertInfoList = await trackPromise(GetExpertInfoListAPI());
+            setExpertInfoList(expertInfoList);
+        }
+        fetchData();
     }, [refreshDataFlag])
 
     const updateExpertOnclick = (expertUsername) => {
@@ -161,7 +164,7 @@ const ManageExpert = () => {
                                         ),
                                     'birthday':
                                         (item) => (<td>
-                                            {(item.birthday == "" || item.birthday == null) ? "" : format(parseISO(item.birthday), "dd-MM-yyyy")}
+                                            {(item.birthday === "" || item.birthday == null) ? "" : format(parseISO(item.birthday), "dd-MM-yyyy")}
                                         </td>),
                                     'average_rating':
                                         (item, index) => {

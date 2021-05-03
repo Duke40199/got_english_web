@@ -89,10 +89,6 @@ const TheHeaderDropdown = () => {
           <CBadge color="primary" className="mfs-auto">42</CBadge>
         </CDropdownItem> */}
         <CDropdownItem divider />
-        <CDropdownItem>
-          <CIcon name="cil-settings" className="mfe-2" />
-            Thiết lập
-        </CDropdownItem>
         <CDropdownItem onClick={Logout}>
           <CIcon name="cil-lock-locked" className="mfe-2" />
             Đăng xuất

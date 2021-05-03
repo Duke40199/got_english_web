@@ -79,7 +79,7 @@ const AddExpertModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag
             var img = document.getElementById("addExpertAvt");
             const fileSize = e.target.files[0].size;
             const fileType = e.target.files[0].type;
-            if (fileSize <= 300000 && (fileType == "image/jpeg" || fileType == "image/png" || fileType == "image/jpg")) {
+            if (fileSize <= 300000 && (fileType === "image/jpeg" || fileType === "image/png" || fileType === "image/jpg")) {
                 // create blob url
                 var blobUrl = URL.createObjectURL(e.target.files[0]);
                 // use blob url to preview avatar
@@ -137,7 +137,7 @@ const AddExpertModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag
                         "fullname": addExpertFullname,
                         "address": addExpertAddress,
                         "phone_number": addExpertPhoneNumber,
-                        "birthday": ((addExpertBirthday == "" || addExpertBirthday == null) ? "" : format(addExpertBirthday, 'yyyy-MM-dd')),
+                        "birthday": ((addExpertBirthday === "" || addExpertBirthday == null) ? "" : format(addExpertBirthday, 'yyyy-MM-dd')),
                         "avatar_url": newAvtSrc
                     }
                     const permissionInput = {
@@ -244,7 +244,7 @@ const AddExpertModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag
                             <CLabel htmlFor="expert-birthday-input">Ngày sinh:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            {(addExpertBirthday == "" || addExpertBirthday == null) ?
+                            {(addExpertBirthday === "" || addExpertBirthday == null) ?
                                 <DatePicker
                                     className="form-control"
                                     locale="vi"
@@ -339,7 +339,7 @@ const AddExpertModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag
                     <CFormGroup row>
                         <CLabel col md="4" htmlFor="expert-avatar-url">Ảnh đại diện:</CLabel>
                         <CCol xs="12" md="8">
-                            <img id="addExpertAvt" className="mr-2" src={addExpertAvatarUrl} width="80" height="80" />
+                            <img id="addExpertAvt" className="mr-2" alt="Expert Avatar" src={(addExpertAvatarUrl === "" || addExpertAvatarUrl == null) ? "/avatars/default_avt.png" : addExpertAvatarUrl} width="80" height="80" />
                             <CButton
                                 color="info"
                                 className="rounded-circle"

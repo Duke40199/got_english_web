@@ -63,8 +63,8 @@ const ViewCandidateCertification = () => {
     const defineApplicationFormType = (applicationType) => {
         let definedApplicationFormType = [];
         let beforeDefineApplicationType = applicationType.split(",");
-        if (beforeDefineApplicationType != null && beforeDefineApplicationType != "") {
-            beforeDefineApplicationType.map((item, index) => {
+        if (beforeDefineApplicationType != null && beforeDefineApplicationType !== "") {
+            beforeDefineApplicationType.forEach((item) => {
                 if (item === "can_chat") {
                     definedApplicationFormType.push("Xin nhận Phiên Nhắn Tin\n");
                 }
@@ -79,26 +79,29 @@ const ViewCandidateCertification = () => {
         return definedApplicationFormType;
     }
 
-    useEffect(async () => {
-        const applicationFormList = await trackPromise(GetApplicationFormListAPI());
-        const editedApplicationFormList = [];
-        let editedApplicationForm = {};
-        if (applicationFormList != null) {
-            applicationFormList.map((item) => {
-                editedApplicationForm = {
-                    "expert_fullname": (item.expert_info.account.fullname == null || item.expert_info.account.fullname == "") ? "" : item.expert_info.account.fullname,
-                    "expert_email": item.expert_info.account.email,
-                    "expert_phone": item.expert_info.account.phone_number == null || item.expert_info.account.phone_number == "" ? "" : item.expert_info.account.phone_number,
-                    "application_id": item.id,
-                    "application_type": item.type,
-                    "application_form_certificate": item.photo_url,
-                    "application_form_status": item.status,
-                    "application_form_send_datetime": item.created_at
-                }
-                editedApplicationFormList.push(editedApplicationForm);
-            });
+    useEffect(() => {
+        async function fetchData() {
+            const applicationFormList = await trackPromise(GetApplicationFormListAPI());
+            const editedApplicationFormList = [];
+            let editedApplicationForm = {};
+            if (applicationFormList != null) {
+                applicationFormList.forEach((item) => {
+                    editedApplicationForm = {
+                        "expert_fullname": (item.expert_info.account.fullname == null || item.expert_info.account.fullname === "") ? "" : item.expert_info.account.fullname,
+                        "expert_email": item.expert_info.account.email,
+                        "expert_phone": item.expert_info.account.phone_number == null || item.expert_info.account.phone_number === "" ? "" : item.expert_info.account.phone_number,
+                        "application_id": item.id,
+                        "application_type": item.type,
+                        "application_form_certificate": item.photo_url,
+                        "application_form_status": item.status,
+                        "application_form_send_datetime": item.created_at
+                    }
+                    editedApplicationFormList.push(editedApplicationForm);
+                });
+            }
+            setApplicationFormList(editedApplicationFormList);
         }
-        setApplicationFormList(editedApplicationFormList);
+        fetchData();
     }, [refreshDataFlag]);
 
     const approveApplicationFormOnclick = (applicationFormId) => {
@@ -161,7 +164,7 @@ const ViewCandidateCertification = () => {
                                         'application_type':
                                             (item, index) => (
                                                 <td className="text-pre-line">
-                                                    {(item.application_type == null || item.application_type == "") ?
+                                                    {(item.application_type == null || item.application_type === "") ?
                                                         "" :
                                                         defineApplicationFormType(item.application_type)
                                                     }
@@ -170,8 +173,8 @@ const ViewCandidateCertification = () => {
                                         'application_form_certificate':
                                             (item, index) => (
                                                 <td>
-                                                    <img src={item.application_form_certificate} className="img-thumbnail lightbox-thumbnail-img" width="120px" height="90px" onClick={e => openLightbox(index)} />
-                                                    {currentIndex == index
+                                                    <img src={item.application_form_certificate} alt="Certificate" className="img-thumbnail lightbox-thumbnail-img" width="120px" height="90px" onClick={e => openLightbox(index)} />
+                                                    {currentIndex === index
                                                         ?
                                                         <Lightbox image={item.application_form_certificate}
                                                             showTitle={false}
@@ -191,7 +194,7 @@ const ViewCandidateCertification = () => {
                                             (item, index) => (
                                                 <td>
                                                     {
-                                                        (item.application_form_send_datetime == null || item.application_form_send_datetime == "") ?
+                                                        (item.application_form_send_datetime == null || item.application_form_send_datetime === "") ?
                                                             ""
                                                             :
                                                             format(parseISO(item.application_form_send_datetime), 'dd-MM-yyyy hh:mm:ss')
@@ -202,7 +205,7 @@ const ViewCandidateCertification = () => {
                                             (item, index) => (
 
                                                 <td className="py-1">
-                                                    {(item.application_form_status == "Pending") ?
+                                                    {(item.application_form_status === "Pending") ?
                                                         <div>
                                                             <button type="button" className="table-action-button mr-2" data-toggle="tooltip" title="Duyệt">
                                                                 <CIcon name="cil-check" onClick={() => approveApplicationFormOnclick(item.application_id)}>
