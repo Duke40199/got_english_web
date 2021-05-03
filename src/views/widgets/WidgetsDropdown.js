@@ -19,57 +19,60 @@ const WidgetsDropdown = () => {
   const [lastWeekInvoice, setLastWeekInvoice] = useState(null);
 
 
-  useEffect(async () => {
-    const dailySummary = await GetDailySummaryAPI();
-    let lastWeekNewExpert = [];
-    let lastWeekNewLearner = [];
-    let lastWeekCompletedService = [];
-    let lastWeekInvoice = [];
-    if (dailySummary != null) {
-      //today report
-      setTodayNewExpert(dailySummary.new_expert_weekly_count["0_day_ago"]);
-      setTodayNewLearner(dailySummary.new_learner_weekly_count["0_day_ago"]);
-      setTodayCompletedService(dailySummary.new_messaging_session_weekly_count["0_day_ago"] + dailySummary.new_live_call_session_weekly_count["0_day_ago"] + dailySummary.new_translation_session_weekly_count["0_day_ago"]);
-      setTodayInvoice(dailySummary.new_invoice_weekly_count["0_day_ago"]);
-      //last week report
-      //new expert
-      lastWeekNewExpert.push(dailySummary.new_expert_weekly_count["7_day_ago"]);
-      lastWeekNewExpert.push(dailySummary.new_expert_weekly_count["6_day_ago"]);
-      lastWeekNewExpert.push(dailySummary.new_expert_weekly_count["5_day_ago"]);
-      lastWeekNewExpert.push(dailySummary.new_expert_weekly_count["4_day_ago"]);
-      lastWeekNewExpert.push(dailySummary.new_expert_weekly_count["3_day_ago"]);
-      lastWeekNewExpert.push(dailySummary.new_expert_weekly_count["2_day_ago"]);
-      lastWeekNewExpert.push(dailySummary.new_expert_weekly_count["1_day_ago"]);
-      //new learner
-      lastWeekNewLearner.push(dailySummary.new_learner_weekly_count["7_day_ago"]);
-      lastWeekNewLearner.push(dailySummary.new_learner_weekly_count["6_day_ago"]);
-      lastWeekNewLearner.push(dailySummary.new_learner_weekly_count["5_day_ago"]);
-      lastWeekNewLearner.push(dailySummary.new_learner_weekly_count["4_day_ago"]);
-      lastWeekNewLearner.push(dailySummary.new_learner_weekly_count["3_day_ago"]);
-      lastWeekNewLearner.push(dailySummary.new_learner_weekly_count["2_day_ago"]);
-      lastWeekNewLearner.push(dailySummary.new_learner_weekly_count["1_day_ago"]);
-      //new completed service
-      lastWeekCompletedService.push(dailySummary.new_messaging_session_weekly_count["7_day_ago"] + dailySummary.new_live_call_session_weekly_count["7_day_ago"] + dailySummary.new_translation_session_weekly_count["7_day_ago"]);
-      lastWeekCompletedService.push(dailySummary.new_messaging_session_weekly_count["6_day_ago"] + dailySummary.new_live_call_session_weekly_count["6_day_ago"] + dailySummary.new_translation_session_weekly_count["6_day_ago"]);
-      lastWeekCompletedService.push(dailySummary.new_messaging_session_weekly_count["5_day_ago"] + dailySummary.new_live_call_session_weekly_count["5_day_ago"] + dailySummary.new_translation_session_weekly_count["5_day_ago"]);
-      lastWeekCompletedService.push(dailySummary.new_messaging_session_weekly_count["4_day_ago"] + dailySummary.new_live_call_session_weekly_count["4_day_ago"] + dailySummary.new_translation_session_weekly_count["4_day_ago"]);
-      lastWeekCompletedService.push(dailySummary.new_messaging_session_weekly_count["3_day_ago"] + dailySummary.new_live_call_session_weekly_count["3_day_ago"] + dailySummary.new_translation_session_weekly_count["3_day_ago"]);
-      lastWeekCompletedService.push(dailySummary.new_messaging_session_weekly_count["2_day_ago"] + dailySummary.new_live_call_session_weekly_count["2_day_ago"] + dailySummary.new_translation_session_weekly_count["2_day_ago"]);
-      lastWeekCompletedService.push(dailySummary.new_messaging_session_weekly_count["1_day_ago"] + dailySummary.new_live_call_session_weekly_count["1_day_ago"] + dailySummary.new_translation_session_weekly_count["1_day_ago"]);
-      //new invoice
-      lastWeekInvoice.push(dailySummary.new_invoice_weekly_count["7_day_ago"]);
-      lastWeekInvoice.push(dailySummary.new_invoice_weekly_count["6_day_ago"]);
-      lastWeekInvoice.push(dailySummary.new_invoice_weekly_count["5_day_ago"]);
-      lastWeekInvoice.push(dailySummary.new_invoice_weekly_count["4_day_ago"]);
-      lastWeekInvoice.push(dailySummary.new_invoice_weekly_count["3_day_ago"]);
-      lastWeekInvoice.push(dailySummary.new_invoice_weekly_count["2_day_ago"]);
-      lastWeekInvoice.push(dailySummary.new_invoice_weekly_count["1_day_ago"]);
-      //set state
-      setLastWeekNewExpert(lastWeekNewExpert);
-      setLastWeekNewLearner(lastWeekNewLearner);
-      setLastWeekCompletedService(lastWeekCompletedService);
-      setLastWeekInvoice(lastWeekInvoice);
+  useEffect(() => {
+    async function fetchData() {
+      const dailySummary = await GetDailySummaryAPI();
+      let lastWeekNewExpert = [];
+      let lastWeekNewLearner = [];
+      let lastWeekCompletedService = [];
+      let lastWeekInvoice = [];
+      if (dailySummary != null) {
+        //today report
+        setTodayNewExpert(dailySummary.new_expert_weekly_count["0_day_ago"]);
+        setTodayNewLearner(dailySummary.new_learner_weekly_count["0_day_ago"]);
+        setTodayCompletedService(dailySummary.new_messaging_session_weekly_count["0_day_ago"] + dailySummary.new_live_call_session_weekly_count["0_day_ago"] + dailySummary.new_translation_session_weekly_count["0_day_ago"]);
+        setTodayInvoice(dailySummary.new_invoice_weekly_count["0_day_ago"]);
+        //last week report
+        //new expert
+        lastWeekNewExpert.push(dailySummary.new_expert_weekly_count["7_day_ago"]);
+        lastWeekNewExpert.push(dailySummary.new_expert_weekly_count["6_day_ago"]);
+        lastWeekNewExpert.push(dailySummary.new_expert_weekly_count["5_day_ago"]);
+        lastWeekNewExpert.push(dailySummary.new_expert_weekly_count["4_day_ago"]);
+        lastWeekNewExpert.push(dailySummary.new_expert_weekly_count["3_day_ago"]);
+        lastWeekNewExpert.push(dailySummary.new_expert_weekly_count["2_day_ago"]);
+        lastWeekNewExpert.push(dailySummary.new_expert_weekly_count["1_day_ago"]);
+        //new learner
+        lastWeekNewLearner.push(dailySummary.new_learner_weekly_count["7_day_ago"]);
+        lastWeekNewLearner.push(dailySummary.new_learner_weekly_count["6_day_ago"]);
+        lastWeekNewLearner.push(dailySummary.new_learner_weekly_count["5_day_ago"]);
+        lastWeekNewLearner.push(dailySummary.new_learner_weekly_count["4_day_ago"]);
+        lastWeekNewLearner.push(dailySummary.new_learner_weekly_count["3_day_ago"]);
+        lastWeekNewLearner.push(dailySummary.new_learner_weekly_count["2_day_ago"]);
+        lastWeekNewLearner.push(dailySummary.new_learner_weekly_count["1_day_ago"]);
+        //new completed service
+        lastWeekCompletedService.push(dailySummary.new_messaging_session_weekly_count["7_day_ago"] + dailySummary.new_live_call_session_weekly_count["7_day_ago"] + dailySummary.new_translation_session_weekly_count["7_day_ago"]);
+        lastWeekCompletedService.push(dailySummary.new_messaging_session_weekly_count["6_day_ago"] + dailySummary.new_live_call_session_weekly_count["6_day_ago"] + dailySummary.new_translation_session_weekly_count["6_day_ago"]);
+        lastWeekCompletedService.push(dailySummary.new_messaging_session_weekly_count["5_day_ago"] + dailySummary.new_live_call_session_weekly_count["5_day_ago"] + dailySummary.new_translation_session_weekly_count["5_day_ago"]);
+        lastWeekCompletedService.push(dailySummary.new_messaging_session_weekly_count["4_day_ago"] + dailySummary.new_live_call_session_weekly_count["4_day_ago"] + dailySummary.new_translation_session_weekly_count["4_day_ago"]);
+        lastWeekCompletedService.push(dailySummary.new_messaging_session_weekly_count["3_day_ago"] + dailySummary.new_live_call_session_weekly_count["3_day_ago"] + dailySummary.new_translation_session_weekly_count["3_day_ago"]);
+        lastWeekCompletedService.push(dailySummary.new_messaging_session_weekly_count["2_day_ago"] + dailySummary.new_live_call_session_weekly_count["2_day_ago"] + dailySummary.new_translation_session_weekly_count["2_day_ago"]);
+        lastWeekCompletedService.push(dailySummary.new_messaging_session_weekly_count["1_day_ago"] + dailySummary.new_live_call_session_weekly_count["1_day_ago"] + dailySummary.new_translation_session_weekly_count["1_day_ago"]);
+        //new invoice
+        lastWeekInvoice.push(dailySummary.new_invoice_weekly_count["7_day_ago"]);
+        lastWeekInvoice.push(dailySummary.new_invoice_weekly_count["6_day_ago"]);
+        lastWeekInvoice.push(dailySummary.new_invoice_weekly_count["5_day_ago"]);
+        lastWeekInvoice.push(dailySummary.new_invoice_weekly_count["4_day_ago"]);
+        lastWeekInvoice.push(dailySummary.new_invoice_weekly_count["3_day_ago"]);
+        lastWeekInvoice.push(dailySummary.new_invoice_weekly_count["2_day_ago"]);
+        lastWeekInvoice.push(dailySummary.new_invoice_weekly_count["1_day_ago"]);
+        //set state
+        setLastWeekNewExpert(lastWeekNewExpert);
+        setLastWeekNewLearner(lastWeekNewLearner);
+        setLastWeekCompletedService(lastWeekCompletedService);
+        setLastWeekInvoice(lastWeekInvoice);
+      }
     }
+    fetchData();
   }, []);
 
   // render

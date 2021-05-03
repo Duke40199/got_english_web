@@ -23,14 +23,17 @@ const SuspendModeratorModal = ({ selectedModeratorUsername, show, handleClose, r
     const { promiseInProgress } = usePromiseTracker();
 
     //this useEffect will be executed every time the modal show
-    useEffect(async () => {
-        if (selectedModeratorUsername != null) {
-            const selectedModeratorInfo = await trackPromise(GetUserInfoAPI(selectedModeratorUsername, 'Moderator'));
-            if (selectedModeratorInfo != null) {
-                setSuspendModeratorUUID(selectedModeratorInfo.id);
-                setSuspendModeratorUsername(selectedModeratorInfo.username);
+    useEffect(() => {
+        async function fetchData() {
+            if (selectedModeratorUsername != null) {
+                const selectedModeratorInfo = await trackPromise(GetUserInfoAPI(selectedModeratorUsername, 'Moderator'));
+                if (selectedModeratorInfo != null) {
+                    setSuspendModeratorUUID(selectedModeratorInfo.id);
+                    setSuspendModeratorUsername(selectedModeratorInfo.username);
+                }
             }
         }
+        fetchData();
     }, [selectedModeratorUsername]);
 
     const onSubmitSuspendForm = async (e) => {

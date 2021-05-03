@@ -15,6 +15,7 @@ const TheLayout = React.lazy(() => import('./containers/TheLayout'));
 // Pages
 const Login = React.lazy(() => import('./views/pages/login/Login'));
 const Page404 = React.lazy(() => import('./views/pages/page404/Page404'));
+const RecoverAccount = React.lazy(() => import('./views/pages/recover-password/RecoverPassword'));
 //const Page500 = React.lazy(() => import('./views/pages/page500/Page500'));
 
 const isAuthenticated = () => {
@@ -56,6 +57,7 @@ class App extends Component {
                 <UnauthenticatedRoute exact path="/" name="Home" component={Login} />
             }
             <UnauthenticatedRoute path="/login" name="Login Page" component={Login} />
+            <UnauthenticatedRoute path="/recover-account" name="Recover Account Page" component={RecoverAccount} />
             {
               isAuthenticated ?
                 <AuthenticatedRoute path="*" name="Dashboard" component={TheLayout} /> :

@@ -1,4 +1,5 @@
 import APIKit from './APIKit';
+import DefineErrorLog from '../reusable/DefineErrorLog';
 
 export const GetExchangeRateInfoListAPI = async () => {
     const token = (JSON.parse(localStorage.getItem("user"))).token;
@@ -53,13 +54,11 @@ export const UpdateExchangeRateInfoByIdAPI = async (exchangeRateId, updateInfoJs
     const token = (JSON.parse(localStorage.getItem("user"))).token;
     let updateResult = null;
     const onSuccess = response => {
-        console.log(response.data);
         updateResult = response.data.success;
     }
 
     const onFailure = error => {
-        console.log(error);
-        updateResult = false;
+        updateResult = DefineErrorLog(error);
     }
 
     const apiConfig = {

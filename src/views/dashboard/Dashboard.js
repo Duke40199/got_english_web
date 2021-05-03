@@ -31,54 +31,57 @@ const Dashboard = () => {
   const [sumMonthlyLiveCallSession, setSumMonthlyLiveCallSession] = useState(0);
   const [sumMonthlyTranslationSession, setSumMonthlyTranslationSession] = useState(0);
 
-  useEffect(async () => {
-    const month = format(new Date(), "MM");
-    const year = format(new Date(), "yyyy");
-    //-----------USER SUMMARY-----------
-    const userMonthYearSummary = await GetMonthlyAccountSummaryByYearMonthAPI(year, month);
-    let newExpertMonthlyData = [];
-    let newLearnerMonthlyData = [];
-    if (userMonthYearSummary != null) {
-      const expertDataCount = Object.keys(userMonthYearSummary.new_expert_monthly_count).length;
-      const learnerDataCount = Object.keys(userMonthYearSummary.new_learner_monthly_count).length;
-      for (let i = expertDataCount - 1; i >= 0; i--) {
-        let key = i + "_day_ago";
-        newExpertMonthlyData.push(userMonthYearSummary.new_expert_monthly_count[key]);
-      }
-      for (let i = learnerDataCount - 1; i >= 0; i--) {
-        let key = i + "_day_ago";
-        newLearnerMonthlyData.push(userMonthYearSummary.new_learner_monthly_count[key]);
-      }
-      setSumMonthlyExpert(newExpertMonthlyData.reduce((a, b) => a + b, 0));
-      setSumMonthlyLearner(newLearnerMonthlyData.reduce((a, b) => a + b, 0));
-      setUserMonthlySummary(userMonthYearSummary);
-      //-----------SERVICE SUMMARY-----------
-      const serviceMonthYearSummary = await GetMonthlyServiceSummaryByYearMonthAPI(year, month);
-      let messagingSessionMonthlyData = [];
-      let liveCallSessionMonthlyData = [];
-      let translationSessionMonthlyData = [];
-      if (serviceMonthYearSummary != null) {
-        const messagingSessionDataCount = Object.keys(serviceMonthYearSummary.new_messaging_session_monthly_count).length;
-        const liveCallSessionDataCount = Object.keys(serviceMonthYearSummary.new_live_call_session_monthly_count).length;
-        const translationSessionDataCount = Object.keys(serviceMonthYearSummary.new_translation_session_monthly_count).length;
-        for (let i = messagingSessionDataCount - 1; i >= 0; i--) {
+  useEffect(() => {
+    async function fetchData() {
+      const month = format(new Date(), "MM");
+      const year = format(new Date(), "yyyy");
+      //-----------USER SUMMARY-----------
+      const userMonthYearSummary = await GetMonthlyAccountSummaryByYearMonthAPI(year, month);
+      let newExpertMonthlyData = [];
+      let newLearnerMonthlyData = [];
+      if (userMonthYearSummary != null) {
+        const expertDataCount = Object.keys(userMonthYearSummary.new_expert_monthly_count).length;
+        const learnerDataCount = Object.keys(userMonthYearSummary.new_learner_monthly_count).length;
+        for (let i = expertDataCount - 1; i >= 0; i--) {
           let key = i + "_day_ago";
-          messagingSessionMonthlyData.push(serviceMonthYearSummary.new_messaging_session_monthly_count[key]);
+          newExpertMonthlyData.push(userMonthYearSummary.new_expert_monthly_count[key]);
         }
-        for (let i = liveCallSessionDataCount - 1; i >= 0; i--) {
+        for (let i = learnerDataCount - 1; i >= 0; i--) {
           let key = i + "_day_ago";
-          liveCallSessionMonthlyData.push(serviceMonthYearSummary.new_live_call_session_monthly_count[key]);
+          newLearnerMonthlyData.push(userMonthYearSummary.new_learner_monthly_count[key]);
         }
-        for (let i = translationSessionDataCount - 1; i >= 0; i--) {
-          let key = i + "_day_ago";
-          translationSessionMonthlyData.push(serviceMonthYearSummary.new_translation_session_monthly_count[key]);
+        setSumMonthlyExpert(newExpertMonthlyData.reduce((a, b) => a + b, 0));
+        setSumMonthlyLearner(newLearnerMonthlyData.reduce((a, b) => a + b, 0));
+        setUserMonthlySummary(userMonthYearSummary);
+        //-----------SERVICE SUMMARY-----------
+        const serviceMonthYearSummary = await GetMonthlyServiceSummaryByYearMonthAPI(year, month);
+        let messagingSessionMonthlyData = [];
+        let liveCallSessionMonthlyData = [];
+        let translationSessionMonthlyData = [];
+        if (serviceMonthYearSummary != null) {
+          const messagingSessionDataCount = Object.keys(serviceMonthYearSummary.new_messaging_session_monthly_count).length;
+          const liveCallSessionDataCount = Object.keys(serviceMonthYearSummary.new_live_call_session_monthly_count).length;
+          const translationSessionDataCount = Object.keys(serviceMonthYearSummary.new_translation_session_monthly_count).length;
+          for (let i = messagingSessionDataCount - 1; i >= 0; i--) {
+            let key = i + "_day_ago";
+            messagingSessionMonthlyData.push(serviceMonthYearSummary.new_messaging_session_monthly_count[key]);
+          }
+          for (let i = liveCallSessionDataCount - 1; i >= 0; i--) {
+            let key = i + "_day_ago";
+            liveCallSessionMonthlyData.push(serviceMonthYearSummary.new_live_call_session_monthly_count[key]);
+          }
+          for (let i = translationSessionDataCount - 1; i >= 0; i--) {
+            let key = i + "_day_ago";
+            translationSessionMonthlyData.push(serviceMonthYearSummary.new_translation_session_monthly_count[key]);
+          }
+          setSumMonthlyMessagingSession(messagingSessionMonthlyData.reduce((a, b) => a + b, 0));
+          setSumMonthlyLiveCallSession(liveCallSessionMonthlyData.reduce((a, b) => a + b, 0));
+          setSumMonthlyTranslationSession(translationSessionMonthlyData.reduce((a, b) => a + b, 0));
+          setServiceMonthlySummary(serviceMonthYearSummary);
         }
-        setSumMonthlyMessagingSession(messagingSessionMonthlyData.reduce((a, b) => a + b, 0));
-        setSumMonthlyLiveCallSession(liveCallSessionMonthlyData.reduce((a, b) => a + b, 0));
-        setSumMonthlyTranslationSession(translationSessionMonthlyData.reduce((a, b) => a + b, 0));
-        setServiceMonthlySummary(serviceMonthYearSummary);
       }
     }
+    fetchData();
   }, []);
 
   const UserSummaryMonthYearInput = ({ value, onClick }) => (
@@ -158,7 +161,7 @@ const Dashboard = () => {
         <CCardBody>
           <CRow>
             <CCol sm="5">
-              <h4 id="traffic" className="card-title mb-0">Thống kê lượng Người Dùng theo Tháng</h4>
+              <h4 id="traffic" className="card-title mb-0">Thống kê lượng Người Dùng mới theo Tháng</h4>
             </CCol>
             <CCol sm="7" className="d-none d-md-block">
               <DatePicker

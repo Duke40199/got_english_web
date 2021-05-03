@@ -49,27 +49,30 @@ const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose, refreshD
     const { promiseInProgress } = usePromiseTracker();
 
     //this useEffect will be executed every time the modal show
-    useEffect(async () => {
-        if (selectedExpertUsername != null) {
-            const selectedExpertInfo = await trackPromise(GetUserInfoAPI(selectedExpertUsername, 'Expert'));
-            if (selectedExpertInfo != null) {
-                setUpdateExpertUUID(selectedExpertInfo.id);
-                setUpdateExpertFullname(selectedExpertInfo.fullname);
-                setUpdateExpertUsername(selectedExpertInfo.username);
-                setUpdateExpertEmail(selectedExpertInfo.email);
-                setUpdateExpertAddress(selectedExpertInfo.address);
-                setUpdateExpertPhoneNumber(selectedExpertInfo.phone_number);
-                if (selectedExpertInfo.birthday == "" || selectedExpertInfo.birthday == null) {
-                    setUpdateExpertBirthday("");
-                } else {
-                    setUpdateExpertBirthday(parseISO(selectedExpertInfo.birthday));
+    useEffect(() => {
+        async function fetchData() {
+            if (selectedExpertUsername != null) {
+                const selectedExpertInfo = await trackPromise(GetUserInfoAPI(selectedExpertUsername, 'Expert'));
+                if (selectedExpertInfo != null) {
+                    setUpdateExpertUUID(selectedExpertInfo.id);
+                    setUpdateExpertFullname(selectedExpertInfo.fullname);
+                    setUpdateExpertUsername(selectedExpertInfo.username);
+                    setUpdateExpertEmail(selectedExpertInfo.email);
+                    setUpdateExpertAddress(selectedExpertInfo.address);
+                    setUpdateExpertPhoneNumber(selectedExpertInfo.phone_number);
+                    if (selectedExpertInfo.birthday === "" || selectedExpertInfo.birthday == null) {
+                        setUpdateExpertBirthday("");
+                    } else {
+                        setUpdateExpertBirthday(parseISO(selectedExpertInfo.birthday));
+                    }
+                    setUpdateExpertAvatarUrl((selectedExpertInfo.avatar_url === "" || selectedExpertInfo.avatar_url == null) ? "" : selectedExpertInfo.avatar_url);
+                    setUpdateExpertCanChat(selectedExpertInfo.expert_details.can_chat);
+                    setUpdateExpertCanJoinTranslationSession(selectedExpertInfo.expert_details.can_join_translation_session);
+                    setUpdateExpertCanJoinLiveCallSession(selectedExpertInfo.expert_details.can_join_live_call_session);
                 }
-                setUpdateExpertAvatarUrl((selectedExpertInfo.avatar_url == "" || selectedExpertInfo.avatar_url == null) ? "" : selectedExpertInfo.avatar_url);
-                setUpdateExpertCanChat(selectedExpertInfo.expert_details.can_chat);
-                setUpdateExpertCanJoinTranslationSession(selectedExpertInfo.expert_details.can_join_translation_session);
-                setUpdateExpertCanJoinLiveCallSession(selectedExpertInfo.expert_details.can_join_live_call_session);
             }
         }
+        fetchData();
     }, [selectedExpertUsername]);
 
     const uploadToStorage = async (imageURL) => {
@@ -103,7 +106,7 @@ const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose, refreshD
             var img = document.getElementById("updateExpertAvt");
             const fileSize = e.target.files[0].size;
             const fileType = e.target.files[0].type;
-            if (fileSize <= 300000 && (fileType == "image/jpeg" || fileType == "image/png" || fileType == "image/jpg")) {
+            if (fileSize <= 300000 && (fileType === "image/jpeg" || fileType === "image/png" || fileType === "image/jpg")) {
                 // create blob url
                 var blobUrl = URL.createObjectURL(e.target.files[0]);
                 // use blob url to preview avatar
@@ -150,7 +153,7 @@ const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose, refreshD
                     "username": updateExpertUsername,
                     "address": updateExpertAddress,
                     "phone_number": updateExpertPhoneNumber,
-                    "birthday": ((updateExpertBirthday == "" || updateExpertBirthday == null) ? "" : format(updateExpertBirthday, 'yyyy-MM-dd')),
+                    "birthday": ((updateExpertBirthday === "" || updateExpertBirthday == null) ? "" : format(updateExpertBirthday, 'yyyy-MM-dd')),
                     "avatar_url": newAvtSrc,
                 }
                 permissionInput = {
@@ -165,7 +168,7 @@ const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose, refreshD
                     "password": updateExpertPassword,
                     "address": updateExpertAddress,
                     "phone_number": updateExpertPhoneNumber,
-                    "birthday": ((updateExpertBirthday == "" || updateExpertBirthday == null) ? "" : format(updateExpertBirthday, 'yyyy-MM-dd')),
+                    "birthday": ((updateExpertBirthday === "" || updateExpertBirthday == null) ? "" : format(updateExpertBirthday, 'yyyy-MM-dd')),
                     "avatar_url": newAvtSrc,
                 }
                 permissionInput = {
@@ -275,7 +278,7 @@ const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose, refreshD
                             <CLabel htmlFor="update-expert-birthday-input">Ngày sinh:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            {(updateExpertBirthday == "" || updateExpertBirthday == null) ?
+                            {(updateExpertBirthday === "" || updateExpertBirthday == null) ?
                                 <DatePicker
                                     className="form-control"
                                     locale="vi"
@@ -368,7 +371,7 @@ const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose, refreshD
                     <CFormGroup row>
                         <CLabel col md="4" htmlFor="update-expert-avatar-url">Ảnh đại diện:</CLabel>
                         <CCol xs="12" md="8">
-                            <img id="updateExpertAvt" className="mr-2" src={updateExpertAvatarUrl} width="80" height="80" />
+                            <img id="updateExpertAvt" alt="Expert Avatar" className="mr-2" src={updateExpertAvatarUrl} width="80" height="80" />
                             <CButton
                                 color="info"
                                 className="rounded-circle"

@@ -1,4 +1,5 @@
 import APIKit from './APIKit';
+import DefineErrorLog from '../reusable/DefineErrorLog'
 
 export const GetCoinBundleInfoListAPI = async () => {
     const token = (JSON.parse(localStorage.getItem("user"))).token;
@@ -53,13 +54,11 @@ export const UpdateCoinBundleByIdAPI = async (coinBundleId, updateInfoJson) => {
     const token = (JSON.parse(localStorage.getItem("user"))).token;
     let updateResult = null;
     const onSuccess = response => {
-        console.log(response.data);
         updateResult = response.data.success;
     }
 
     const onFailure = error => {
-        console.log(error);
-        updateResult = false;
+        updateResult = DefineErrorLog(error);
     }
 
     const apiConfig = {
@@ -78,13 +77,11 @@ export const CreateCoinBundleAPI = async (coinBundleInfoJson) => {
     let createResult = null;
 
     const onSuccess = response => {
-        console.log(response.data);
         createResult = response.data.success;
     }
 
     const onFailure = error => {
-        console.log(error);
-        createResult = false;
+        createResult = DefineErrorLog(error);
     }
 
     const apiConfig = {
@@ -103,17 +100,11 @@ export const DeleteCoinBundleByIdAPI = async (coinBundleId) => {
     let deleteResult = null;
 
     const onSuccess = response => {
-        console.log(response.data);
         deleteResult = response.data.success;
     }
 
     const onFailure = error => {
-        console.log(error);
-        if ((error.response.data).includes("coin bundle not found or already deleted")) {
-            deleteResult = "Gói Coin này không tìm thấy hoặc đã bị xóa!"
-        } else {
-            deleteResult = "Xóa Gói Coin thất bại!"
-        }
+        deleteResult = DefineErrorLog(error);
     }
 
     const apiConfig = {

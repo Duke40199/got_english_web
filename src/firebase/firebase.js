@@ -1,7 +1,7 @@
 import firebase from 'firebase'
 import "firebase/auth";
 import "firebase/firestore";
-import util from 'util';
+//import util from 'util';
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
@@ -31,5 +31,22 @@ export const signInWithEmailAndPasswordHandler = async (email, password) => {
     });
     return idToken
 };
+
+export const sendResetPasswordEmail = async (email) => {
+    let result = false;
+    const onSuccess = response => {
+        result = true;
+    }
+
+    const onFailure = error => {
+        console.log(error);
+    }
+
+    await auth.sendPasswordResetEmail(email)
+        .then(onSuccess)
+        .catch(onFailure)
+
+    return result;
+}
 
 export default firebase

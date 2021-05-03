@@ -53,9 +53,12 @@ const ManageLearner = () => {
 
     const { promiseInProgress } = usePromiseTracker();
 
-    useEffect(async () => {
-        const learnerInfoList = await trackPromise(GetLearnerInfoListAPI());
-        setLearnerInfoList(learnerInfoList);
+    useEffect(() => {
+        async function fetchData() {
+            const learnerInfoList = await trackPromise(GetLearnerInfoListAPI());
+            setLearnerInfoList(learnerInfoList);
+        }
+        fetchData();
     }, [refreshDataFlag])
 
     const updateLearnerOnclick = (learnerUsername) => {
@@ -104,7 +107,7 @@ const ManageLearner = () => {
                 <CCol>
                     <CCard>
                         <CCardHeader>
-                        <h3 className="m-0">Danh sách Học Viên</h3>
+                            <h3 className="m-0">Danh sách Học Viên</h3>
                             <CButton color="primary" className="mt-2 d-flex align-items-center" onClick={() => setAddLearnerModalShow(true)}>
                                 <CIcon name="cilPlus" size="sm" className="mr-1"></CIcon>Thêm mới Học Viên</CButton>
                         </CCardHeader>
@@ -156,7 +159,7 @@ const ManageLearner = () => {
                                         ),
                                     'birthday':
                                         (item) => (<td>
-                                            {(item.birthday == "" || item.birthday == null) ? "" : format(parseISO(item.birthday), "dd-MM-yyyy")}
+                                            {(item.birthday === "" || item.birthday == null) ? "" : format(parseISO(item.birthday), "dd-MM-yyyy")}
                                         </td>),
                                     'action':
                                         (item, index) => {

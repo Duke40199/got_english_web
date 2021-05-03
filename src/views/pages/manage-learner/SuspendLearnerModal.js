@@ -23,14 +23,17 @@ const SuspendLearnerModal = ({ selectedLearnerUsername, show, handleClose, refre
     const { promiseInProgress } = usePromiseTracker();
 
     //this useEffect will be executed every time the modal show
-    useEffect(async () => {
-        if (selectedLearnerUsername != null) {
-            const selectedLearnerInfo = await trackPromise(GetUserInfoAPI(selectedLearnerUsername, 'Learner'));
-            if (selectedLearnerInfo != null) {
-                setSuspendLearnerUUID(selectedLearnerInfo.id);
-                setSuspendLearnerUsername(selectedLearnerInfo.username);
+    useEffect(() => {
+        async function fetchData() {
+            if (selectedLearnerUsername != null) {
+                const selectedLearnerInfo = await trackPromise(GetUserInfoAPI(selectedLearnerUsername, 'Learner'));
+                if (selectedLearnerInfo != null) {
+                    setSuspendLearnerUUID(selectedLearnerInfo.id);
+                    setSuspendLearnerUsername(selectedLearnerInfo.username);
+                }
             }
         }
+        fetchData();
     }, [selectedLearnerUsername]);
 
     const onSubmitSuspendForm = async (e) => {

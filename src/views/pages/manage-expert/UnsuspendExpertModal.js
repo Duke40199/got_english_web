@@ -23,14 +23,17 @@ const UnsuspendExpertModal = ({ selectedExpertUsername, show, handleClose, refre
     const { promiseInProgress } = usePromiseTracker();
 
     //this useEffect will be executed every time the modal show
-    useEffect(async () => {
-        if (selectedExpertUsername != null) {
-            const selectedExpertInfo = await trackPromise(GetUserInfoAPI(selectedExpertUsername, 'Expert'));
-            if (selectedExpertInfo != null) {
-                setUnsuspendExpertUUID(selectedExpertInfo.id);
-                setUnsuspendExpertUsername(selectedExpertInfo.username);
+    useEffect(() => {
+        async function fetchData() {
+            if (selectedExpertUsername != null) {
+                const selectedExpertInfo = await trackPromise(GetUserInfoAPI(selectedExpertUsername, 'Expert'));
+                if (selectedExpertInfo != null) {
+                    setUnsuspendExpertUUID(selectedExpertInfo.id);
+                    setUnsuspendExpertUsername(selectedExpertInfo.username);
+                }
             }
         }
+        fetchData();
     }, [selectedExpertUsername]);
 
     const onSubmitUnsuspendForm = async (e) => {

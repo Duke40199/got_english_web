@@ -16,8 +16,7 @@ import {
     CCardHeader,
     CCol,
     CDataTable,
-    CRow,
-    CAlert
+    CRow
 } from '@coreui/react'
 
 const fields = [
@@ -39,13 +38,16 @@ const ViewExpertFeedback = () => {
 
     const { promiseInProgress } = usePromiseTracker();
 
-    useEffect(async () => {
-        const expertInfo = await trackPromise(GetExpertInfoByIdAPI(expertId));
-        if (expertInfo != null) {
-            const expertRatingList = await trackPromise(GetRatingListByExpertIdAPI(expertId));
-            setSelectedExpertRatingList(expertRatingList);
-            setSelectedExpertInfo(expertInfo);
+    useEffect(() => {
+        async function fetchData() {
+            const expertInfo = await trackPromise(GetExpertInfoByIdAPI(expertId));
+            if (expertInfo != null) {
+                const expertRatingList = await trackPromise(GetRatingListByExpertIdAPI(expertId));
+                setSelectedExpertRatingList(expertRatingList);
+                setSelectedExpertInfo(expertInfo);
+            }
         }
+        fetchData();
     }, [expertId])
 
     const GetUsedService = expertRatingList => {

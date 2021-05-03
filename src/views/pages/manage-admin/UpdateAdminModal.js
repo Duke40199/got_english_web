@@ -51,28 +51,31 @@ const UpdateAdminModal = ({ selectedAdminUsername, show, handleClose, refreshDat
     const { promiseInProgress } = usePromiseTracker();
 
     //this useEffect will be executed every time the modal show
-    useEffect(async () => {
-        if (selectedAdminUsername != null) {
-            const selectedAdminInfo = await trackPromise(GetUserInfoAPI(selectedAdminUsername, 'Admin'));
-            if (selectedAdminInfo != null) {
-                setUpdateAdminUUID(selectedAdminInfo.id);
-                setUpdateAdminFullname(selectedAdminInfo.fullname);
-                setUpdateAdminUsername(selectedAdminInfo.username);
-                setUpdateAdminEmail(selectedAdminInfo.email);
-                setUpdateAdminAddress(selectedAdminInfo.address);
-                setUpdateAdminPhoneNumber(selectedAdminInfo.phone_number);
-                if (selectedAdminInfo.birthday == "" || selectedAdminInfo.birthday == null) {
-                    setUpdateAdminBirthday("");
-                } else {
-                    setUpdateAdminBirthday(parseISO(selectedAdminInfo.birthday));
+    useEffect(() => {
+        async function fetchData() {
+            if (selectedAdminUsername != null) {
+                const selectedAdminInfo = await trackPromise(GetUserInfoAPI(selectedAdminUsername, 'Admin'));
+                if (selectedAdminInfo != null) {
+                    setUpdateAdminUUID(selectedAdminInfo.id);
+                    setUpdateAdminFullname(selectedAdminInfo.fullname);
+                    setUpdateAdminUsername(selectedAdminInfo.username);
+                    setUpdateAdminEmail(selectedAdminInfo.email);
+                    setUpdateAdminAddress(selectedAdminInfo.address);
+                    setUpdateAdminPhoneNumber(selectedAdminInfo.phone_number);
+                    if (selectedAdminInfo.birthday === "" || selectedAdminInfo.birthday == null) {
+                        setUpdateAdminBirthday("");
+                    } else {
+                        setUpdateAdminBirthday(parseISO(selectedAdminInfo.birthday));
+                    }
+                    setUpdateAdminAvatarUrl((selectedAdminInfo.avatar_url === "" || selectedAdminInfo.avatar_url == null) ? "" : selectedAdminInfo.avatar_url);
+                    setUpdateAdminCanManageLearner(selectedAdminInfo.admin_details.can_manage_learner);
+                    setUpdateAdminCanManageExpert(selectedAdminInfo.admin_details.can_manage_expert);
+                    setUpdateAdminCanManageModerator(selectedAdminInfo.admin_details.can_manage_moderator);
+                    setUpdateAdminCanManageAdmin(selectedAdminInfo.admin_details.can_manage_admin);
                 }
-                setUpdateAdminAvatarUrl((selectedAdminInfo.avatar_url == "" || selectedAdminInfo.avatar_url == null) ? "" : selectedAdminInfo.avatar_url);
-                setUpdateAdminCanManageLearner(selectedAdminInfo.admin_details.can_manage_learner);
-                setUpdateAdminCanManageExpert(selectedAdminInfo.admin_details.can_manage_expert);
-                setUpdateAdminCanManageModerator(selectedAdminInfo.admin_details.can_manage_moderator);
-                setUpdateAdminCanManageAdmin(selectedAdminInfo.admin_details.can_manage_admin);
             }
         }
+        fetchData();
     }, [selectedAdminUsername]);
 
     const uploadToStorage = async (imageURL) => {
@@ -106,7 +109,7 @@ const UpdateAdminModal = ({ selectedAdminUsername, show, handleClose, refreshDat
             var img = document.getElementById("updateAdminAvt");
             const fileSize = e.target.files[0].size;
             const fileType = e.target.files[0].type;
-            if (fileSize <= 300000 && (fileType == "image/jpeg" || fileType == "image/png" || fileType == "image/jpg")) {
+            if (fileSize <= 300000 && (fileType === "image/jpeg" || fileType === "image/png" || fileType === "image/jpg")) {
                 // create blob url
                 var blobUrl = URL.createObjectURL(e.target.files[0]);
                 // use blob url to preview avatar
@@ -156,7 +159,7 @@ const UpdateAdminModal = ({ selectedAdminUsername, show, handleClose, refreshDat
                     "username": updateAdminUsername,
                     "address": updateAdminAddress,
                     "phone_number": updateAdminPhoneNumber,
-                    "birthday": ((updateAdminBirthday != "" && updateAdminBirthday != null) ? format(updateAdminBirthday, 'yyyy-MM-dd') : ""),
+                    "birthday": ((updateAdminBirthday !== "" && updateAdminBirthday != null) ? format(updateAdminBirthday, 'yyyy-MM-dd') : ""),
                     "avatar_url": newAvtSrc,
 
                 }
@@ -173,7 +176,7 @@ const UpdateAdminModal = ({ selectedAdminUsername, show, handleClose, refreshDat
                     "password": updateAdminPassword,
                     "address": updateAdminAddress,
                     "phone_number": updateAdminPhoneNumber,
-                    "birthday": ((updateAdminBirthday != "" && updateAdminBirthday != null) ? format(updateAdminBirthday, 'yyyy-MM-dd') : ""),
+                    "birthday": ((updateAdminBirthday !== "" && updateAdminBirthday != null) ? format(updateAdminBirthday, 'yyyy-MM-dd') : ""),
                     "avatar_url": newAvtSrc,
                 }
                 permissionInput = {
@@ -286,7 +289,7 @@ const UpdateAdminModal = ({ selectedAdminUsername, show, handleClose, refreshDat
                             <CLabel htmlFor="update-admin-birthday-input">Ngày sinh:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            {(updateAdminBirthday == "" || updateAdminBirthday == null) ?
+                            {(updateAdminBirthday === "" || updateAdminBirthday == null) ?
                                 <DatePicker
                                     className="form-control"
                                     locale="vi"
@@ -389,7 +392,7 @@ const UpdateAdminModal = ({ selectedAdminUsername, show, handleClose, refreshDat
                     <CFormGroup row>
                         <CLabel col md="4" htmlFor="update-admin-avatar-url">Ảnh đại diện:</CLabel>
                         <CCol xs="12" md="8">
-                            <img id="updateAdminAvt" className="mr-2" src={updateAdminAvatarUrl} width="80" height="80" />
+                            <img id="updateAdminAvt" alt="Admin Avatar" className="mr-2" src={updateAdminAvatarUrl} width="80" height="80" />
                             <CButton
                                 color="info"
                                 className="rounded-circle"

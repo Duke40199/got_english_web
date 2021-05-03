@@ -12,8 +12,6 @@ import {
   CSidebarNavItem,
 } from '@coreui/react'
 
-import CIcon from '@coreui/icons-react'
-
 // sidebar nav config
 import navigation from './_nav'
 
@@ -27,8 +25,8 @@ const TheSidebar = () => {
       onShowChange={(val) => dispatch({ type: 'set', sidebarShow: val })}
     >
       <CSidebarBrand className="d-md-down-none" to="/">
-        <img src="/logos/GotEnglish-big.png" className="c-sidebar-brand-full" name="logo-negative" height={25} width={200} />
-        <img src="/logos/GotEnglish-small.png" className="c-sidebar-brand-minimized" name="sygnet" height={25} width={25} />
+        <img src="/logos/GotEnglish-big.png" alt="GE Big Logo" className="c-sidebar-brand-full" name="logo-negative" height={25} width={200} />
+        <img src="/logos/GotEnglish-small.png" alt="GE Small Logo" className="c-sidebar-brand-minimized" name="sygnet" height={25} width={25} />
       </CSidebarBrand>
       <CSidebarNav>
 

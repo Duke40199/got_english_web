@@ -47,6 +47,7 @@ const ManageExchangeRate = React.lazy(() => import('./views/pages/manage-exchang
 const ManageLearner = React.lazy(() => import('./views/pages/manage-learner/ManageLearner'));
 const ManagePricing = React.lazy(() => import('./views/pages/manage-pricing/ManagePricing'));
 const MyProfile = React.lazy(() => import('./views/pages/my-profile/MyProfile'));
+const RatingAlgorithm = React.lazy(() => import('./views/pages/rating-algorithm/RatingAlgorithm'));
 const Page404 = React.lazy(() => import('./views/pages/page404/Page404'));
 
 const routes = [
@@ -100,6 +101,7 @@ const routes = [
   { path: '/manage-learner', name: 'Quản lý Học Viên', component: ManageLearner, exact: true },
   { path: '/manage-pricing', name: 'Quản lý Đơn Giá', component: ManagePricing, exact: true },
   { path: '/my-profile', name: 'Hồ sơ của tôi', component: MyProfile, exact: true },
+  { path: '/rating-algorithm', name: 'Thuật toán Đánh Giá', component: RatingAlgorithm, exact: true },
   { path: '*', name: '404', component: Page404 },
 ];
 

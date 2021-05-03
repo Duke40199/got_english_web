@@ -45,34 +45,39 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose, re
     const [updateModeratorCanManagePricing, setUpdateModeratorCanManagePricing] = useState(false);
     const [updateModeratorCanManageApplicationForm, setUpdateModeratorCanManageApplicationForm] = useState(false);
     const [updateModeratorCanManageExchangeRate, setUpdateModeratorCanManageExchangeRate] = useState(false);
+    const [updateModeratorCanManageRatingAlgorithm, setUpdateModeratorCanManageRatingAlgorithm] = useState(false);
     const [fieldErrorMessages, setFieldErrorMessages] = useState({});
     const [updateMessage, setUpdateMessage] = useState(null);
 
     const { promiseInProgress } = usePromiseTracker();
 
     //this useEffect will be executed every time the modal show
-    useEffect(async () => {
-        if (selectedModeratorUsername != null) {
-            const selectedModeratorInfo = await trackPromise(GetUserInfoAPI(selectedModeratorUsername, 'Moderator'));
-            if (selectedModeratorInfo != null) {
-                setUpdateModeratorUUID(selectedModeratorInfo.id);
-                setUpdateModeratorFullname(selectedModeratorInfo.fullname);
-                setUpdateModeratorUsername(selectedModeratorInfo.username);
-                setUpdateModeratorEmail(selectedModeratorInfo.email);
-                setUpdateModeratorAddress(selectedModeratorInfo.address);
-                setUpdateModeratorPhoneNumber(selectedModeratorInfo.phone_number);
-                if (selectedModeratorInfo.birthday == "" || selectedModeratorInfo.birthday == null) {
-                    setUpdateModeratorBirthday("");
-                } else {
-                    setUpdateModeratorBirthday(parseISO(selectedModeratorInfo.birthday));
+    useEffect(() => {
+        async function fetchData() {
+            if (selectedModeratorUsername != null) {
+                const selectedModeratorInfo = await trackPromise(GetUserInfoAPI(selectedModeratorUsername, 'Moderator'));
+                if (selectedModeratorInfo != null) {
+                    setUpdateModeratorUUID(selectedModeratorInfo.id);
+                    setUpdateModeratorFullname(selectedModeratorInfo.fullname);
+                    setUpdateModeratorUsername(selectedModeratorInfo.username);
+                    setUpdateModeratorEmail(selectedModeratorInfo.email);
+                    setUpdateModeratorAddress(selectedModeratorInfo.address);
+                    setUpdateModeratorPhoneNumber(selectedModeratorInfo.phone_number);
+                    if (selectedModeratorInfo.birthday === "" || selectedModeratorInfo.birthday == null) {
+                        setUpdateModeratorBirthday("");
+                    } else {
+                        setUpdateModeratorBirthday(parseISO(selectedModeratorInfo.birthday));
+                    }
+                    setUpdateModeratorAvatarUrl((selectedModeratorInfo.avatar_url === "" || selectedModeratorInfo.avatar_url == null) ? "" : selectedModeratorInfo.avatar_url);
+                    setUpdateModeratorCanManageCoinBundle(selectedModeratorInfo.moderator_details.can_manage_coin_bundle);
+                    setUpdateModeratorCanManagePricing(selectedModeratorInfo.moderator_details.can_manage_pricing);
+                    setUpdateModeratorCanManageApplicationForm(selectedModeratorInfo.moderator_details.can_manage_application_form);
+                    setUpdateModeratorCanManageExchangeRate(selectedModeratorInfo.moderator_details.can_manage_exchange_rate);
+                    setUpdateModeratorCanManageRatingAlgorithm(selectedModeratorInfo.moderator_details.can_manage_rating_algorithm);
                 }
-                setUpdateModeratorAvatarUrl((selectedModeratorInfo.avatar_url == "" || selectedModeratorInfo.avatar_url == null) ? "" : selectedModeratorInfo.avatar_url);
-                setUpdateModeratorCanManageCoinBundle(selectedModeratorInfo.moderator_details.can_manage_coin_bundle);
-                setUpdateModeratorCanManagePricing(selectedModeratorInfo.moderator_details.can_manage_pricing);
-                setUpdateModeratorCanManageApplicationForm(selectedModeratorInfo.moderator_details.can_manage_application_form);
-                setUpdateModeratorCanManageExchangeRate(selectedModeratorInfo.moderator_details.can_manage_exchange_rate);
             }
         }
+        fetchData();
     }, [selectedModeratorUsername]);
 
     const uploadToStorage = async (imageURL) => {
@@ -106,7 +111,7 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose, re
             var img = document.getElementById("updateModeratorAvt");
             const fileSize = e.target.files[0].size;
             const fileType = e.target.files[0].type;
-            if (fileSize <= 300000 && (fileType == "image/jpeg" || fileType == "image/png" || fileType == "image/jpg")) {
+            if (fileSize <= 300000 && (fileType === "image/jpeg" || fileType === "image/png" || fileType === "image/jpg")) {
                 // create blob url
                 var blobUrl = URL.createObjectURL(e.target.files[0]);
                 // use blob url to preview avatar
@@ -156,7 +161,7 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose, re
                     "username": updateModeratorUsername,
                     "address": updateModeratorAddress,
                     "phone_number": updateModeratorPhoneNumber,
-                    "birthday": ((updateModeratorBirthday != "" && updateModeratorBirthday != null) ? format(updateModeratorBirthday, 'yyyy-MM-dd') : ""),
+                    "birthday": ((updateModeratorBirthday !== "" && updateModeratorBirthday != null) ? format(updateModeratorBirthday, 'yyyy-MM-dd') : ""),
                     "avatar_url": newAvtSrc,
 
                 }
@@ -164,7 +169,8 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose, re
                     "can_manage_coin_bundle": updateModeratorCanManageCoinBundle,
                     "can_manage_pricing": updateModeratorCanManagePricing,
                     "can_manage_application_form": updateModeratorCanManageApplicationForm,
-                    "can_manage_exchange_rate": updateModeratorCanManageExchangeRate
+                    "can_manage_exchange_rate": updateModeratorCanManageExchangeRate,
+                    "can_manage_rating_algorithm": updateModeratorCanManageRatingAlgorithm
                 }
             } else {
                 updateModeratorData = {
@@ -173,14 +179,15 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose, re
                     "password": updateModeratorPassword,
                     "address": updateModeratorAddress,
                     "phone_number": updateModeratorPhoneNumber,
-                    "birthday": ((updateModeratorBirthday != "" && updateModeratorBirthday != null) ? format(updateModeratorBirthday, 'yyyy-MM-dd') : ""),
+                    "birthday": ((updateModeratorBirthday !== "" && updateModeratorBirthday != null) ? format(updateModeratorBirthday, 'yyyy-MM-dd') : ""),
                     "avatar_url": newAvtSrc,
                 }
                 permissionInput = {
                     "can_manage_coin_bundle": updateModeratorCanManageCoinBundle,
                     "can_manage_pricing": updateModeratorCanManagePricing,
                     "can_manage_application_form": updateModeratorCanManageApplicationForm,
-                    "can_manage_exchange_rate": updateModeratorCanManageExchangeRate
+                    "can_manage_exchange_rate": updateModeratorCanManageExchangeRate,
+                    "can_manage_rating_algorithm": updateModeratorCanManageRatingAlgorithm
                 }
             }
 
@@ -284,7 +291,7 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose, re
                             <CLabel htmlFor="update-moderator-birthday-input">Ngày sinh:</CLabel>
                         </CCol>
                         <CCol xs="12" md="8">
-                            {(updateModeratorBirthday == "" || updateModeratorBirthday == null) ?
+                            {(updateModeratorBirthday === "" || updateModeratorBirthday == null) ?
                                 <DatePicker
                                     className="form-control"
                                     locale="vi"
@@ -382,12 +389,22 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose, re
                                 />
                                 Quản lý Chiết Khấu
                                 </CLabel>
+                            <CLabel htmlFor="update-moderator-can-manage-rating-algorithm-input"
+                                className="w-100 permission-input-checkbox">
+                                <CInputCheckbox
+                                    id="update-moderator-can-manage-rating-algorithm-input"
+                                    name="update-moderator-can-manage-rating-algorithm-input"
+                                    checked={updateModeratorCanManageRatingAlgorithm}
+                                    onChange={({ target }) => setUpdateModeratorCanManageRatingAlgorithm(target.checked)}
+                                />
+                                Quản lý Thuật toán Đánh Giá
+                                </CLabel>
                         </CCol>
                     </CFormGroup>
                     <CFormGroup row>
                         <CLabel col md="4" htmlFor="update-moderator-avatar-url">Ảnh đại diện:</CLabel>
                         <CCol xs="12" md="8">
-                            <img id="updateModeratorAvt" className="mr-2" src={updateModeratorAvatarUrl} width="80" height="80" />
+                            <img id="updateModeratorAvt" alt="Moderator Avatar" className="mr-2" src={updateModeratorAvatarUrl} width="80" height="80" />
                             <CButton
                                 color="info"
                                 className="rounded-circle"

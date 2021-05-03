@@ -72,6 +72,12 @@ if (role === "Admin") {
       name: 'Quản lý Chiết Khấu',
       to: '/manage-exchange-rate',
       icon: 'cil-balance-scale',
+    },
+    {
+      _tag: 'CSidebarNavItem',
+      name: 'Thuật toán Đánh giá',
+      to: '/rating-algorithm',
+      icon: 'cil-calculator',
     }
   ]
 }

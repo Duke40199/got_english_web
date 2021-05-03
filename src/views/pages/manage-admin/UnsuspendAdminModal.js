@@ -23,14 +23,17 @@ const UnsuspendAdminModal = ({ selectedAdminUsername, show, handleClose, refresh
     const { promiseInProgress } = usePromiseTracker();
 
     //this useEffect will be executed every time the modal show
-    useEffect(async () => {
-        if (selectedAdminUsername != null) {
-            const selectedAdminInfo = await trackPromise(GetUserInfoAPI(selectedAdminUsername, 'Admin'));
-            if (selectedAdminInfo != null) {
-                setUnsuspendAdminUUID(selectedAdminInfo.id);
-                setUnsuspendAdminUsername(selectedAdminInfo.username);
+    useEffect(() => {
+        async function fetchData() {
+            if (selectedAdminUsername != null) {
+                const selectedAdminInfo = await trackPromise(GetUserInfoAPI(selectedAdminUsername, 'Admin'));
+                if (selectedAdminInfo != null) {
+                    setUnsuspendAdminUUID(selectedAdminInfo.id);
+                    setUnsuspendAdminUsername(selectedAdminInfo.username);
+                }
             }
         }
+        fetchData();
     }, [selectedAdminUsername]);
 
     const onSubmitUnsuspendForm = async (e) => {

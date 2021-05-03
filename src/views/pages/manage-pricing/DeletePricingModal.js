@@ -29,7 +29,7 @@ const DeletePricingModal = ({ selectedPricingId, show, handleClose, refreshDataF
             setDeleteMessage(<CAlert color="success">Xóa thành công!</CAlert>);
             setRefreshDataFlag(!refreshDataFlag);
         } else {
-            setDeleteMessage(<CAlert color="danger">Xóa thất bại!</CAlert>);
+            setDeleteMessage(<CAlert color="danger">{deletePricingResult}</CAlert>);
         }
     }
 
