@@ -152,7 +152,7 @@ const AddModeratorModal = ({ show, handleClose, refreshDataFlag, setRefreshDataF
 
                     const updateModeratorAvt = await trackPromise(UpdateUserInfoByUserIdAPI(newModeratorID, additionalData));
                     const permissionUpdateResult = await trackPromise(UpdateModeratorPermissionByIdAPI(newModeratorID, permissionInput));
-                    
+
                     if (updateModeratorAvt === true && permissionUpdateResult === true) {
                         setAddMessage(<CAlert color="success">Thêm mới thành công!</CAlert>);
                     } else {
@@ -362,7 +362,7 @@ const AddModeratorModal = ({ show, handleClose, refreshDataFlag, setRefreshDataF
                     <CFormGroup row>
                         <CLabel col md="4" htmlFor="moderator-avatar-url">Ảnh đại diện:</CLabel>
                         <CCol xs="12" md="8">
-                            <img id="addModeratorAvt" alt="Moderator Avatar" className="mr-2" src={addModeratorAvatarUrl} width="80" height="80" />
+                            <img id="addModeratorAvt" className="mr-2" alt="Moderator Avatar" src={(addModeratorAvatarUrl === "" || addModeratorAvatarUrl == null) ? "/avatars/default_avt.png" : addModeratorAvatarUrl} width="80" height="80" />
                             <CButton
                                 color="info"
                                 className="rounded-circle"

@@ -404,7 +404,7 @@ const UpdateModeratorModal = ({ selectedModeratorUsername, show, handleClose, re
                     <CFormGroup row>
                         <CLabel col md="4" htmlFor="update-moderator-avatar-url">Ảnh đại diện:</CLabel>
                         <CCol xs="12" md="8">
-                            <img id="updateModeratorAvt" alt="Moderator Avatar" className="mr-2" src={updateModeratorAvatarUrl} width="80" height="80" />
+                            <img id="updateModeratorAvt" className="mr-2" alt="Moderator Avatar" src={(updateModeratorAvatarUrl === "" || updateModeratorAvatarUrl == null) ? "/avatars/default_avt.png" : updateModeratorAvatarUrl} width="80" height="80" />
                             <CButton
                                 color="info"
                                 className="rounded-circle"

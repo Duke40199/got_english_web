@@ -339,7 +339,7 @@ const AddExpertModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag
                     <CFormGroup row>
                         <CLabel col md="4" htmlFor="expert-avatar-url">Ảnh đại diện:</CLabel>
                         <CCol xs="12" md="8">
-                            <img id="addExpertAvt" alt="Expert Avatar" className="mr-2" src={addExpertAvatarUrl} width="80" height="80" />
+                            <img id="addExpertAvt" className="mr-2" alt="Expert Avatar" src={(addExpertAvatarUrl === "" || addExpertAvatarUrl == null) ? "/avatars/default_avt.png" : addExpertAvatarUrl} width="80" height="80" />
                             <CButton
                                 color="info"
                                 className="rounded-circle"

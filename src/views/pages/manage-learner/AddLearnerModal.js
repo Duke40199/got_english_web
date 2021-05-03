@@ -311,7 +311,7 @@ const AddLearnerModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFla
                     <CFormGroup row>
                         <CLabel col md="4" htmlFor="learner-avatar-url">Ảnh đại diện:</CLabel>
                         <CCol xs="12" md="8">
-                            <img id="addLearnerAvt" alt="Learner Avatar" className="mr-2" src={addLearnerAvatarUrl} width="80" height="80" />
+                            <img id="addLearnerAvt" className="mr-2" alt="Learner Avatar" src={(addLearnerAvatarUrl === "" || addLearnerAvatarUrl == null) ? "/avatars/default_avt.png" : addLearnerAvatarUrl} width="80" height="80" />
                             <CButton
                                 color="info"
                                 className="rounded-circle"

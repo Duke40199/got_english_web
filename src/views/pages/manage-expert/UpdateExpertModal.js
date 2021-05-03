@@ -371,7 +371,7 @@ const UpdateExpertModal = ({ selectedExpertUsername, show, handleClose, refreshD
                     <CFormGroup row>
                         <CLabel col md="4" htmlFor="update-expert-avatar-url">Ảnh đại diện:</CLabel>
                         <CCol xs="12" md="8">
-                            <img id="updateExpertAvt" alt="Expert Avatar" className="mr-2" src={updateExpertAvatarUrl} width="80" height="80" />
+                            <img id="updateExpertAvt" className="mr-2" alt="Expert Avatar" src={(updateExpertAvatarUrl === "" || updateExpertAvatarUrl == null) ? "/avatars/default_avt.png" : updateExpertAvatarUrl} width="80" height="80" />
                             <CButton
                                 color="info"
                                 className="rounded-circle"

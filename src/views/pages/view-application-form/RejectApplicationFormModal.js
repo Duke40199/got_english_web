@@ -41,7 +41,7 @@ const RejectApplicationFormModal = ({ selectedApplicationFormId, show, handleClo
         >
             <CForm onSubmit={onSubmitRejectForm} method="post" encType="multipart/form-data" className="form-horizontal">
                 <CModalHeader closeButton>
-                    <CModalTitle>Từ chối đơn xin ( id: {selectedApplicationFormId} )</CModalTitle>
+                    <CModalTitle>Từ chối đơn xin</CModalTitle>
                 </CModalHeader>
                 <CModalBody>
                     {rejectMessage ? rejectMessage : "Bạn chắc chắn muốn từ chối đơn xin này chứ?"}

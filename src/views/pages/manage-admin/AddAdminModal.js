@@ -350,7 +350,7 @@ const AddAdminModal = ({ show, handleClose, refreshDataFlag, setRefreshDataFlag 
                     <CFormGroup row>
                         <CLabel col md="4" htmlFor="admin-avatar-url">Ảnh đại diện:</CLabel>
                         <CCol xs="12" md="8">
-                            <img id="addAdminAvt" alt="Admin Avatar" className="mr-2" src={addAdminAvatarUrl} width="80" height="80" />
+                            <img id="addAdminAvt" className="mr-2" alt="Admin Avatar" src={(addAdminAvatarUrl === "" || addAdminAvatarUrl == null) ? "/avatars/default_avt.png" : addAdminAvatarUrl} width="80" height="80" />
                             <CButton
                                 color="info"
                                 className="rounded-circle"

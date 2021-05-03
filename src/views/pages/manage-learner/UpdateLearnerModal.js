@@ -319,7 +319,7 @@ const UpdateLearnerModal = ({ selectedLearnerUsername, show, handleClose, refres
                     <CFormGroup row>
                         <CLabel col md="4" htmlFor="update-learner-avatar-url">Ảnh đại diện:</CLabel>
                         <CCol xs="12" md="8">
-                            <img id="updateLearnerAvt" alt="Learner Avatar" className="mr-2" src={updateLearnerAvatarUrl} width="80" height="80" />
+                            <img id="updateLearnerAvt" className="mr-2" alt="Learner Avatar" src={(updateLearnerAvatarUrl === "" || updateLearnerAvatarUrl == null) ? "/avatars/default_avt.png" : updateLearnerAvatarUrl} width="80" height="80" />
                             <CButton
                                 color="info"
                                 className="rounded-circle"

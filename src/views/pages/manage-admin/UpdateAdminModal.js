@@ -392,7 +392,7 @@ const UpdateAdminModal = ({ selectedAdminUsername, show, handleClose, refreshDat
                     <CFormGroup row>
                         <CLabel col md="4" htmlFor="update-admin-avatar-url">Ảnh đại diện:</CLabel>
                         <CCol xs="12" md="8">
-                            <img id="updateAdminAvt" alt="Admin Avatar" className="mr-2" src={updateAdminAvatarUrl} width="80" height="80" />
+                            <img id="updateAdminAvt" className="mr-2" alt="Admin Avatar" src={(updateAdminAvatarUrl === "" || updateAdminAvatarUrl == null) ? "/avatars/default_avt.png" : updateAdminAvatarUrl} width="80" height="80" />
                             <CButton
                                 color="info"
                                 className="rounded-circle"
